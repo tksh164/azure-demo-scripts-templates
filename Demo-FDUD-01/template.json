@@ -1,0 +1,228 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseName": {
+            "type": "string",
+            "defaultValue": "FDUD",
+            "metadata": {
+                "description": "Base name for each resources."
+            }
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_A1_v2",
+            "metadata": {
+                "description": "Virtual machine size."
+            }
+        },
+        "NumOfVirtualMachines": {
+            "type": "int",
+            "defaultValue": 8,
+            "minValue": 1
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "User name for administrator on the virtual machine."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for administrator on the virtual machine."
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "Address space for virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "default",
+            "metadata": {
+                "description": "Name of subnet for virtual machines."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/24",
+            "metadata": {
+                "description": "Address range for subnet."
+            }
+        },        
+        "availabilitySetPlatformFaultDomainCount": {
+            "type": "int",
+            "defaultValue": 3,
+            "minValue": 1,
+            "maxValue": 3,
+            "metadata": {
+                "description": "Number of fault domain."
+            }
+        },
+        "availabilitySetPlatformUpdateDomainCount": {
+            "type": "int",
+            "defaultValue": 5,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of update domain."
+            }
+        }
+    },
+    "variables": {
+        "copyIndexOffset": 1,
+        "vmName": "[concat(parameters('baseName'), '-vm')]",
+        "avSetName": "[concat(parameters('baseName'), '-as')]",
+        "nsgName": "[concat(parameters('baseName'), '-nsg')]",
+        "vnetName": "[concat(parameters('baseName'), '-vnet')]",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-12-01",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },        
+        {
+            "copy": {
+                "name": "numvm",
+                "count": "[parameters('NumOfVirtualMachines')]"
+            },
+            "name": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')))]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-nic'))]",
+                "[resourceId('Microsoft.Compute/availabilitySets/', variables('avSetName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-disk')]",
+                        "createOption": "fromImage"
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-nic'))]"
+                        }
+                    ]
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+                }
+            }
+        },
+        {
+            "name": "[variables('avSetName')]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "platformFaultDomainCount": "[parameters('availabilitySetPlatformFaultDomainCount')]",
+                "platformUpdateDomainCount": "[parameters('availabilitySetPlatformUpdateDomainCount')]",
+                "managed": true
+            }
+        },
+        {
+            "copy": {
+                "name": "numvm",
+                "count": "[parameters('NumOfVirtualMachines')]"
+            },
+            "name": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-nic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-12-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                }
+            }
+        },
+        {
+            "name": "[variables('nsgName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2016-12-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-rdp",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "3389",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+}
