@@ -1,0 +1,195 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "description": "Prefix for each reasources."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "User name for administrator on the virtual machine."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "minLength": 12,
+            "metadata": {
+                "description": "Password for administrator on the virtual machine."
+            }
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "URL for artifacts (linked templates, DSC configurations, etc)."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "minLength": 1,
+            "metadata": {
+                "description": "SAS token for artifacts access."
+            }
+        }
+    },
+    "variables": {
+        // Virtual Network
+        "vnetName": "[concat(parameters('prefix'), '-vnet')]",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetName": "default",
+        "subnetAddressPrefix": "10.0.0.0/24",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+
+        // Virtual Machine
+        "vmNames": [
+            "[concat(parameters('prefix'), '-vm')]"
+        ],
+        "virtualMachineSize": "Standard_A1_v2",
+
+        // DSC extension
+        "dscConfigurationUri": "[concat(parameters('_artifactsLocation'), '/DSC/config.zip')]",
+        "dscConfigurationScript": "config.ps1",
+        "dscConfigurationFunction": "Config"
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-12-01",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "copy": {
+                "name": "numvm",
+                "count": "[length(variables('vmNames'))]"
+            },
+            "name": "[concat(variables('vmNames')[copyIndex()], '-nic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-12-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "copy": {
+                "name": "numvm",
+                "count": "[length(variables('vmNames'))]"
+            },
+            "name": "[variables('vmNames')[copyIndex()]]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('vmNames')[copyIndex()], '-nic'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('vmNames')[copyIndex()]]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmNames')[copyIndex()], '-osdisk')]",
+                        "createOption": "FromImage",
+                        "managedDisk":{
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmNames')[copyIndex()], '-nic'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "numvm",
+                "count": "[length(variables('vmNames'))]"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmNames')[copyIndex()], '/dsc1')]",
+            "apiVersion": "2017-12-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmNames')[copyIndex()])]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "wmfVersion": "latest",
+                    "configuration": {
+                        "url": "[variables('dscConfigurationUri')]",
+                        "script": "[variables('dscConfigurationScript')]",
+                        "function": "[variables('dscConfigurationFunction')]"
+                    }
+                },
+                "protectedSettings": {
+                    "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        }
+    }
+}
