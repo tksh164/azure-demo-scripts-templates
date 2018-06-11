@@ -1,0 +1,297 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseName": {
+            "type": "string",
+            "defaultValue": "VMSS",
+            "metadata": {
+                "description": "Base name for each resources."
+            }
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS1_v2",
+            "allowedValues": [
+                "Standard_A1_v2",
+                "Standard_DS1_v2"
+            ],
+            "metadata": {
+                "description": "Virtual machine size in virtual machine scale set."
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "User name for administrator on the virtual machine."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for administrator on the virtual machine."
+            }
+        },
+        "vmssInstanceCount": {
+            "type": "int",
+            "defaultValue": 3
+        },
+        "singlePlacementGroup": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": ""
+            }
+        },
+        "publicIpAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Dynamic",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "Address space for virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "default",
+            "metadata": {
+                "description": "Name of subnet for virtual machines."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/24",
+            "metadata": {
+                "description": "Address range for subnet."
+            }
+        }
+    },
+    "variables": {
+        // Virtual Machine Scale Set
+        "vmssName": "[concat(parameters('baseName'), '-vmss')]",
+        "vmssComputerNamePrefix": "[toLower(take(concat(parameters('baseName'), uniqueString(resourceGroup().id)), 9))]",
+        
+        // Public IP Address
+        "publicIpName": "[concat(parameters('baseName'), '-ip')]",
+        "publicIpLabel": "[toLower(concat(parameters('baseName'), take(uniqueString(subscription().subscriptionId), 4)))]",
+
+        // Loadbalancer
+        "loadBalancerName": "[concat(parameters('baseName'), '-lb')]",
+        "loadBalancerId": "[resourceId(resourceGroup().name, 'Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
+        "backendPoolName": "bepool",
+        "backendPoolRef": "[concat(variables('loadBalancerId'), '/backendAddressPools/', variables('backendPoolName'))]",
+        "inboundNatPoolName": "natpool",
+        "inboundNatPoolRef": "[concat(variables('loadBalancerId'), '/inboundNatPools/', variables('inboundNatPoolName'))]",
+        
+        // Virtual Network
+        "vnetName": "[concat(parameters('baseName'), '-vnet')]",
+        "vnetId": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+
+        //
+        // Public IP Address
+        //
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIpName')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2017-06-01",
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('publicIpAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('publicIpLabel')]"
+                }
+            }
+        },
+
+        //
+        // Load Balancer
+        //
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[variables('loadBalancerName')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2017-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "loadbalancerFrontEnd",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "bepool"
+                    }
+                ],
+                "inboundNatPools": [
+                    {
+                        "name": "natpool",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/loadbalancerFrontEnd')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPortRangeStart": 50000,
+                            "frontendPortRangeEnd": 50119,
+                            "backendPort": 3389
+                        }
+                    }
+                ]
+            }
+        },
+
+        //
+        // Virtual Network
+        //
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2017-06-01",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+
+        //
+        // Virtual Machine Scale Set
+        //
+        {
+            "name": "[variables('vmssName')]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('virtualMachineSize')]",
+                "tier": "Standard",
+                "capacity": "[parameters('vmssInstanceCount')]"
+            },
+            "properties": {
+                "overprovision": true,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "singlePlacementGroup": "[parameters('singlePlacementGroup')]",
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "imageReference": {
+                            "publisher": "MicrosoftWindowsServer",
+                            "offer": "WindowsServer",
+                            "sku": "2016-Datacenter-smalldisk",
+                            "version": "latest"
+                        },
+                        "osDisk": {
+                            "createOption": "FromImage",
+                            "caching": "ReadWrite"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[variables('vmssComputerNamePrefix')]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "[concat(variables('vmssName'), '-nic')]",
+                                "properties": {
+                                    "primary": true,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "[concat(variables('vmssName'), 'IpConfig')]",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnetRef')]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[variables('backendPoolRef')]"
+                                                    }
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                    {
+                                                        "id": "[variables('inboundNatPoolRef')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+
+        // Virtual Machine Scale Set
+        "vmssName": {
+            "type": "string",
+            "value": "[variables('vmssName')]"
+        },
+        "vmssComputerNamePrefix": {
+            "type": "string",
+            "value": "[variables('vmssComputerNamePrefix')]"
+        },
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        },
+        
+        // Public IP Address
+        "publicIpName": {
+            "type": "string",
+            "value": "[variables('publicIpName')]"
+        },
+        "publicIpLabel": {
+            "type": "string",
+            "value": "[variables('publicIpLabel')]"
+        },
+
+        // Loadbalancer
+        "loadBalancerName": {
+            "type": "string",
+            "value": "[variables('loadBalancerName')]"
+        },
+        
+        // Virtual Network
+        "vnetName": {
+            "type": "string",
+            "value": "[variables('vnetName')]"
+        }       
+    }
+}
