@@ -1,0 +1,237 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "defaultValue": "fdud",
+            "metadata": {
+                "description": "Prefix for each reasources."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "User name for the administrator on the virtual machines."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the administrator on the virtual machines."
+            }
+        },
+        "virtualMachineCount": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 200,
+            "defaultValue": 8,
+            "metadata": {
+                "description": "The number of virtual machines in the availability set."
+            }
+        },
+        "faultDomainCount": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 3,
+            "defaultValue": 2,
+            "metadata": {
+                "description": "The number of fault domains."
+            }
+        },
+        "updateDomainCount": {
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 20,
+            "defaultValue": 5,
+            "metadata": {
+                "description": "The number of update domains."
+            }
+        }
+    },
+    "variables": {
+
+        // Virtual Network
+
+        "virtualNetworkName": "[concat(parameters('prefix'), '-vnet')]",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetName": "default",
+        "subnetAddressPrefix": "10.0.0.0/24",
+        "virtualNetworkId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetId": "[concat(variables('virtualNetworkId'), '/subnets/', variables('subnetName'))]",
+
+        // Virtual Machines & Network Interfaces
+
+        "numOfConfigs": "[parameters('virtualMachineCount')]",
+        "virtualMachineNameBase": "[concat(parameters('prefix'), '-vm')]",
+        "copy": [
+            {
+                "name": "configs",
+                "count": "[variables('numOfConfigs')]",
+                "input": {
+                    "virtualMachine": {
+                        "name": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1))]",
+                        "size": "Standard_DS1_v2",
+                        "osDiskName": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-osdisk')]",
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('virtualMachineNameBase'), copyIndex('configs', 1)))]"
+                    },
+                    "networkInterface": {
+                        "name": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-nic1')]",
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-nic1'))]",
+                    }
+                }
+            }
+        ],
+
+        // Availability Set
+
+        "availabilitySetName": "[concat(parameters('prefix'), '-as')]",
+        "availabilitySetFaultDomainCount": "[parameters('faultDomainCount')]",
+        "availabilitySetUpdateDomainCount": "[parameters('updateDomainCount')]",
+        "availabilitySetId": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+    },
+    "resources": [
+
+        // Virtual Network
+
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        },
+
+        // Virtual Machine
+
+        {
+            "copy": {
+                "name": "NumOfVirtualMachines",
+                "count": "[variables('numOfConfigs')]"
+            },
+            "name": "[variables('configs')[copyIndex()].virtualMachine.name]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('configs')[copyIndex()].networkInterface.id]",
+                "[variables('availabilitySetId')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('configs')[copyIndex()].virtualMachine.size]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[variables('configs')[copyIndex()].virtualMachine.osDiskName]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[variables('configs')[copyIndex()].networkInterface.id]",
+                            "properties":{
+                                "primary": true
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('configs')[copyIndex()].virtualMachine.name]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true,
+                        "timeZone": "Tokyo Standard Time"
+                    }
+                },
+                "availabilitySet": {
+                    "id": "[variables('availabilitySetId')]"
+                }
+            },
+            "tags": {}
+        },
+
+        // Network Interface
+
+        {
+            "copy": {
+                "name": "NumOfNetworkInterfaces",
+                "count": "[variables('numOfConfigs')]"
+            },
+            "name": "[variables('configs')[copyIndex()].networkInterface.name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('virtualNetworkId')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        },
+
+        // Availability Set
+
+        {
+            "name": "[variables('availabilitySetName')]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2018-06-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+                "platformFaultDomainCount": "[variables('availabilitySetFaultDomainCount')]",
+                "platformUpdateDomainCount": "[variables('availabilitySetUpdateDomainCount')]"
+            },
+            "sku": {
+                "name": "Aligned"
+            },
+            "tags": {}
+        }
+    ],
+    "outputs": {
+    }
+}
