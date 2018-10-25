@@ -51,13 +51,13 @@ if ($ValidateOnly)
 else
 {
     $params = @{
-        Name = ('{0}-{1}'-f (Get-ChildItem -LiteralPath $TemplateFile).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
-        ResourceGroupName = $ResourceGroupName
-        TemplateFile = $TemplateFile
+        Name                  = ('{0}-{1}'-f (Get-ChildItem -LiteralPath $TemplateFile).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
+        ResourceGroupName     = $ResourceGroupName
+        TemplateFile          = $TemplateFile
         TemplateParameterFile = $TemplateParametersFile
-        Force = $true
-        Verbose = $true
-        ErrorVariable = 'errorMessages'
+        Force                 = $true
+        Verbose               = $true
+        ErrorVariable         = 'errorMessages'
     }
     New-AzResourceGroupDeployment @params @OptionalParameters
 
