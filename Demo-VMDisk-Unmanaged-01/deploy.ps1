@@ -60,7 +60,7 @@ else
         ErrorVariable = 'errorMessages'
     }
     New-AzResourceGroupDeployment @params @OptionalParameters
-                                      
+
     if ($errorMessages)
     {
         Write-Output '', 'Template deployment returned the following errors:', @(@($errorMessages) | ForEach-Object { $_.Exception.Message.TrimEnd("`r`n") })

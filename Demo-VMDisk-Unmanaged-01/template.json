@@ -173,7 +173,7 @@
                         "enabled": true,
                         "storageUri": "[concat('https://', variables('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
                     }
-                }                
+                }
             },
             "tags": {}
         },
@@ -267,7 +267,7 @@
                             "destinationAddressPrefix": "*",
                             "destinationPortRange": "3389"
                         }
-                    }                    
+                    }
                 ]
             },
             "tags": {}
