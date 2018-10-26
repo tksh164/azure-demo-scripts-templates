@@ -30,7 +30,7 @@
             "type": "int",
             "minValue": 1,
             "maxValue": 200,
-            "defaultValue": 8,
+            "defaultValue": 3,
             "metadata": {
                 "description": "The number of virtual machines in the availability set."
             }
@@ -67,22 +67,34 @@
 
         // Virtual Machines & Network Interfaces
 
-        "numOfConfigs": "[parameters('virtualMachineCount')]",
-        "virtualMachineNameBase": "[concat(parameters('prefix'), '-vm')]",
         "copy": [
             {
+                "name": "virtualMachineNames",
+                "count": "[parameters('virtualMachineCount')]",
+                "input": {
+                    "name": "[concat(parameters('prefix'), '-vm', copyIndex('virtualMachineNames', 1))]",
+                }
+            },
+            {
+                "name": "networkInterfaceNames",
+                "count": "[length(variables('virtualMachineNames'))]",
+                "input": {
+                    "name": "[concat(variables('virtualMachineNames')[copyIndex('networkInterfaceNames')].name, '-nic1')]",
+                }
+            },
+            {
                 "name": "configs",
-                "count": "[variables('numOfConfigs')]",
+                "count": "[length(variables('virtualMachineNames'))]",
                 "input": {
                     "virtualMachine": {
-                        "name": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1))]",
+                        "name": "[variables('virtualMachineNames')[copyIndex('configs')].name]",
                         "size": "Standard_DS1_v2",
-                        "osDiskName": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-osdisk')]",
-                        "id": "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('virtualMachineNameBase'), copyIndex('configs', 1)))]"
+                        "osDiskName": "[concat(variables('virtualMachineNames')[copyIndex('configs')].name, '-osdisk')]",
+                        "id": "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachineNames')[copyIndex('configs')].name)]"
                     },
                     "networkInterface": {
-                        "name": "[concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-nic1')]",
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('virtualMachineNameBase'), copyIndex('configs', 1), '-nic1'))]",
+                        "name": "[variables('networkInterfaceNames')[copyIndex('configs')].name]",
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('configs')].name)]",
                     }
                 }
             }
@@ -128,7 +140,7 @@
         {
             "copy": {
                 "name": "NumOfVirtualMachines",
-                "count": "[variables('numOfConfigs')]"
+                "count": "[length(variables('configs'))]"
             },
             "name": "[variables('configs')[copyIndex()].virtualMachine.name]",
             "type": "Microsoft.Compute/virtualMachines",
@@ -189,7 +201,7 @@
         {
             "copy": {
                 "name": "NumOfNetworkInterfaces",
-                "count": "[variables('numOfConfigs')]"
+                "count": "[length(variables('configs'))]"
             },
             "name": "[variables('configs')[copyIndex()].networkInterface.name]",
             "type": "Microsoft.Network/networkInterfaces",
