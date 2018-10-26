@@ -1,0 +1,273 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Prefix for each reasources."
+            },
+            "defaultValue": "multinic"
+        },
+        "adminUserName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "metadata": {
+                "description": "User name for administrator on the virtual machine."
+            },
+            "defaultValue": "vmadmin"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for administrator on the virtual machine."
+            }
+        }
+    },
+    "variables": {
+
+        // Virtual Machine
+
+        "virtualMachineName": "[concat(parameters('prefix'), '-vm1')]",
+        "virtualMachineSize": "Standard_A4_v2",
+        "virtualMachineOSDiskName": "[concat(variables('virtualMachineName'), '-osdisk')]",
+        "virtualMachineId": "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachineName'))]",
+        
+        // Virtual Network
+
+        "virtualNetworkName": "[concat(parameters('prefix'), '-vnet')]",
+        "addressPrefix": "10.0.0.0/16",
+        "virtualNetworkId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+
+        "copy": [
+
+            // Subnets in Virtual Network
+
+            {
+                "name": "subnetNames",
+                "count": 3,
+                "input": {
+                    "name": "[concat('subnet', copyIndex('subnetNames', 1))]"
+                }
+            },
+            {
+                "name": "subnets",
+                "count": "[length(variables('subnetNames'))]",
+                "input": {
+                    "name": "[variables('subnetNames')[copyIndex('subnets')].name]",
+                    "addressPrefix": "[concat('10.0.', copyIndex('subnets', 1), '.0/24')]",  // 192.168.*.0/24
+                    "id": "[concat(variables('virtualNetworkId'), '/subnets/', variables('subnetNames')[copyIndex('subnets')].name)]",
+                }
+            },
+            {
+                "name": "subnetsProperty",
+                "count": "[length(variables('subnets'))]",
+                "input": {
+                    "name": "[variables('subnets')[copyIndex('subnetsProperty')].name]",
+                    "properties": {
+                        "addressPrefix": "[variables('subnets')[copyIndex('subnetsProperty')].addressPrefix]"
+                    }
+                }
+            },
+
+            // Network Interfaces
+
+            {
+                "name": "networkInterfaceNames",
+                "count": 4,
+                "input": {
+                    "name": "[concat(variables('virtualMachineName'), '-nic', copyIndex('networkInterfaceNames', 1))]",
+                }
+            },
+            {
+                "name": "networkInterfaces",
+                "count": "[length(variables('networkInterfaceNames'))]",
+                "input": {
+                    "name": "[variables('networkInterfaceNames')[copyIndex('networkInterfaces')].name]",
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('networkInterfaces')].name)]"
+                }
+            },
+            {
+                "name": "networkInterfacesProperty",
+                "count": "[length(variables('networkInterfaces'))]",
+                "input": {
+                    "id": "[variables('networkInterfaces')[copyIndex('networkInterfacesProperty')].id]",
+                    "properties":{
+                        // The first network interface is set to primary.
+                        "primary": "[if(equals(copyIndex('networkInterfacesProperty'), 0), bool('true'), bool('false'))]"
+                    }
+                }
+            }
+        ]
+    },
+    "resources": [
+
+        // Virtual Network
+
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": "[variables('subnetsProperty')]"
+            },
+            "tags": {}
+        },
+
+        // Virtual Machine
+
+        {
+            "name": "[variables('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('networkInterfaces')[0].id]",
+                "[variables('networkInterfaces')[1].id]",
+                "[variables('networkInterfaces')[2].id]",
+                "[variables('networkInterfaces')[3].id]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[variables('virtualMachineOSDiskName')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": "[variables('networkInterfacesProperty')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true,
+                        "timeZone": "Tokyo Standard Time"
+                    }
+                }
+            },
+            "tags": {}
+        },
+
+        // Network Interfaces
+
+        {
+            "name": "[variables('networkInterfaces')[0].name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('virtualNetworkId')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnets')[0].id]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        },
+        {
+            "name": "[variables('networkInterfaces')[1].name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('virtualNetworkId')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnets')[0].id]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        },
+        {
+            "name": "[variables('networkInterfaces')[2].name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('virtualNetworkId')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnets')[1].id]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        },
+        {
+            "name": "[variables('networkInterfaces')[3].name]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[variables('virtualNetworkId')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnets')[2].id]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            },
+            "tags": {}
+        }
+    ],
+    "outputs": {
+    }
+}
