@@ -4,7 +4,7 @@
     "parameters": {
         "baseName": {
             "type": "string",
-            "defaultValue": "VMSS",
+            "defaultValue": "vmss",
             "metadata": {
                 "description": "Base name for each resources."
             }
@@ -78,7 +78,7 @@
         "vmssComputerNamePrefix": "[toLower(take(concat(parameters('baseName'), uniqueString(resourceGroup().id)), 9))]",
         
         // Public IP Address
-        "publicIpName": "[concat(parameters('baseName'), '-ip')]",
+        "publicIpName": "[concat(parameters('baseName'), '-lb-pip')]",
         "publicIpLabel": "[toLower(concat(parameters('baseName'), take(uniqueString(subscription().subscriptionId), 4)))]",
 
         // Loadbalancer
