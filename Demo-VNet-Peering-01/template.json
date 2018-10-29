@@ -1,0 +1,150 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "metadata": {
+                "description": "Prefix for each reasources."
+            },
+            "defaultValue": "vnet"
+        },
+        "vnet1Location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of the first VNet."
+            },
+            "defaultValue": "japaneast"
+        },
+        "vnet2Location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of the second VNet."
+            },
+            "defaultValue": "japanwest"
+        }
+    },
+    "variables": {
+
+        // 1st Virtual Network
+
+        "virtualNetworkName1": "[concat(parameters('prefix'), '1', '-vnet')]",
+        "virtualNetworkLocation1": "[parameters('vnet1Location')]",
+        "addressPrefix1": "10.1.0.0/16",
+        "subnetName1": "default",
+        "subnetAddressPrefix1": "10.1.0.0/24",
+        "virtualNetworkId1": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName1'))]",
+
+        // 2nd Virtual Network
+
+        "virtualNetworkName2": "[concat(parameters('prefix'), '2', '-vnet')]",
+        "virtualNetworkLocation2": "[parameters('vnet2Location')]",
+        "addressPrefix2": "10.2.0.0/16",
+        "subnetName2": "default",
+        "subnetAddressPrefix2": "10.2.0.0/24",
+        "virtualNetworkId2": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName2'))]",
+
+        // Peerings
+
+        "peeringName1": "[concat(parameters('prefix'), '1', '-peering')]",
+        "peeringName2": "[concat(parameters('prefix'), '2', '-peering')]"
+    },
+    "resources": [
+
+        // Virtual Network
+
+        {
+            "name": "[variables('virtualNetworkName1')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('virtualNetworkLocation1')]",
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix1')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName1')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix1')]"
+                        }
+                    }
+                ]
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-08-01",
+                    "type": "virtualNetworkPeerings",
+                    "name": "[variables('peeringName1')]",
+                    "location": "[variables('virtualNetworkLocation1')]",
+                    "dependsOn": [
+                        "[variables('virtualNetworkId1')]",
+                        "[variables('virtualNetworkId2')]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[variables('virtualNetworkId2')]"
+                        }
+                    }
+                }
+            ],
+            "tags": {}
+        },
+
+        {
+            "name": "[variables('virtualNetworkName2')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('virtualNetworkLocation2')]",
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix2')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName2')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix2')]"
+                        }
+                    }
+                ]
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-08-01",
+                    "type": "virtualNetworkPeerings",
+                    "name": "[variables('peeringName2')]",
+                    "location": "[variables('virtualNetworkLocation2')]",
+                    "dependsOn": [
+                        "[variables('virtualNetworkId1')]",
+                        "[variables('virtualNetworkId2')]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[variables('virtualNetworkId1')]"
+                        }
+                    }
+                }
+            ],
+            "tags": {}
+        }
+    ],
+    "outputs": {
+    }
+}
