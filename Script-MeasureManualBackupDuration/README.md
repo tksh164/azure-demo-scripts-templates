@@ -2,7 +2,7 @@
 
 This script measures the manual backup duration include each subtask by Azure VM backup.
 
-## Output example
+## Example
 
 ```
 PS > .\MeasureManualBackupDuration.ps1 -RecoveryServicesVaultName backup-vault -BackupItemName vm1
