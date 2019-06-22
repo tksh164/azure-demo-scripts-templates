@@ -1,77 +1,140 @@
-#
-# Get a backup item.
-#
+#Requires -Version 5.1
+#Requires -Modules @{ ModuleName = 'Az.RecoveryServices'; ModuleVersion = '1.4.1' }
 
-$recoveryServicesVaultName = 'backup-vault'
-$backupItemName = 'vm1'
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory = $true)]
+    [string] $RecoveryServicesVaultName,
 
-$vault = Get-AzRecoveryServicesVault -Name $recoveryServicesVaultName
-$container = Get-AzRecoveryServicesBackupContainer -VaultId $vault.ID -ContainerType AzureVM -FriendlyName $backupItemName
-$item = Get-AzRecoveryServicesBackupItem -VaultId $vault.Id -Container $container -WorkloadType AzureVM
+    [Parameter(Mandatory = $true)]
+    [string] $BackupItemName
+)
 
-#
-# Start the manual backup.
-#
+$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
 
-$jobStartTime = Get-Date
-$jobDetail = Backup-AzRecoveryServicesBackupItem -VaultId $vault.ID -Item $item
-
-#
-# Wait for each subtask completion in the backup job.
-#
-
-if ($jobDetail.Status -eq 'InProgress')
+function Get-BackupJobSubtask
 {
-    # Get the current time at started subtask operation.
-    $allSubtasksStartTime = Get-Date
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $VaultId,
 
-    $subtaskNames = 'Take Snapshot', 'Transfer data to vault'
-    foreach ($subtaskName in $subtaskNames)
+        [Parameter(Mandatory = $true)]
+        [string] $JobId,
+
+        [Parameter(Mandatory = $true)]
+        [string] $SubtaskName
+    )    
+
+    $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $VaultId -JobId $JobId -WarningAction SilentlyContinue  # Suppress the breaking changes warnings.
+    $subtask = $jobDetail.SubTasks.Where({ $_.Name -eq $SubtaskName })
+    $subtask
+}
+
+function Wait-BackupJobSubtaskCompletion
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $VaultId,
+
+        [Parameter(Mandatory = $true)]
+        [string] $JobId,
+
+        [Parameter(Mandatory = $true)]
+        [string[]] $SubtaskName
+    )    
+
+    $results = @()
+
+    foreach ($currentSubtaskName in $SubtaskName)
     {
-        # Get the current time at started the subtask.
-        $subtaskStartTime = Get-Date
-
-        $subtask = $jobDetail.SubTasks.Where({ $_.Name -eq $subtaskName })
-        Write-Host ('Waiting for the ''{0}'' subtask completion.' -f $subtask.Name) -NoNewline
-
-        while ($subtask.Status -ne 'Completed')
-        {
-            Write-Host '.' -NoNewline
-            Start-Sleep -Seconds 1
-            $job = Get-AzRecoveryServicesBackupJob -VaultId $vault.ID -JobId $jobDetail.JobId 
-            $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $vault.ID -Job $job -WarningAction SilentlyContinue
-            $subtask = $jobDetail.SubTasks.Where({ $_.Name -eq $subtaskName })
+        $result = [PSCustomObject] @{
+            Name     = $currentSubtaskName
+            Start    = Get-Date
+            End      = $null
+            Duration = $null
         }
 
-        # Get the current time at ended the subtask.
-        $subtaskEndTime = Get-Date
+        $subtask = Get-BackupJobSubtask -VaultId $VaultId -JobId $JobId -SubtaskName $currentSubtaskName
+        while ($subtask.Status -ne 'Completed')
+        {
+            Write-Verbose -Message ('{0}: Waiting for the ''{1}'' subtask completion...' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'), $currentSubtaskName)
+            Start-Sleep -Seconds 1
+            $subtask = Get-BackupJobSubtask -VaultId $VaultId -JobId $JobId -SubtaskName $currentSubtaskName
+        }
 
-        Write-Host ''
-        Write-Host ('Duration time for ''{0}'' subtask is {1}.' -f $subtaskName, ($subtaskEndTime - $subtaskStartTime).ToString('hh\:mm\:ss'))
+        $result.End = Get-Date
+        $result.Duration = $result.End - $result.Start
+        $results += $result
+
+        Write-Verbose -Message ('{0}: Subtask ''{1}'' was completed with {2}.' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'), $currentSubtaskName, $result.Duration.ToString('hh\:mm\:ss'))
     }
 
-    # Get the current time at ended subtask operation.
-    $allSubtasksEndTime = Get-Date
-
-    Write-Host ('Duration time for all subtask is {0}.' -f ($allSubtasksEndTime - $allSubtasksStartTime).ToString('hh\:mm\:ss'))
+    ,$results
 }
 
-#
-# Wait for the backup job completion.
-#
-
-Write-Host 'Waiting for the job completion.' -NoNewline
-
-while ($jobDetail.Status -ne 'Completed')
+function Wait-BackupJobCompletion
 {
-    Write-Host '.' -NoNewline
-    Start-Sleep -Seconds 1
-    $job = Get-AzRecoveryServicesBackupJob -VaultId $vault.ID -JobId $jobDetail.JobId 
-    $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $vault.ID -Job $job -WarningAction SilentlyContinue
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $VaultId,
+
+        [Parameter(Mandatory = $true)]
+        [string] $JobId
+    )    
+
+    $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $VaultId -JobId $JobId -WarningAction SilentlyContinue  # Suppress the breaking changes warnings.
+
+    while ($jobDetail.Status -eq 'InProgress')
+    {
+        Write-Verbose -Message ('{0}: Waiting for the job completion...' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))
+        Start-Sleep -Seconds 1
+        $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $vault.ID -JobId $jobDetail.JobId -WarningAction SilentlyContinue  # Suppress the breaking changes warnings.
+    }
+
+    $jobDetail
 }
 
-# Get the current time at ended the job.
-$jobEndTime = Get-Date
+function Wait-BackupJob
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $VaultId,
 
-Write-Host ''
-Write-Host ('Duration time for the job is {0}.' -f ($jobEndTime - $jobStartTime).ToString('hh\:mm\:ss'))
+        [Parameter(Mandatory = $true)]
+        [string] $JobId
+    )    
+
+    $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $VaultId -JobId $JobId -WarningAction SilentlyContinue  # Suppress the breaking changes warnings.
+
+    if ($jobDetail.BackupManagementType -ne [Microsoft.Azure.Commands.RecoveryServices.Backup.Cmdlets.Models.BackupManagementType]::AzureVM)
+    {
+        throw ('Unsupported backup management type: {0}' -f $jobDetail.BackupManagementType)
+    }
+
+    $results = [PSCustomObject] @{
+        Job       = $null
+        Subtasks  = $null
+    }
+
+    if ($jobDetail.Status -eq 'InProgress')
+    {
+        $results.Subtasks = Wait-BackupJobSubtaskCompletion -VaultId $VaultId -JobId $jobDetail.JobId -SubtaskName 'Take Snapshot','Transfer data to vault'
+    }
+
+    $results.Job = Wait-BackupJobCompletion -VaultId $VaultId -JobId $jobDetail.JobId
+
+    $results
+}
+
+$vault = Get-AzRecoveryServicesVault -Name $RecoveryServicesVaultName
+$container = Get-AzRecoveryServicesBackupContainer -VaultId $vault.ID -ContainerType AzureVM -FriendlyName $BackupItemName
+$item = Get-AzRecoveryServicesBackupItem -VaultId $vault.Id -Container $container -WorkloadType AzureVM
+
+$jobDetail = Backup-AzRecoveryServicesBackupItem -VaultId $vault.ID -Item $item
+$results = Wait-BackupJob -VaultId $vault.ID -JobId $jobDetail.JobId -Verbose  # TODO remove verbose option.
+
+$results.Job | Format-List -Property '*'
+$results.Subtasks | Format-List -Property '*'
