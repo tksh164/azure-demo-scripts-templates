@@ -58,7 +58,7 @@ function Wait-BackupJobSubtaskCompletion
         $subtask = Get-BackupJobSubtask -VaultId $VaultId -JobId $JobId -SubtaskName $currentSubtaskName
         while ($subtask.Status -ne 'Completed')
         {
-            Write-Verbose -Message ('{0}: Waiting for the ''{1}'' subtask completion...' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'), $currentSubtaskName)
+            Write-Verbose -Message ('{0}: Waiting for the ''{1}'' subtask completion...' -f (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'), $currentSubtaskName)
             Start-Sleep -Seconds 1
             $subtask = Get-BackupJobSubtask -VaultId $VaultId -JobId $JobId -SubtaskName $currentSubtaskName
         }
@@ -67,7 +67,7 @@ function Wait-BackupJobSubtaskCompletion
         $result.Duration = $result.End - $result.Start
         $results += $result
 
-        Write-Verbose -Message ('{0}: Subtask ''{1}'' was completed with {2}.' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'), $currentSubtaskName, $result.Duration.ToString('hh\:mm\:ss'))
+        Write-Verbose -Message ('{0}: Subtask ''{1}'' was completed with {2}.' -f (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'), $currentSubtaskName, $result.Duration.ToString('hh\:mm\:ss'))
     }
 
     ,$results
@@ -88,7 +88,7 @@ function Wait-BackupJobCompletion
 
     while ($jobDetail.Status -eq 'InProgress')
     {
-        Write-Verbose -Message ('{0}: Waiting for the job completion...' -f (Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))
+        Write-Verbose -Message ('{0}: Waiting for the job completion...' -f (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))
         Start-Sleep -Seconds 1
         $jobDetail = Get-AzRecoveryServicesBackupJobDetail -VaultId $vault.ID -JobId $jobDetail.JobId -WarningAction SilentlyContinue  # Suppress the breaking changes warnings.
     }
