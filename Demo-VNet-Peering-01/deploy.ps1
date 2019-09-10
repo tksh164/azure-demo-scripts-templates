@@ -28,7 +28,7 @@ $OptionalParameters = New-Object -TypeName Hashtable
 $TemplateFile = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateFile))
 $TemplateParametersFile = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
 
-New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -Verbose -Force
+New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -Tag @{ 'Usage' = 'Demo' } -Verbose -Force
 
 if ($ValidateOnly)
 {
