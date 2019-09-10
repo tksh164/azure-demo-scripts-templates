@@ -88,7 +88,7 @@
                 "input": {
                     "virtualMachine": {
                         "name": "[variables('virtualMachineNames')[copyIndex('configs')].name]",
-                        "size": "Standard_DS1_v2",
+                        "size": "Standard_A1_v2",
                         "osDiskName": "[concat(variables('virtualMachineNames')[copyIndex('configs')].name, '-osdisk')]",
                         "id": "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachineNames')[copyIndex('configs')].name)]"
                     },
