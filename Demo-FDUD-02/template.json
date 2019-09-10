@@ -158,7 +158,7 @@
                     "imageReference": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2016-Datacenter-smalldisk",
+                        "sku": "2019-Datacenter-smalldisk",
                         "version": "latest"
                     },
                     "osDisk": {
