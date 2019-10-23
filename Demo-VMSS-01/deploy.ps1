@@ -3,7 +3,7 @@
 #Requires -Module Az.Resources
 
 Param(
-    [string] $ResourceGroupName = 'Demo-VMSS-RG',
+    [string] $ResourceGroupName = 'demo-vmss',
     [string] $ResourceGroupLocation = 'Japan East',
     [string] $TemplateFile = 'template.json',
     [string] $TemplateParametersFile = 'parameters.json',
