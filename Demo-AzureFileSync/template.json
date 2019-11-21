@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageSyncServicesNamePrefix": {
+            "type": "string"
+        },
+        "storageAccountNamePrefix": {
+            "type": "string"
+        },
+        "uniqueSuffix": {
+            "type": "string",
+            "defaultValue": "[utcNow('ssmmhhdd')]"
+        }
+    },
+    "variables": {
+        "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), parameters('uniqueSuffix'))]",
+        "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), parameters('uniqueSuffix'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.StorageSync/storageSyncServices",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('storageSyncServicesName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {},
+            "tags": {}
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "tags": {}
+        }
+    ]
+}
