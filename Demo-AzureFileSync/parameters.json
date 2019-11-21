@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageSyncServicesNamePrefix": {
-            "value": "sss"
+            "value": "storage-sync-service"
         },
         "storageAccountNamePrefix": {
             "value": "afs"

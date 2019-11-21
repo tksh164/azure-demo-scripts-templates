@@ -14,7 +14,7 @@
         }
     },
     "variables": {
-        "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), parameters('uniqueSuffix'))]",
+        "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), '-', parameters('uniqueSuffix'))]",
         "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), parameters('uniqueSuffix'))]"
     },
     "resources": [
