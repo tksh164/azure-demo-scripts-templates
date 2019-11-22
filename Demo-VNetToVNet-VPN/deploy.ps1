@@ -1,5 +1,5 @@
 param (
-    [string] $ResourceGroupName = 'Demo-VNetToVNet-VPN',
+    [string] $ResourceGroupName = 'Demo-VPN-VNet-VNet',
     [string] $ResourceGroupLocation = 'Japan East',
     [string] $TemplateFile = 'template.json',
     [string] $TemplateParametersFile = 'parameters.json',
