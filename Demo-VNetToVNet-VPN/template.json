@@ -4,11 +4,17 @@
     "parameters": {
         "vnet1Name": {
             "type": "string",
-            "defaultValue": "vnet1"
+            "defaultValue": "vnet1",
+            "metadata": {
+                "description": "The VNet1 name. Also, this uses to resource name prefix for VNet1 related resources."
+            }
         },
         "vnet2Name": {
             "type": "string",
-            "defaultValue": "vnet2"
+            "defaultValue": "vnet2",
+            "metadata": {
+                "description": "The VNet2 name. Also, this uses to resource name prefix for VNet2 related resources."
+            }
         }
     },
     "variables": {
