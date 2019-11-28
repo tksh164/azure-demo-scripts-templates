@@ -2,7 +2,7 @@
 
 ## Template overview
 
-### Deployment
+### Deployments
 
 - Resource group: `Dmeo-AzureBackup`
 - Recovery Services vault: `azbackup-rsv`
@@ -29,7 +29,7 @@
 
 All the above names are the default value.
 
-### No deployment
+### No deployments
 
 - Azure Backup Server is not configured.
 - VM Backup is not configured to both VMs.
