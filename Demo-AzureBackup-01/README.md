@@ -9,13 +9,13 @@
 - VNet: `azbackup-vnet`
     - Subnet: `default`
         - Virtual machine: `abs-vm1`
-            - For Azure Backup Server.
+            - For Azure Backup Server. You need to setup Azure Backup Server manually.
             - Disk: `abs-vm1-osdisk`
             - Network interface: `abs-vm1-nic`
             - Public IP address: `abs-vm1-ip`
             - Network security group: `abs-vm1-nsg`
         - Virtual machine: `vmbakup-vm1`
-            - For pre-configured VM backup.
+            - For pre-configured VM backup. You need to configure the VM backup manually.
             - Disk: `vmbakup-vm1-osdisk`
             - Network interface: `vmbakup-vm1-nic`
             - Public IP address: `vmbakup-vm1-ip`
