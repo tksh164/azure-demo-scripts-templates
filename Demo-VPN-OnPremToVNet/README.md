@@ -4,8 +4,9 @@ The on-premises network is simulated by VNet.
 
 ## Template overview
 
-### Deployment
+### Deployments
 
+- Resource group: `Demo-VPN-OnPrem-VNet`
 - VNet: `onprem-vnet`
     - Subnet: `default`
         - Virtual machine: `onprem-vm1`
@@ -27,7 +28,7 @@ The on-premises network is simulated by VNet.
         - VPN gateway: `azure-vpngw`
             - Public IP address: `azure-vpngw-ip` - For VPN gateway.
 
-### No deployment
+### No deployments
 
 - Create no connections inter VPN gateways.
 
