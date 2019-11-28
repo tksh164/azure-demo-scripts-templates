@@ -2,8 +2,9 @@
 
 ## Template overview
 
-### Deployment
+### Deployments
 
+- Resource group: `Demo-VPN-VNet-VNet`
 - VNet: `vnet1`
     - Subnet: `default`
     - Subnet: `GatewaySubnet`
@@ -15,7 +16,7 @@
 - Public IP Address: `vnet1-vpngw-ip` - For VPN gateway.
 - Public IP Address: `vnet2-vpngw-ip` - For VPN gateway.
 
-### No deployment
+### No deployments
 
 - Deploy no virtual machines.
 - Create no connections inter VPN gateways.
