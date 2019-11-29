@@ -28,31 +28,56 @@
 
         "vnetName": "azbackup-vnet",
 
+        // Domain Controller VM for Azure Backup Server
+
+        "dcVmPrefix": "dc",
+
+        "dcVm": {
+            "vmName": "[concat(variables('dcVmPrefix'), '-vm1')]",
+            "osDiskName": "[concat(variables('dcVmPrefix'), '-vm1-osdisk')]",
+            "dataDiskName": [
+                "[concat(variables('dcVmPrefix'), '-vm1-datadisk1')]"
+            ],
+            "nicName": "[concat(variables('dcVmPrefix'), '-vm1-nic')]",
+            "ipName": "[concat(variables('dcVmPrefix'), '-vm1-ip')]",
+            "nsgName": "[concat(variables('dcVmPrefix'), '-vm1-nsg')]"
+        },
+
         // Azure Backup Server
 
-        "azureBackupServerVmNamePrefix": "abs",
+        "absVmPrefix": "abs",
 
-        "absVmName": "[concat(variables('azureBackupServerVmNamePrefix'), '-vm1')]",
-        "absVmOsDiskName": "[concat(variables('azureBackupServerVmNamePrefix'), '-vm1-osdisk')]",
-        "absVmNicName": "[concat(variables('azureBackupServerVmNamePrefix'), '-vm1-nic')]",
-        "absVmIpName": "[concat(variables('azureBackupServerVmNamePrefix'), '-vm1-ip')]",
-        "absVmNsgName": "[concat(variables('azureBackupServerVmNamePrefix'), '-vm1-nsg')]",
+        "absVm": {
+            "vmName": "[concat(variables('absVmPrefix'), '-vm1')]",
+            "osDiskName": "[concat(variables('absVmPrefix'), '-vm1-osdisk')]",
+            "dataDiskName": [
+                "[concat(variables('absVmPrefix'), '-vm1-datadisk1')]"
+            ],
+            "nicName": "[concat(variables('absVmPrefix'), '-vm1-nic')]",
+            "ipName": "[concat(variables('absVmPrefix'), '-vm1-ip')]",
+            "nsgName": "[concat(variables('absVmPrefix'), '-vm1-nsg')]"
+        },
 
-        // VM Backup
+        // VM Backup VMs
 
-        "vmBackupVmNamePrefix": "vmbakup",
+        "vmBackupVmPrefix": "vmbakup",
 
-        "vmBakupVmName1": "[concat(variables('vmBackupVmNamePrefix'), '-vm1')]",
-        "vmBakupVmOsDiskName1": "[concat(variables('vmBackupVmNamePrefix'), '-vm1-osdisk')]",
-        "vmBakupVmNicName1": "[concat(variables('vmBackupVmNamePrefix'), '-vm1-nic')]",
-        "vmBakupVmIpName1": "[concat(variables('vmBackupVmNamePrefix'), '-vm1-ip')]",
-        "vmBakupVmNsgName1": "[concat(variables('vmBackupVmNamePrefix'), '-vm1-nsg')]",
-
-        "vmBakupVmName2": "[concat(variables('vmBackupVmNamePrefix'), '-vm2')]",
-        "vmBakupVmOsDiskName2": "[concat(variables('vmBackupVmNamePrefix'), '-vm2-osdisk')]",
-        "vmBakupVmNicName2": "[concat(variables('vmBackupVmNamePrefix'), '-vm2-nic')]",
-        "vmBakupVmIpName2": "[concat(variables('vmBackupVmNamePrefix'), '-vm2-ip')]",
-        "vmBakupVmNsgName2": "[concat(variables('vmBackupVmNamePrefix'), '-vm2-nsg')]"
+        "vmBackupVm": [
+            {
+                "vmName": "[concat(variables('vmBackupVmPrefix'), '-vm1')]",
+                "osDiskName": "[concat(variables('vmBackupVmPrefix'), '-vm1-osdisk')]",
+                "nicName": "[concat(variables('vmBackupVmPrefix'), '-vm1-nic')]",
+                "ipName": "[concat(variables('vmBackupVmPrefix'), '-vm1-ip')]",
+                "nsgName": "[concat(variables('vmBackupVmPrefix'), '-vm1-nsg')]"
+            },
+            {
+                "vmName": "[concat(variables('vmBackupVmPrefix'), '-vm2')]",
+                "osDiskName": "[concat(variables('vmBackupVmPrefix'), '-vm2-osdisk')]",
+                "nicName": "[concat(variables('vmBackupVmPrefix'), '-vm2-nic')]",
+                "ipName": "[concat(variables('vmBackupVmPrefix'), '-vm2-ip')]",
+                "nsgName": "[concat(variables('vmBackupVmPrefix'), '-vm2-nsg')]"
+            }
+        ]
     },
     "resources": [
 
@@ -97,12 +122,12 @@
             }
         },
 
-        // Azure Backup Server
+        // Domain Controller VM for Azure Backup Servers
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "name": "[variables('absVmIpName')]",
+            "name": "[variables('dcVm').ipName]",
             "location": "[variables('location')]",
             "sku": {
                 "name": "Basic"
@@ -114,7 +139,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-02-01",
-            "name": "[variables('absVmNsgName')]",
+            "name": "[variables('dcVm').nsgName]",
             "location": "[variables('location')]",
             "properties": {
                 "securityRules": [
@@ -137,11 +162,11 @@
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-07-01",
-            "name": "[variables('absVmNicName')]",
+            "name": "[variables('dcVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('absVmIpName'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('absVmNsgName'))]"
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('dcVm').ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('dcVm').nsgName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -153,23 +178,39 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('absVmIpName'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('dcVm').ipName)]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('absVmNsgName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('dcVm').nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2018-06-01",
+            "name": "[variables('dcVm').dataDiskName[0]]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "diskSizeGB": 32,
+                "creationData": {
+                    "createOption": "empty"
                 }
             }
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[variables('absVmName')]",
+            "name": "[variables('dcVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces/', variables('absVmNicName'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('dcVm').nicName)]",
+                "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName[0])]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -177,7 +218,7 @@
                 },
                 "storageProfile": {
                     "osDisk": {
-                        "name": "[variables('absVmOsDiskName')]",
+                        "name": "[variables('dcVm').osDiskName]",
                         "createOption": "fromImage",
                         "managedDisk": {
                             "storageAccountType": "Standard_LRS"
@@ -188,17 +229,27 @@
                         "offer": "WindowsServer",
                         "sku": "2019-Datacenter-smalldisk",
                         "version": "latest"
-                    }
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "Attach",
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName[0])]"
+                            }
+                        }
+                    ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('absVmNicName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
                         }
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[variables('absVmName')]",
+                    "computerName": "[variables('dcVm').vmName]",
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -214,12 +265,12 @@
             }
         },
 
-        // VM Backup 1
+        // Azure Backup Server VM
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "name": "[variables('vmBakupVmIpName1')]",
+            "name": "[variables('absVm').ipName]",
             "location": "[variables('location')]",
             "sku": {
                 "name": "Basic"
@@ -231,7 +282,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-02-01",
-            "name": "[variables('vmBakupVmNsgName1')]",
+            "name": "[variables('absVm').nsgName]",
             "location": "[variables('location')]",
             "properties": {
                 "securityRules": [
@@ -254,11 +305,11 @@
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-07-01",
-            "name": "[variables('vmBakupVmNicName1')]",
+            "name": "[variables('absVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('vmBakupVmIpName1'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBakupVmNsgName1'))]"
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('absVm').ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('absVm').nsgName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -270,23 +321,39 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBakupVmIpName1'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('absVm').ipName)]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBakupVmNsgName1'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('absVm').nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2018-06-01",
+            "name": "[variables('absVm').dataDiskName[0]]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "diskSizeGB": 32,
+                "creationData": {
+                    "createOption": "empty"
                 }
             }
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[variables('vmBakupVmName1')]",
+            "name": "[variables('absVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces/', variables('vmBakupVmNicName1'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('absVm').nicName)]",
+                "[resourceId('Microsoft.Compute/disks', variables('absVm').dataDiskName[0])]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -294,7 +361,7 @@
                 },
                 "storageProfile": {
                     "osDisk": {
-                        "name": "[variables('vmBakupVmOsDiskName1')]",
+                        "name": "[variables('absVm').osDiskName]",
                         "createOption": "fromImage",
                         "managedDisk": {
                             "storageAccountType": "Standard_LRS"
@@ -305,17 +372,27 @@
                         "offer": "WindowsServer",
                         "sku": "2019-Datacenter-smalldisk",
                         "version": "latest"
-                    }
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "Attach",
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('absVm').dataDiskName[0])]"
+                            }
+                        }
+                    ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmBakupVmNicName1'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('absVm').nicName)]"
                         }
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[variables('vmBakupVmName1')]",
+                    "computerName": "[variables('absVm').vmName]",
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -331,12 +408,12 @@
             }
         },
 
-        // VM Backup 2
+        // VM Backup VM 1
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "name": "[variables('vmBakupVmIpName2')]",
+            "name": "[variables('vmBackupVm')[0].ipName]",
             "location": "[variables('location')]",
             "sku": {
                 "name": "Basic"
@@ -348,7 +425,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-02-01",
-            "name": "[variables('vmBakupVmNsgName2')]",
+            "name": "[variables('vmBackupVm')[0].nsgName]",
             "location": "[variables('location')]",
             "properties": {
                 "securityRules": [
@@ -371,11 +448,11 @@
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-07-01",
-            "name": "[variables('vmBakupVmNicName2')]",
+            "name": "[variables('vmBackupVm')[0].nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('vmBakupVmIpName2'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBakupVmNsgName2'))]"
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('vmBackupVm')[0].ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBackupVm')[0].nsgName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -387,23 +464,23 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBakupVmIpName2'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[0].ipName)]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBakupVmNsgName2'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBackupVm')[0].nsgName)]"
                 }
             }
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[variables('vmBakupVmName2')]",
+            "name": "[variables('vmBackupVm')[0].vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces/', variables('vmBakupVmNicName2'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('vmBackupVm')[0].nicName)]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -411,7 +488,7 @@
                 },
                 "storageProfile": {
                     "osDisk": {
-                        "name": "[variables('vmBakupVmOsDiskName2')]",
+                        "name": "[variables('vmBackupVm')[0].osDiskName]",
                         "createOption": "fromImage",
                         "managedDisk": {
                             "storageAccountType": "Standard_LRS"
@@ -427,12 +504,129 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmBakupVmNicName2'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmBackupVm')[0].nicName)]"
                         }
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[variables('vmBakupVmName2')]",
+                    "computerName": "[variables('vmBackupVm')[0].vmName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            }
+        },
+
+        // VM Backup VM 2
+
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('vmBackupVm')[1].ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('vmBackupVm')[1].nsgName]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('vmBackupVm')[1].nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('vmBackupVm')[1].ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBackupVm')[1].nsgName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[1].ipName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('vmBackupVm')[1].nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[variables('vmBackupVm')[1].vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('vmBackupVm')[1].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmBackupVm')[1].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmBackupVm')[1].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmBackupVm')[1].vmName]",
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
