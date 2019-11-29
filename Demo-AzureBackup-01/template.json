@@ -14,6 +14,10 @@
             "metadata": {
                 "description": "The admin user password for both side VMs."
             }
+        },
+        "uniqueSuffix": {
+            "type": "string",
+            "defaultValue": "[utcNow('ssmmhhdd')]"
         }
     },
     "variables": {
@@ -22,7 +26,7 @@
 
         // Recovery Services vault
 
-        "recoveryServicesVaultName": "azbackup-rsv",
+        "recoveryServicesVaultName": "[concat('azbackup', parameters('uniqueSuffix'), '-rsv')]",
 
         // Virtual Network
 
@@ -176,7 +180,8 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('dcVm').ipName)]"
                             }
@@ -319,13 +324,19 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "10.0.0.5",
+                            "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('absVm').ipName)]"
                             }
                         }
                     }
                 ],
+                "dnsSettings": {
+                    "dnsServers": [
+                        "10.0.0.4"
+                    ]
+                },
                 "networkSecurityGroup": {
                     "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('absVm').nsgName)]"
                 }
@@ -462,7 +473,8 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "10.0.0.6",
+                            "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[0].ipName)]"
                             }
@@ -579,7 +591,8 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "10.0.0.7",
+                            "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[1].ipName)]"
                             }
