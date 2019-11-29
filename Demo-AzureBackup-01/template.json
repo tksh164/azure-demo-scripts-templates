@@ -27,6 +27,7 @@
         // Recovery Services vault
 
         "recoveryServicesVaultName": "[concat('azbackup', parameters('uniqueSuffix'), '-rsv')]",
+        "recoveryServicesVaultDiagStorageName": "[concat('azbackupdiag', parameters('uniqueSuffix'))]",
 
         // Virtual Network
 
@@ -97,6 +98,20 @@
                 "tier": "Standard"
             },
             "properties": {}
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('recoveryServicesVaultDiagStorageName')]",
+            "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
         },
 
         // Virtual Network

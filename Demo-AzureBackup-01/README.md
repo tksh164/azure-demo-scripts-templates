@@ -7,12 +7,14 @@
 All the below names are the default value.
 
 - Resource group: `Dmeo-AzureBackup`
-- Recovery Services vault: `azbackup-rsv`
+- Recovery Services vault: `azbackup########-rsv`
+- Storage account: `azbackupdiag########`
+    - Diagnostics storage account for the Recovery Services vault.
 - Virtual network: `azbackup-vnet`
     - Subnet: `default`
         - Address prefix: `10.0.0.0/24`
         - Virtual machine: `dc-vm1`
-            - Domain Controller for Azure Backup Server. You need to setup Domain Controoler manually.
+            - Domain Controller for the Azure Backup Server. You need to setup Domain Controoler manually.
             - OS disk: `dc-vm1-osdisk`
             - Data disk: `dc-vm1-datadisk1`
             - Network interface: `dc-vm1-nic`
@@ -45,6 +47,7 @@ All the below names are the default value.
 
 ### No deployments
 
+- The Recovery Services vault's diagnostics settings are not configured.
 - Domain Controller is not configured.
 - Azure Backup Server is not configured.
 - VM Backup is not configured to both VMs.
