@@ -45,7 +45,7 @@ All the below names are the default value.
             - Public IP address: `vmbackup-vm2-ip`
             - Network security group: `vmbackup-vm2-nsg`
 
-### No deployments
+### Non-deployments
 
 - The Recovery Services vault's diagnostics settings are not configured.
 - Domain Controller is not configured.
