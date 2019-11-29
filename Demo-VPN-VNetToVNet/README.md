@@ -16,7 +16,7 @@
 - Public IP Address: `vnet1-vpngw-ip` - For VPN gateway.
 - Public IP Address: `vnet2-vpngw-ip` - For VPN gateway.
 
-### No deployments
+### Non-deployments
 
 - Deploy no virtual machines.
 - Create no connections inter VPN gateways.
