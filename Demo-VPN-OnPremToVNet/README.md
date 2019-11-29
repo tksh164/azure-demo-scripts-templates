@@ -28,7 +28,7 @@ The on-premises network is simulated by VNet.
         - VPN gateway: `azure-vpngw`
             - Public IP address: `azure-vpngw-ip` - For VPN gateway.
 
-### No deployments
+### Non-deployments
 
 - Create no connections inter VPN gateways.
 
