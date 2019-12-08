@@ -1,5 +1,5 @@
 param (
-    [string] $ResourceGroupName = 'Dmeo-AzureBackup',
+    [string] $ResourceGroupName = 'dmeo-az-backup',
     [string] $ResourceGroupLocation = 'Japan East',
     [string] $TemplateFile = 'template.json',
     [string] $TemplateParametersFile = 'parameters.json',

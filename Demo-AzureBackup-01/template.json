@@ -28,10 +28,34 @@
 
         "recoveryServicesVaultName": "[concat('azbackup', parameters('uniqueSuffix'), '-rsv')]",
         "recoveryServicesVaultDiagStorageName": "[concat('azbackupdiag', parameters('uniqueSuffix'))]",
+        "logAnalyticsWorkspaceName": "[concat('azbackup', parameters('uniqueSuffix'), '-law')]",
 
         // Virtual Network
 
         "vnetName": "azbackup-vnet",
+
+        // MARS agent
+
+        "marsAgentPrefix": "marsagent",
+
+        "marsAgentVm": [
+            {
+                "vmName": "[concat(variables('marsAgentPrefix'), '-vm1')]",
+                "osDiskName": "[concat(variables('marsAgentPrefix'), '-vm1-osdisk')]",
+                "nicName": "[concat(variables('marsAgentPrefix'), '-vm1-nic')]",
+                "privateIPAddress": "10.0.0.6",
+                "ipName": "[concat(variables('marsAgentPrefix'), '-vm1-ip')]",
+                "nsgName": "[concat(variables('marsAgentPrefix'), '-vm1-nsg')]"
+            },
+            {
+                "vmName": "[concat(variables('marsAgentPrefix'), '-vm2')]",
+                "osDiskName": "[concat(variables('marsAgentPrefix'), '-vm2-osdisk')]",
+                "nicName": "[concat(variables('marsAgentPrefix'), '-vm2-nic')]",
+                "privateIPAddress": "10.0.0.7",
+                "ipName": "[concat(variables('marsAgentPrefix'), '-vm2-ip')]",
+                "nsgName": "[concat(variables('marsAgentPrefix'), '-vm2-nsg')]"
+            }
+        ],
 
         // Domain Controller VM for Azure Backup Server
 
@@ -44,13 +68,14 @@
                 "[concat(variables('dcVmPrefix'), '-vm1-datadisk1')]"
             ],
             "nicName": "[concat(variables('dcVmPrefix'), '-vm1-nic')]",
+            "privateIPAddress": "10.0.0.4",
             "ipName": "[concat(variables('dcVmPrefix'), '-vm1-ip')]",
             "nsgName": "[concat(variables('dcVmPrefix'), '-vm1-nsg')]"
         },
 
         // Azure Backup Server
 
-        "absVmPrefix": "abs",
+        "absVmPrefix": "mabs",
 
         "absVm": {
             "vmName": "[concat(variables('absVmPrefix'), '-vm1')]",
@@ -59,6 +84,7 @@
                 "[concat(variables('absVmPrefix'), '-vm1-datadisk1')]"
             ],
             "nicName": "[concat(variables('absVmPrefix'), '-vm1-nic')]",
+            "privateIPAddress": "10.0.0.5",
             "ipName": "[concat(variables('absVmPrefix'), '-vm1-ip')]",
             "nsgName": "[concat(variables('absVmPrefix'), '-vm1-nsg')]"
         },
@@ -72,6 +98,7 @@
                 "vmName": "[concat(variables('vmBackupVmPrefix'), '-vm1')]",
                 "osDiskName": "[concat(variables('vmBackupVmPrefix'), '-vm1-osdisk')]",
                 "nicName": "[concat(variables('vmBackupVmPrefix'), '-vm1-nic')]",
+                "privateIPAddress": "10.0.0.8",
                 "ipName": "[concat(variables('vmBackupVmPrefix'), '-vm1-ip')]",
                 "nsgName": "[concat(variables('vmBackupVmPrefix'), '-vm1-nsg')]"
             },
@@ -79,6 +106,7 @@
                 "vmName": "[concat(variables('vmBackupVmPrefix'), '-vm2')]",
                 "osDiskName": "[concat(variables('vmBackupVmPrefix'), '-vm2-osdisk')]",
                 "nicName": "[concat(variables('vmBackupVmPrefix'), '-vm2-nic')]",
+                "privateIPAddress": "10.0.0.9",
                 "ipName": "[concat(variables('vmBackupVmPrefix'), '-vm2-ip')]",
                 "nsgName": "[concat(variables('vmBackupVmPrefix'), '-vm2-nsg')]"
             }
@@ -113,6 +141,20 @@
                 "supportsHttpsTrafficOnly": true
             }
         },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2015-11-01-preview",
+            "name": "[variables('logAnalyticsWorkspaceName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "sku": {
+                    "name": "pergb2018"
+                },
+                "features": {
+                    "searchVersion": "1"
+                }
+            }
+        },
 
         // Virtual Network
 
@@ -138,6 +180,242 @@
                 "virtualNetworkPeerings": [],
                 "enableDdosProtection": false,
                 "enableVmProtection": false
+            }
+        },
+
+        // MARS agent VM 1
+
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('marsAgentVm')[0].ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('marsAgentVm')[0].nsgName]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('marsAgentVm')[0].nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('marsAgentVm')[0].ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('marsAgentVm')[0].nsgName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
+                            },
+                            "privateIPAddress": "[variables('marsAgentVm')[0].privateIPAddress]",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('marsAgentVm')[0].ipName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('marsAgentVm')[0].nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[variables('marsAgentVm')[0].vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('marsAgentVm')[0].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('marsAgentVm')[0].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('marsAgentVm')[0].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('marsAgentVm')[0].vmName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            }
+        },
+
+        // MARS agent VM 2
+
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('marsAgentVm')[1].ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "name": "[variables('marsAgentVm')[1].nsgName]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('marsAgentVm')[1].nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('marsAgentVm')[1].ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('marsAgentVm')[1].nsgName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
+                            },
+                            "privateIPAddress": "[variables('marsAgentVm')[1].privateIPAddress]",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('marsAgentVm')[1].ipName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('marsAgentVm')[1].nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[variables('marsAgentVm')[1].vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('marsAgentVm')[1].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('marsAgentVm')[1].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('marsAgentVm')[1].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('marsAgentVm')[1].vmName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
             }
         },
 
@@ -195,7 +473,7 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAddress": "[variables('dcVm').privateIPAddress]",
                             "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('dcVm').ipName)]"
@@ -339,7 +617,7 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAddress": "10.0.0.5",
+                            "privateIPAddress": "[variables('absVm').privateIPAddress]",
                             "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('absVm').ipName)]"
@@ -488,7 +766,7 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAddress": "10.0.0.6",
+                            "privateIPAddress": "[variables('vmBackupVm')[0].privateIPAddress]",
                             "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[0].ipName)]"
@@ -606,7 +884,7 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
                             },
-                            "privateIPAddress": "10.0.0.7",
+                            "privateIPAddress": "[variables('vmBackupVm')[1].privateIPAddress]",
                             "privateIPAllocationMethod": "Static",
                             "publicIpAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vmBackupVm')[1].ipName)]"
