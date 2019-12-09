@@ -17,7 +17,7 @@
         },
         "uniqueSuffix": {
             "type": "string",
-            "defaultValue": "[utcNow('ssmmhhdd')]"
+            "defaultValue": "[utcNow('fffdd')]"
         }
     },
     "variables": {
