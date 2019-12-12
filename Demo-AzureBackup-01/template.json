@@ -14,21 +14,18 @@
             "metadata": {
                 "description": "The admin user password for both side VMs."
             }
-        },
-        "uniqueSuffix": {
-            "type": "string",
-            "defaultValue": "[utcNow('fffdd')]"
         }
     },
     "variables": {
 
         "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
 
         // Recovery Services vault
 
-        "recoveryServicesVaultName": "[concat('azbackup', parameters('uniqueSuffix'), '-rsv')]",
-        "recoveryServicesVaultDiagStorageName": "[concat('azbackupdiag', parameters('uniqueSuffix'))]",
-        "logAnalyticsWorkspaceName": "[concat('azbackup', parameters('uniqueSuffix'), '-law')]",
+        "recoveryServicesVaultName": "[concat('azbackup', variables('uniqueSuffix'), '-rsv')]",
+        "recoveryServicesVaultDiagStorageName": "[concat('azbackupdiag', variables('uniqueSuffix'))]",
+        "logAnalyticsWorkspaceName": "[concat('azbackup', variables('uniqueSuffix'), '-law')]",
 
         // Virtual Network
 
