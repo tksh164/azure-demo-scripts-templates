@@ -7,15 +7,13 @@
         },
         "storageAccountNamePrefix": {
             "type": "string"
-        },
-        "uniqueSuffix": {
-            "type": "string",
-            "defaultValue": "[utcNow('ssmmhhdd')]"
         }
     },
     "variables": {
-        "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), '-', parameters('uniqueSuffix'))]",
-        "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), parameters('uniqueSuffix'))]"
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
+
+        "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), variables('uniqueSuffix'), '-storagesync')]",
+        "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), variables('uniqueSuffix'))]"
     },
     "resources": [
         {

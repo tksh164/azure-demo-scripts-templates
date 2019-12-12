@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageSyncServicesNamePrefix": {
-            "value": "storage-sync-service"
+            "value": "afslab"
         },
         "storageAccountNamePrefix": {
-            "value": "afs"
+            "value": "afslab"
         }
     }
 }
