@@ -1,12 +1,12 @@
 # Role playing PoC
 
-## Template overview
-
 You can deploy this template by the `deploy.ps1` script. Also can specify the resource group via `-ResourceGroupName` parameter.
 
 ```
 PS > .\deploy.ps1
 ```
+
+## Template overview
 
 ### Deployments
 
