@@ -2,6 +2,12 @@
 
 ## Template overview
 
+You can deploy this template by the `deploy.ps1` script. Also can specify the resource group via `-ResourceGroupName` parameter.
+
+```
+PS > .\deploy.ps1
+```
+
 ### Deployments
 
 - Resource group: `demo-roleplaying-poc`
@@ -54,6 +60,7 @@
     - Private DNS zone: `privatelink.file.core.windows.net`
     - Log Analytics workspace: `monitor####-law`
     - Recovery Services vault: `backup####-rsv`
+
 
 ### Non-deployments
 
