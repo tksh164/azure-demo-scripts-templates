@@ -8,28 +8,34 @@
     - VNet: `poc-vnet`
         - Subnet: `adds-subnet`
             - Network security group: `adds-subnet-nsg`
-            - Availability set: `dc-as`
-                - Virtual Machine: `dc-vm1`
-                    - OS disk: `dc-vm1-osdisk`
-                    - Data disk: `dc-vm1-datadisk1`
-                - Virtual Machine: `dc-vm2`
-                    - OS disk: `dc-vm2-osdisk`
-                    - Data disk: `dc-vm2-datadisk1`
+            - Availability set: `adds-dc-as`
+                - Virtual Machine: `adds-dc-vm1`
+                    - OS disk: `adds-dc-vm1-osdisk`
+                    - Data disk: `adds-dc-vm1-datadisk1`
+                - Virtual Machine: `adds-dc-vm2`
+                    - OS disk: `adds-dc-vm2-osdisk`
+                    - Data disk: `adds-dc-vm2-datadisk1`
         - Subnet: `database-subnet`
             - Network security group: `database-subnet-nsg`
-            - Availability set: `db-as`
-                - Virtual Machine: `db-vm1`
-                    - OS disk: `db-vm1-osdisk`
-                    - Data disk: `db-vm1-datadisk1`
-                - Virtual Machine: `db-vm2`
-                    - OS disk: `db-vm2-osdisk`
-                    - Data disk: `db-vm2-datadisk1`
+            - Availability set: `database-as`
+                - Virtual Machine: `database-vm1`
+                    - OS disk: `database-vm1-osdisk`
+                    - Data disk: `database-vm1-datadisk1`
+                - Virtual Machine: `database-vm2`
+                    - OS disk: `database-vm2-osdisk`
+                    - Data disk: `database-vm2-datadisk1`
         - Subnet: `web-subnet`
             - Network security group: `web-subnet-nsg`
             - Availability set: `web-as`
                 - Virtual Machine: `web-vm1`
+                    - OS disk: `web-vm1-osdisk`
+                    - Data disk: `web-vm1-datadisk1`
                 - Virtual Machine: `web-vm2`
+                    - OS disk: `web-vm1-osdisk`
+                    - Data disk: `web-vm1-datadisk1`
                 - Virtual Machine: `web-vm3`
+                    - OS disk: `web-vm1-osdisk`
+                    - Data disk: `web-vm1-datadisk1`
         - Subnet: `appgateway-subnet`
             - Network security group: `appgateway-subnet-nsg`
             - Application gateway: `waf-ag`
