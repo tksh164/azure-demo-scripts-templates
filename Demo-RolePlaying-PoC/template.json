@@ -1,0 +1,2096 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for both side VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for both side VMs."
+            }
+        }
+    },
+    "variables": {
+
+        "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
+
+        // Network security group
+
+        "nsgNames": {
+            "adds": "adds-subnet-nsg",
+            "database": "database-subnet-nsg",
+            "web": "web-subnet-nsg",
+            "appGateway": "appgateway-subnet-nsg",
+            "bastion": "bastion-subnet-nsg"
+        },
+
+        // Virtual network
+
+        "vnet": {
+            "name": "poc-vnet",
+            "addressPrefixes": [
+                "10.0.0.0/16"
+            ],
+            "subnets": {
+                "adds": {
+                    "name": "adds-subnet",
+                    "addressPrefix": "10.0.0.0/24"
+                },
+                "database": {
+                    "name": "database-subnet",
+                    "addressPrefix": "10.0.1.0/24"
+                },
+                "web": {
+                    "name": "web-subnet",
+                    "addressPrefix": "10.0.2.0/24"
+                },
+                "appGateway": {
+                    "name": "appgateway-subnet",
+                    "addressPrefix": "10.0.254.0/26"
+                },
+                "firewall": {
+                    "name": "AzureFirewallSubnet",
+                    "addressPrefix": "10.0.254.128/26"
+                },
+                "bastion": {
+                    "name": "AzureBastionSubnet",
+                    "addressPrefix": "10.0.254.192/26"
+                }
+            }
+        },
+
+        // AD DS Domain controllers
+
+        "addsVmPrefix": "adds-dc",
+        "addsVmAvailabilitySet": {
+            "name": "[concat(variables('addsVmPrefix'), '-as')]"
+        },
+        "addsVms": [
+            {
+                "vmName": "[concat(variables('addsVmPrefix'), '-vm1')]",
+                "osDiskName": "[concat(variables('addsVmPrefix'), '-vm1-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('addsVmPrefix'), '-vm1-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('addsVmPrefix'), '-vm1-nic')]",
+                "privateIpAddress": "10.0.0.10"
+            },
+            {
+                "vmName": "[concat(variables('addsVmPrefix'), '-vm2')]",
+                "osDiskName": "[concat(variables('addsVmPrefix'), '-vm2-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('addsVmPrefix'), '-vm2-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('addsVmPrefix'), '-vm2-nic')]",
+                "privateIpAddress": "10.0.0.11"
+            }
+        ],
+
+        // Database servers
+
+        "databaseVmPrefix": "database",
+        "databaseVmAvailabilitySet": {
+            "name": "[concat(variables('databaseVmPrefix'), '-as')]"
+        },
+        "databaseVms": [
+            {
+                "vmName": "[concat(variables('databaseVmPrefix'), '-vm1')]",
+                "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm1-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('databaseVmPrefix'), '-vm1-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('databaseVmPrefix'), '-vm1-nic')]",
+                "privateIpAddress": "10.0.1.10"
+            },
+            {
+                "vmName": "[concat(variables('databaseVmPrefix'), '-vm2')]",
+                "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm2-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('databaseVmPrefix'), '-vm2-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('databaseVmPrefix'), '-vm2-nic')]",
+                "privateIpAddress": "10.0.1.11"
+            }
+        ],
+
+        // Web servers
+
+        "webVmPrefix": "web",
+        "webVmAvailabilitySet": {
+            "name": "[concat(variables('webVmPrefix'), '-as')]"
+        },
+        "webVms": [
+            {
+                "vmName": "[concat(variables('webVmPrefix'), '-vm1')]",
+                "osDiskName": "[concat(variables('webVmPrefix'), '-vm1-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('webVmPrefix'), '-vm1-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('webVmPrefix'), '-vm1-nic')]",
+                "privateIpAddress": "10.0.2.10"
+            },
+            {
+                "vmName": "[concat(variables('webVmPrefix'), '-vm2')]",
+                "osDiskName": "[concat(variables('webVmPrefix'), '-vm2-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('webVmPrefix'), '-vm2-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('webVmPrefix'), '-vm2-nic')]",
+                "privateIpAddress": "10.0.2.11"
+            },
+            {
+                "vmName": "[concat(variables('webVmPrefix'), '-vm3')]",
+                "osDiskName": "[concat(variables('webVmPrefix'), '-vm3-osdisk')]",
+                "dataDiskName": [
+                    "[concat(variables('webVmPrefix'), '-vm3-datadisk1')]"
+                ],
+                "nicName": "[concat(variables('webVmPrefix'), '-vm3-nic')]",
+                "privateIpAddress": "10.0.2.12"
+            }
+        ],
+
+        // Application gateway
+
+        "appGwPrefix": "waf",
+        "appGateway": {
+            "name": "[concat(variables('appGwPrefix'), '-ag')]",
+            "ipAddressName": "[concat(variables('appGwPrefix'), '-ag-ip')]"
+        },
+
+        // Storage account
+
+        "imageStoreStorageAccount": {
+            "name": "[concat('imagestore', variables('uniqueSuffix'))]"
+        },
+
+        // Private endpoint
+
+        "imageStorePrivateEndpoint": {
+            "name": "imagestore-privateendpoint",
+            "connectionName": "imagestore-privateendpoint-connection",
+        },
+
+        // Private DNS zone for private endpoint
+
+        "imageStorePrivateEndpointPrivateDnsZone": {
+            "name": "privatelink.file.core.windows.net",
+            "virtualNetworkLinkName": "privateendpoint-link"
+        },
+
+        // Firewall
+
+        "firewallPrefix": "firewall",
+        "firewall": {
+            "name": "[concat(variables('firewallPrefix'))]",
+            "ipAddressName": "[concat(variables('firewallPrefix'), '-ip')]",
+            "routeTableName": "[concat(variables('firewallPrefix'), '-route')]",
+            "routeName": "firewall"
+        },
+
+        // Bastion
+
+        "bastionPrefix": "bastion",
+        "bastion": {
+            "name": "[concat(variables('bastionPrefix'))]",
+            "ipAddressName": "[concat(variables('bastionPrefix'), '-ip')]"
+        },
+
+        // Log Analytics
+
+        "logAnalyticsWorkspacePrefix": "monitor",
+        "logAnalyticsWorkspace": {
+            "name": "[concat(variables('logAnalyticsWorkspacePrefix'), variables('uniqueSuffix'), '-law')]"
+        },
+
+        // Recovery Services vault
+
+        "rsVaultPrefix": "backup",
+        "rsVault": {
+            "name": "[concat(variables('rsVaultPrefix'), variables('uniqueSuffix'), '-rsv')]"
+        }
+    },
+    "resources": [
+
+        // Network security group
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "networkSecurityGroup",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "nsgNames": {
+                        "value": "[variables('nsgNames')]"
+                    },
+                    "vnet": {
+                        "value": "[variables('vnet')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "nsgNames": {
+                            "type": "object"
+                        },
+                        "vnet": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('nsgNames').adds]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowBastionRdpAccessInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "[parameters('vnet').subnets.bastion.addressPrefix]",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "3389",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the RDP connections from the Bastion's subnet."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowAddsTcpInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 210,
+                                            "access": "Allow",
+                                            "sourceAddressPrefixes": [
+                                                "[parameters('vnet').subnets.database.addressPrefix]",
+                                                "[parameters('vnet').subnets.web.addressPrefix]"
+                                            ],
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the AD DS related TCP connections from the Database and Web subnets."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowAddsUdpInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 220,
+                                            "access": "Allow",
+                                            "sourceAddressPrefixes": [
+                                                "[parameters('vnet').subnets.database.addressPrefix]",
+                                                "[parameters('vnet').subnets.web.addressPrefix]"
+                                            ],
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "protocol": "Udp",
+                                            "description": "Allow the AD DS related UDP connections from the Database and Web subnets."
+                                        }
+                                    }
+                                ]   
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('nsgNames').database]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowBastionRdpAccessInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "[parameters('vnet').subnets.bastion.addressPrefix]",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "3389",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the RDP connections from the Bastion's subnet."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowSqlServerAccessInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 210,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "[parameters('vnet').subnets.web.addressPrefix]",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "1433",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the SQL Server connections from the Web subnet."
+                                        }
+                                    }
+                                ]   
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('nsgNames').web]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowBastionRdpAccessInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "[parameters('vnet').subnets.bastion.addressPrefix]",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "3389",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the RDP connections from the Bastion's subnet."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowWebAccssInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 210,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "[parameters('vnet').subnets.appGateway.addressPrefix]",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRanges": [
+                                                "80",
+                                                "443"
+                                            ],
+                                            "protocol": "Tcp",
+                                            "description": "Allow the HTTP/HTTPS connections from the Application Gateways's subnet."
+                                        }
+                                    }
+                                ]   
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('nsgNames').appGateway]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowWebAccssInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "Internet",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "destinationPortRanges": [
+                                                "80",
+                                                "443"
+                                            ],
+                                            "protocol": "Tcp",
+                                            "description": "Allow the HTTP/HTTPS connections from Internet."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowApplicationGatewayV2RequirementPortsInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 300,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "*",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "65200-65535",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the Application Gateway V2 requirement connections."
+                                        }
+                                    }
+                                ]   
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('nsgNames').bastion]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowBastionUserAccessInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "Internet",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "destinationPortRange": "443",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the RDP connections over the HTTPS from Internet."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionControlPlaneInBound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 210,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "GatewayManager",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "443",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the Bastion control plane connections."
+                                        }
+                                    },
+                                    {
+                                        "name": "DenyAllInbound",
+                                        "properties": {
+                                            "direction": "Inbound",
+                                            "priority": 1000,
+                                            "access": "Deny",
+                                            "sourceAddressPrefix": "*",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "protocol": "*"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionVmAccessOutBound",
+                                        "properties": {
+                                            "direction": "Outbound",
+                                            "priority": 200,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "*",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "destinationPortRanges": [
+                                                "3389",
+                                                "22"
+                                            ],
+                                            "protocol": "Tcp",
+                                            "description": "Allow the RDP connection to the virtual machines within the virtual network."
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionAzureAccessOutBound",
+                                        "properties": {
+                                            "direction": "Outbound",
+                                            "priority": 210,
+                                            "access": "Allow",
+                                            "sourceAddressPrefix": "*",
+                                            "sourcePortRange": "*",
+                                            "destinationAddressPrefix": "AzureCloud",
+                                            "destinationPortRange": "443",
+                                            "protocol": "Tcp",
+                                            "description": "Allow the Bastion requirement connections."
+                                        }
+                                    }
+                                ]   
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "nsgIds": {
+                            "type": "object",
+                            "value": {
+                                "adds": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgNames').adds)]",
+                                "database": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgNames').database)]",
+                                "web": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgNames').web)]",
+                                "appGateway": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgNames').appGateway)]",
+                                "bastion": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgNames').bastion)]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        // Virtual network
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "virtualNetwork",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "vnet": {
+                        "value": "[variables('vnet')]"
+                    },
+                    "nsgIds": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'networkSecurityGroup')).outputs.nsgIds]"
+                    },
+                    "firewallRouteTableId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'firewallRouteTable')).outputs.firewallRouteTableId.value]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "vnet": {
+                            "type": "object"
+                        },
+                        "nsgIds": {
+                            "type": "object"
+                        },
+                        "firewallRouteTableId": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('vnet').name]",
+                            "location": "[parameters('location')]",
+                            "dependsOn":[],
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": "[parameters('vnet').addressPrefixes]"
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "[parameters('vnet').subnets.adds.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.adds.addressPrefix]",
+                                            "networkSecurityGroup": {
+                                                "id": "[parameters('nsgIds').value.adds]"
+                                            },
+                                            "routeTable": {
+                                                "id": "[parameters('firewallRouteTableId')]"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "[parameters('vnet').subnets.database.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.database.addressPrefix]",
+                                            "networkSecurityGroup": {
+                                                "id": "[parameters('nsgIds').value.database]"
+                                            },
+                                            "routeTable": {
+                                                "id": "[parameters('firewallRouteTableId')]"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "[parameters('vnet').subnets.web.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.web.addressPrefix]",
+                                            "networkSecurityGroup": {
+                                                "id": "[parameters('nsgIds').value.web]"
+                                            },
+                                            "privateEndpointNetworkPolicies": "Disabled"
+                                        }
+                                    },
+                                    {
+                                        "name": "[parameters('vnet').subnets.appGateway.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.appGateway.addressPrefix]",
+                                            "networkSecurityGroup": {
+                                                "id": "[parameters('nsgIds').value.appGateway]"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "[parameters('vnet').subnets.firewall.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.firewall.addressPrefix]"
+                                        }
+                                    },
+                                    {
+                                        "name": "[parameters('vnet').subnets.bastion.name]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('vnet').subnets.bastion.addressPrefix]",
+                                            "networkSecurityGroup": {
+                                                "id": "[parameters('nsgIds').value.bastion]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "virtualNetworkPeerings": [],
+                                "enableDdosProtection": false,
+                                "enableVmProtection": false
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "vnetId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet').name)]"
+                        },
+                        "subnetIds": {
+                            "type": "object",
+                            "value": {
+                                "adds": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.adds.name)]",
+                                "database": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.database.name)]",
+                                "web": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.web.name)]",
+                                "appGateway": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.appGateway.name)]",
+                                "firewall": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.firewall.name)]",
+                                "bastion": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet').name, parameters('vnet').subnets.bastion.name)]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        // AD DS domain controller virtual machines
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "addsDomainControllersVMs",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "addsSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.adds]"
+                    },
+                    "addsVmAvailabilitySet": {
+                        "value": "[variables('addsVmAvailabilitySet')]"
+                    },
+                    "addsVms": {
+                        "value": "[variables('addsVms')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('adminUserName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "addsSubnetId": {
+                            "type": "string"
+                        },
+                        "addsVmAvailabilitySet": {
+                            "type": "object"
+                        },
+                        "addsVms": {
+                            "type": "array"
+                        },
+                        "adminUserName": {
+                            "type": "string"
+                        },
+                        "adminPassword": {
+                            "type": "secureString"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/availabilitySets",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('addsVmAvailabilitySet').name]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Aligned"
+                            },
+                            "properties": {
+                                "platformUpdateDomainCount": 5,
+                                "platformFaultDomainCount": 2
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dcVmNetworkInterfacesCopy",
+                                "count": "[length(parameters('addsVms'))]"
+                            },
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2019-07-01",
+                            "name": "[parameters('addsVms')[copyIndex()].nicName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('addsSubnetId')]"
+                                            },
+                                            "privateIPAddress": "[parameters('addsVms')[copyIndex()].privateIpAddress]",
+                                            "privateIPAllocationMethod": "Static"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dcVmDiskCopy",
+                                "count": "[length(parameters('addsVms'))]"
+                            },
+                            "type": "Microsoft.Compute/disks",
+                            "apiVersion": "2018-06-01",
+                            "name": "[parameters('addsVms')[copyIndex()].dataDiskName[0]]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard_LRS"
+                            },
+                            "properties": {
+                                "diskSizeGB": 32,
+                                "creationData": {
+                                    "createOption": "empty"
+                                }
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dcVmVirtualMachinesCopy",
+                                "count": "[length(parameters('addsVms'))]"
+                            },
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('addsVms')[copyIndex()].vmName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('addsVmAvailabilitySet').name)]",
+                                "[resourceId('Microsoft.Network/networkInterfaces', parameters('addsVms')[copyIndex()].nicName)]",
+                                "[resourceId('Microsoft.Compute/disks', parameters('addsVms')[copyIndex()].dataDiskName[0])]"
+                            ],
+                            "properties": {
+                                "availabilitySet": {
+                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('addsVmAvailabilitySet').name)]"
+                                },                
+                                "hardwareProfile": {
+                                    "vmSize": "Standard_F2s_v2"
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "name": "[parameters('addsVms')[copyIndex()].osDiskName]",
+                                        "createOption": "fromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "Standard_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "MicrosoftWindowsServer",
+                                        "offer": "WindowsServer",
+                                        "sku": "2019-Datacenter-smalldisk",
+                                        "version": "latest"
+                                    },
+                                    "dataDisks": [
+                                        {
+                                            "createOption": "Attach",
+                                            "lun": 0,
+                                            "caching": "ReadOnly",
+                                            "managedDisk": {
+                                                "id": "[resourceId('Microsoft.Compute/disks', parameters('addsVms')[copyIndex()].dataDiskName[0])]"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('addsVms')[copyIndex()].nicName)]"
+                                        }
+                                    ]
+                                },
+                                "osProfile": {
+                                    "computerName": "[parameters('addsVms')[copyIndex()].vmName]",
+                                    "adminUsername": "[parameters('adminUserName')]",
+                                    "adminPassword": "[parameters('adminPassword')]",
+                                    "windowsConfiguration": {
+                                        "enableAutomaticUpdates": true,
+                                        "provisionVmAgent": true
+                                    }
+                                },
+                                "diagnosticsProfile": {
+                                    "bootDiagnostics": {
+                                        "enabled": false
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Database virtual machines
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "databaseVMs",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "databaseSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                    },
+                    "databaseVmAvailabilitySet": {
+                        "value": "[variables('databaseVmAvailabilitySet')]"
+                    },
+                    "databaseVms": {
+                        "value": "[variables('databaseVms')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('adminUserName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "databaseSubnetId": {
+                            "type": "string"
+                        },
+                        "databaseVmAvailabilitySet": {
+                            "type": "object"
+                        },
+                        "databaseVms": {
+                            "type": "array"
+                        },
+                        "adminUserName": {
+                            "type": "string"
+                        },
+                        "adminPassword": {
+                            "type": "secureString"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/availabilitySets",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('databaseVmAvailabilitySet').name]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Aligned"
+                            },
+                            "properties": {
+                                "platformUpdateDomainCount": 5,
+                                "platformFaultDomainCount": 2
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dcVmNetworkInterfacesCopy",
+                                "count": "[length(parameters('databaseVms'))]"
+                            },
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2019-07-01",
+                            "name": "[parameters('databaseVms')[copyIndex()].nicName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('databaseSubnetId')]"
+                                            },
+                                            "privateIPAddress": "[parameters('databaseVms')[copyIndex()].privateIpAddress]",
+                                            "privateIPAllocationMethod": "Static"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dbVmDiskCopy",
+                                "count": "[length(parameters('databaseVms'))]"
+                            },
+                            "type": "Microsoft.Compute/disks",
+                            "apiVersion": "2018-06-01",
+                            "name": "[parameters('databaseVms')[copyIndex()].dataDiskName[0]]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Premium_LRS"
+                            },
+                            "properties": {
+                                "diskSizeGB": 64,
+                                "creationData": {
+                                    "createOption": "empty"
+                                }
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dbVmVirtualMachinesCopy",
+                                "count": "[length(parameters('databaseVms'))]"
+                            },
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('databaseVms')[copyIndex()].vmName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('databaseVmAvailabilitySet').name)]",
+                                "[resourceId('Microsoft.Network/networkInterfaces', parameters('databaseVms')[copyIndex()].nicName)]"
+                            ],
+                            "properties": {
+                                "availabilitySet": {
+                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('databaseVmAvailabilitySet').name)]"
+                                },                
+                                "hardwareProfile": {
+                                    "vmSize": "Standard_D4s_v3"
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "name": "[parameters('databaseVms')[copyIndex()].osDiskName]",
+                                        "createOption": "fromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "Standard_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "MicrosoftWindowsServer",
+                                        "offer": "WindowsServer",
+                                        "sku": "2019-Datacenter-smalldisk",
+                                        "version": "latest"
+                                    },
+                                    "dataDisks": [
+                                        {
+                                            "createOption": "Attach",
+                                            "lun": 0,
+                                            "caching": "None",
+                                            "managedDisk": {
+                                                "id": "[resourceId('Microsoft.Compute/disks', parameters('databaseVms')[copyIndex()].dataDiskName[0])]"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('databaseVms')[copyIndex()].nicName)]"
+                                        }
+                                    ]
+                                },
+                                "osProfile": {
+                                    "computerName": "[parameters('databaseVms')[copyIndex()].vmName]",
+                                    "adminUsername": "[parameters('adminUserName')]",
+                                    "adminPassword": "[parameters('adminPassword')]",
+                                    "windowsConfiguration": {
+                                        "enableAutomaticUpdates": true,
+                                        "provisionVmAgent": true
+                                    }
+                                },
+                                "diagnosticsProfile": {
+                                    "bootDiagnostics": {
+                                        "enabled": false
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Web server virtual machines
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "webVMs",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "webSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                    },
+                    "appGatewayBackendAddressPoolId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'applicationGateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
+                    },
+                    "webVmAvailabilitySet": {
+                        "value": "[variables('webVmAvailabilitySet')]"
+                    },
+                    "webVms": {
+                        "value": "[variables('webVms')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('adminUserName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "webSubnetId": {
+                            "type": "string"
+                        },
+                        "appGatewayBackendAddressPoolId": {
+                            "type": "string"
+                        },
+                        "webVmAvailabilitySet": {
+                            "type": "object"
+                        },
+                        "webVms": {
+                            "type": "array"
+                        },
+                        "adminUserName": {
+                            "type": "string"
+                        },
+                        "adminPassword": {
+                            "type": "secureString"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/availabilitySets",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('webVmAvailabilitySet').name]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Aligned"
+                            },
+                            "properties": {
+                                "platformUpdateDomainCount": 5,
+                                "platformFaultDomainCount": 2
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "dcVmNetworkInterfacesCopy",
+                                "count": "[length(parameters('webVms'))]"
+                            },
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2019-07-01",
+                            "name": "[parameters('webVms')[copyIndex()].nicName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('webSubnetId')]"
+                                            },
+                                            "privateIPAddress": "[parameters('webVms')[copyIndex()].privateIpAddress]",
+                                            "privateIPAllocationMethod": "Static",
+                                            "applicationGatewayBackendAddressPools": [
+                                                {
+                                                    "id": "[parameters('appGatewayBackendAddressPoolId')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "webVmDiskCopy",
+                                "count": "[length(parameters('webVms'))]"
+                            },
+                            "type": "Microsoft.Compute/disks",
+                            "apiVersion": "2018-06-01",
+                            "name": "[parameters('webVms')[copyIndex()].dataDiskName[0]]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard_LRS"
+                            },
+                            "properties": {
+                                "diskSizeGB": 32,
+                                "creationData": {
+                                    "createOption": "empty"
+                                }
+                            }
+                        },
+                        {
+                            "copy": {
+                                "name": "webVmVirtualMachinesCopy",
+                                "count": "[length(parameters('webVms'))]"
+                            },
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2019-03-01",
+                            "name": "[parameters('webVms')[copyIndex()].vmName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('webVmAvailabilitySet').name)]",
+                                "[resourceId('Microsoft.Network/networkInterfaces', parameters('webVms')[copyIndex()].nicName)]"
+                            ],
+                            "properties": {
+                                "availabilitySet": {
+                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('webVmAvailabilitySet').name)]"
+                                },                
+                                "hardwareProfile": {
+                                    "vmSize": "Standard_D2s_v3"
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "name": "[parameters('webVms')[copyIndex()].osDiskName]",
+                                        "createOption": "fromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "Standard_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "MicrosoftWindowsServer",
+                                        "offer": "WindowsServer",
+                                        "sku": "2019-Datacenter-smalldisk",
+                                        "version": "latest"
+                                    },
+                                    "dataDisks": [
+                                        {
+                                            "createOption": "Attach",
+                                            "lun": 0,
+                                            "caching": "ReadOnly",
+                                            "managedDisk": {
+                                                "id": "[resourceId('Microsoft.Compute/disks', parameters('webVms')[copyIndex()].dataDiskName[0])]"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('webVms')[copyIndex()].nicName)]"
+                                        }
+                                    ]
+                                },
+                                "osProfile": {
+                                    "computerName": "[parameters('webVms')[copyIndex()].vmName]",
+                                    "adminUsername": "[parameters('adminUserName')]",
+                                    "adminPassword": "[parameters('adminPassword')]",
+                                    "windowsConfiguration": {
+                                        "enableAutomaticUpdates": true,
+                                        "provisionVmAgent": true
+                                    }
+                                },
+                                "diagnosticsProfile": {
+                                    "bootDiagnostics": {
+                                        "enabled": false
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Application gateway
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "applicationGateway",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "appGatewaySubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.appGateway]"
+                    },
+                    "appGateway": {
+                        "value": "[variables('appGateway')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "appGatewaySubnetId": {
+                            "type": "string"
+                        },
+                        "appGateway": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "gatewayIPConfigurationName": "appGatewayIpConfig",
+                        "frontendIPConfigurationName": "appGwPublicFrontendIp",
+                        "frontendPortName": "port80",
+                        "backendAddressPoolName": "backendPool1",
+                        "backendHttpSettingsName": "httpSettings1",
+                        "httpListenerName": "httpListeners"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('appGateway').ipAddressName]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "zones": [],
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/applicationGateways",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('appGateway').name]",
+                            "location": "[parameters('location')]",
+                            "zones": [],
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('appGateway').ipAddressName)]"
+                            ],
+                            "tags": {},
+                            "properties": {
+                                "sku": {
+                                    "name": "WAF_v2",
+                                    "tier": "WAF_v2",
+                                    "capacity": 2
+                                },
+                                "gatewayIPConfigurations": [
+                                    {
+                                        "name": "[variables('gatewayIPConfigurationName')]",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('appGatewaySubnetId')]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "frontendIPConfigurations": [
+                                    {
+                                        "name": "[variables('frontendIPConfigurationName')]",
+                                        "properties": {
+                                            "PublicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('appGateway').ipAddressName)]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "frontendPorts": [
+                                    {
+                                        "name": "[variables('frontendPortName')]",
+                                        "properties": {
+                                            "Port": 80
+                                        }
+                                    }
+                                ],
+                                "backendAddressPools": [
+                                    {
+                                        "name": "[variables('backendAddressPoolName')]",
+                                        "properties": {
+                                            "backendAddresses": []
+                                        }
+                                    }
+                                ],
+                                "backendHttpSettingsCollection": [
+                                    {
+                                        "name": "[variables('backendHttpSettingsName')]",
+                                        "properties": {
+                                            "Port": 80,
+                                            "Protocol": "Http",
+                                            "cookieBasedAffinity": "Disabled",
+                                            "requestTimeout": 20
+                                        }
+                                    }
+                                ],
+                                "httpListeners": [
+                                    {
+                                        "name": "[variables('httpListenerName')]",
+                                        "properties": {
+                                            "frontendIPConfiguration": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', parameters('appGateway').name, variables('frontendIPConfigurationName'))]"
+                                            },
+                                            "frontendPort": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', parameters('appGateway').name, variables('frontendPortName'))]"
+                                            },
+                                            "protocol": "Http",
+                                            "customErrorConfigurations": []
+                                        }
+                                    }
+                                ],
+                                "requestRoutingRules": [
+                                    {
+                                        "Name": "rule1",
+                                        "properties": {
+                                            "RuleType": "Basic",
+                                            "httpListener": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('appGateway').name, variables('httpListenerName'))]"
+                                            },
+                                            "backendAddressPool": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('appGateway').name, variables('backendAddressPoolName'))]"
+                                            },
+                                            "backendHttpSettings": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('appGateway').name, variables('backendHttpSettingsName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableHttp2": true,
+                                "sslCertificates": [],
+                                "probes": [],
+                                "webApplicationFirewallConfiguration": {
+                                    "enabled": true,
+                                    "firewallMode": "Prevention",
+                                    "ruleSetType": "OWASP",
+                                    "ruleSetVersion": "3.0"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "appGatewayComponentIds": {
+                            "type": "object",
+                            "value": {
+                                "backendAddressPool": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('appGateway').name, variables('backendAddressPoolName'))]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        // Image store
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "imageStore",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "webSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                    },
+                    "imageStoreStorageAccount": {
+                        "value": "[variables('imageStoreStorageAccount')]"
+                    },
+                    "imageStorePrivateEndpoint": {
+                        "value": "[variables('imageStorePrivateEndpoint')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "webSubnetId": {
+                            "type": "string"
+                        },
+                        "imageStoreStorageAccount": {
+                            "type": "object"
+                        },
+                        "imageStorePrivateEndpoint": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "privateEndpointApiVersion": "2019-09-01",
+                        "privateEndpointId": "[resourceId('Microsoft.Network/privateEndpoints', parameters('imageStorePrivateEndpoint').name)]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "apiVersion": "2019-04-01",
+                            "name": "[parameters('imageStoreStorageAccount').name]",
+                            "location": "[parameters('location')]",
+                            "kind": "StorageV2",
+                            "sku": {
+                                "name": "Standard_RAGRS"
+                            },
+                            "properties": {
+                                "accessTier": "Hot",
+                                "supportsHttpsTrafficOnly": true,
+                                "networkAcls": {
+                                    "defaultAction": "Deny",
+                                    "virtualNetworkRules": [],
+                                    "ipRules": [],
+                                    "bypass": "AzureServices"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "[variables('privateEndpointApiVersion')]",
+                            "name": "[parameters('imageStorePrivateEndpoint').name]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('imageStoreStorageAccount').name)]"
+                            ],
+                            "properties": {
+                                "privateLinkServiceConnections": [
+                                    {
+                                        "name": "[parameters('imageStorePrivateEndpoint').connectionName]",
+                                        "properties": {
+                                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('imageStoreStorageAccount').name)]",
+                                            "groupIds": [
+                                                "file"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "manualPrivateLinkServiceConnections": [],
+                                "subnet": {
+                                    "id": "[parameters('webSubnetId')]"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateEndpointNetworkInterfaceId": {
+                            "type": "string",
+                            "value": "[reference(variables('privateEndpointId'), variables('privateEndpointApiVersion')).networkInterfaces[0].id]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Private DNS zone for the images store's private endpoint
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "privateDnsZone",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "vnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.vnetId.value]"
+                    },
+                    "privateEndpointNetworkInterfaceId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'imageStore')).outputs.privateEndpointNetworkInterfaceId.value]"
+                    },
+                    "imageStorePrivateEndpointPrivateDnsZone": {
+                        "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "vnetId": {
+                            "type": "string"
+                        },
+                        "privateEndpointNetworkInterfaceId": {
+                            "type": "string"
+                        },
+                        "imageStorePrivateEndpointPrivateDnsZone": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "virtualNetworkLinkName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStorePrivateEndpointPrivateDnsZone').virtualNetworkLinkName)]",
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones",
+                            "apiVersion": "2018-09-01",
+                            "name": "[parameters('imageStorePrivateEndpointPrivateDnsZone').name]",
+                            "location": "global",
+                            "properties": {}
+                        },
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                            "apiVersion": "2018-09-01",
+                            "name": "[variables('virtualNetworkLinkName')]",
+                            "location": "global",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('imageStorePrivateEndpointPrivateDnsZone').name)]"
+                            ],
+                            "properties": {
+                                "registrationEnabled": false,
+                                "virtualNetwork": {
+                                    "id": "[parameters('vnetId')]"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateEndpointPrivateIpAddress": {
+                            "type": "string",
+                            "value": "[reference(parameters('privateEndpointNetworkInterfaceId'), '2019-09-01').ipConfigurations[0].properties.privateIPAddress]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // A record for the image store's private endpoint
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "privateEndpointARecord",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "privateEndpointPrivateIpAddress": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'privateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                    },
+                    "imageStorePrivateEndpointPrivateDnsZone": {
+                        "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
+                    },
+                    "imageStoreStorageAccountName": {
+                        "value": "[variables('imageStoreStorageAccount').name]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "privateEndpointPrivateIpAddress": {
+                            "type": "string"
+                        },
+
+                        "imageStorePrivateEndpointPrivateDnsZone": {
+                            "type": "object"
+                        },
+                        "imageStoreStorageAccountName": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "imageStorePrivateEndpointARecordName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStoreStorageAccountName'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/A",
+                            "apiVersion": "2018-09-01",
+                            "name": "[variables('imageStorePrivateEndpointARecordName')]",
+                            "location": "global",
+                            "properties": {
+                                "ttl": 3600,
+                                "aRecords": [
+                                    {
+                                        "ipv4Address": "[parameters('privateEndpointPrivateIpAddress')]"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Firewall
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "firewall",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "firewallSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.firewall]"
+                    },
+                    "firewall": {
+                        "value": "[variables('firewall')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "firewallSubnetId": {
+                            "type": "string"
+                        },
+                        "firewall": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "apiVersion": "2019-02-01",
+                            "name": "[parameters('firewall').ipAddressName]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "zones": [],
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/azureFirewalls",
+                            "apiVersion": "2019-06-01",
+                            "name": "[parameters('firewall').name]",
+                            "location": "[parameters('location')]",
+                            "zones": [],
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('firewall').ipAddressName)]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipConfig",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('firewallSubnetId')]"
+                                            },
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('firewall').ipAddressName)]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "networkRuleCollections": [],
+                                "applicationRuleCollections": [
+                                    {
+                                        "name": "azure-infra",
+                                        "properties": {
+                                            "priority": 200,
+                                            "action": {
+                                                "type": "Allow"
+                                            },
+                                            "rules": [
+                                                {
+                                                    "name": "azure-infra",
+                                                    "protocols": [
+                                                        {
+                                                            "protocolType": "Http",
+                                                            "port": 80
+                                                        },
+                                                        {
+                                                            "protocolType": "Https",
+                                                            "port": 443
+                                                        }
+                                                    ],
+                                                    "fqdnTags": [
+                                                        "WindowsUpdate",
+                                                        "AzureBackup",
+                                                        "WindowsDiagnostics"
+                                                    ],
+                                                    "targetFqdns": [],
+                                                    "sourceAddresses": [],
+                                                    "sourceIpGroups": []
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],                                
+                                "natRuleCollections": []
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "firewallPrivateIpAddress": {
+                            "type": "string",
+                            "value": "[reference(concat('Microsoft.Network/azureFirewalls/', parameters('firewall').name)).ipConfigurations[0].properties.privateIPAddress]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Route table for firewall
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "firewallRouteTable",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "firewall": {
+                        "value": "[variables('firewall')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "firewall": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('firewall').routeTableName]",
+                            "type": "Microsoft.Network/routeTables",
+                            "apiVersion": "2019-02-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [],
+                            "properties": {
+                                "disableBgpRoutePropagation": false,
+                                "routes": []
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "firewallRouteTableId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/routeTables', parameters('firewall').routeTableName)]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Route for firewall
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "firewallRoute",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "firewallPrivateIpAddress": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'firewall')).outputs.firewallPrivateIpAddress.value]"
+                    },
+                    "firewall": {
+                        "value": "[variables('firewall')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "firewallPrivateIpAddress": {
+                            "type": "string"
+                        },
+                        "firewall": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/routeTables/routes",
+                            "apiVersion": "2019-09-01",
+                            "name": "[concat(parameters('firewall').routeTableName, '/', parameters('firewall').routeName)]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [],
+                            "properties": {
+                                "addressPrefix": "0.0.0.0/0",
+                                "nextHopType": "VirtualAppliance",
+                                "nextHopIpAddress": "[parameters('firewallPrivateIpAddress')]"
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Bastion
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "bastion",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "bastionSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.bastion]"
+                    },
+                    "bastion": {
+                        "value": "[variables('bastion')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "bastionSubnetId": {
+                            "type": "string"
+                        },
+                        "bastion": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('bastion').ipAddressName]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/bastionHosts",
+                            "apiVersion": "2019-09-01",
+                            "name": "[parameters('bastion').name]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion').ipAddressName)]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "IpConf",
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion').ipAddressName)]"
+                                            },
+                                            "subnet": {
+                                                "id": "[parameters('bastionSubnetId')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Log Analytics workspace
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "logAnalyticsWorkspace",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "logAnalyticsWorkspace": {
+                        "value": "[variables('logAnalyticsWorkspace')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "logAnalyticsWorkspace": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "apiVersion": "2015-11-01-preview",
+                            "name": "[parameters('logAnalyticsWorkspace').name]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "sku": {
+                                    "name": "pergb2018"
+                                },
+                                "features": {
+                                    "searchVersion": "1"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Recovery Services vault
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "recoveryServicesVault",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "rsVault": {
+                        "value": "[variables('rsVault')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "rsVault": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.RecoveryServices/vaults",
+                            "apiVersion": "2016-06-01",
+                            "name": "[parameters('rsVault').name]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "RS0",
+                                "tier": "Standard"
+                            },
+                            "properties": {}
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "value": "[parameters('adminPassword')]"
+        }
+    }
+}
