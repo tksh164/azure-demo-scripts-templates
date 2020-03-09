@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": "myip"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
+        "functionAppName": "[concat(parameters('name'), '-', variables('uniqueSuffix'), '-funcapp')]",
+        "hostingPlanName": "[concat(parameters('name'), '-', variables('uniqueSuffix'), '-plan')]",
+        "storageAccountName": "[concat(parameters('name'), variables('uniqueSuffix'))]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-11-01",
+            "name": "[variables('functionAppName')]",
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp",
+            "location": "[variables('location')]",
+            "tags": {},
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "name": "[variables('functionAppName')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~3"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "powershell"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'), '2018-02-01').keys[0].value, ';EndpointSuffix=', 'core.windows.net')]"
+                        }
+                    ],
+                    "alwaysOn": false
+                },
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+                "clientAffinityEnabled": true
+            }
+        },
+        {
+            "apiVersion": "2018-02-01",
+            "name": "[variables('hostingPlanName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[variables('location')]",
+            "tags": {},
+            "dependsOn": [],
+            "properties": {
+            },
+            "sku": {
+                "Tier": "Free",
+                "Name": "F1"
+            }
+        },
+        {
+            "apiVersion": "2019-06-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
+        }
+    ]
+}
