@@ -1,5 +1,5 @@
 param (
-    [string] $ResourceGroupName = 'lab-myip',
+    [string] $ResourceGroupName = 'lab-visitor-ip',
     [string] $ResourceGroupLocation = 'Japan East',
     [string] $TemplateFile = 'template.json',
     [string] $TemplateParametersFile = 'parameters.json',

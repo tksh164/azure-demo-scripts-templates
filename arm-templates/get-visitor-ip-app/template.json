@@ -4,13 +4,13 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "myip"
+            "defaultValue": "visitorip"
         }
     },
     "variables": {
         "location": "[resourceGroup().location]",
         "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
-        "functionAppName": "[concat(parameters('name'), '-', variables('uniqueSuffix'), '-funcapp')]",
+        "functionAppName": "[concat(parameters('name'), '-', variables('uniqueSuffix'), '-app')]",
         "hostingPlanName": "[concat(parameters('name'), '-', variables('uniqueSuffix'), '-plan')]",
         "storageAccountName": "[concat(parameters('name'), variables('uniqueSuffix'))]",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -24,7 +24,7 @@
             "location": "[variables('location')]",
             "tags": {},
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ],
             "properties": {
@@ -41,12 +41,12 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'), '2018-02-01').keys[0].value, ';EndpointSuffix=', 'core.windows.net')]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountId'), '2019-06-01').keys[0].value, ';EndpointSuffix=', 'core.windows.net')]"
                         }
                     ],
                     "alwaysOn": false
                 },
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "clientAffinityEnabled": true
             }
         },
