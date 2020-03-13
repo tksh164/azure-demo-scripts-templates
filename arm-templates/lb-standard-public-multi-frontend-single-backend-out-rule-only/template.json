@@ -1,0 +1,449 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for VMs."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]"
+        }
+    },
+    "variables": {
+
+        // Common
+
+        "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+        "prefix": "lboutmfsb",
+
+        // Virtual network
+
+        "vnetName": "[concat(variables('prefix'), '-vnet')]",
+        "vnetSubnetName": "default",
+
+        // Public IP addresses for the load balancer
+
+        "publicIpNameOutbound1": "[concat(variables('prefix'), '-lb-out-ip1')]",
+        "publicIpNameOutbound2": "[concat(variables('prefix'), '-lb-out-ip2')]",
+        
+        // Load balancer
+
+        "lbName": "[concat(variables('prefix'), '-lb')]",
+        "lbFrontendNameOutbound1": "frontend-for-outbound1",
+        "lbFrontendNameOutbound2": "frontend-for-outbound2",
+        "lbBackendPoolName": "backendpool",
+        "lbOutboundRuleName": "outbound-rule",
+
+        // Virtual machines for the backend of the load balancer
+
+        "backendVm": [
+            {
+                "vmName": "[concat(variables('prefix'), '-backend-vm1')]",
+                "computerName": "backendvm1",
+                "osDiskName": "[concat(variables('prefix'), '-backend-vm1-osdisk')]",
+                "nicName": "[concat(variables('prefix'), '-backend-vm1-nic')]",
+                "privateIPAddress": "10.0.0.10",
+                "lbBackendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]",
+                "nsgName": "[concat(variables('prefix'), '-backend-vm1-nsg')]"
+            },
+            {
+                "vmName": "[concat(variables('prefix'), '-backend-vm2')]",
+                "computerName": "backendvm2",
+                "osDiskName": "[concat(variables('prefix'), '-backend-vm2-osdisk')]",
+                "nicName": "[concat(variables('prefix'), '-backend-vm2-nic')]",
+                "privateIPAddress": "10.0.0.11",
+                "lbBackendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]",
+                "nsgName": "[concat(variables('prefix'), '-backend-vm2-nsg')]"
+            }
+        ],
+
+        // Jump virtual machine
+
+        "jumpVm": {
+            "vmName": "[concat(variables('prefix'), '-jump-vm1')]",
+            "computerName": "jumpvm1",
+            "osDiskName": "[concat(variables('prefix'), '-jump-vm1-osdisk')]",
+            "nicName": "[concat(variables('prefix'), '-jump-vm1-nic')]",
+            "privateIPAddress": "10.0.0.5",
+            "ipName": "[concat(variables('prefix'), '-jump-vm1-ip')]",
+            "domainNameLabel": "[concat(variables('prefix'), '-jump-vm1-', variables('uniqueSuffix'))]",
+            "nsgName": "[concat(variables('prefix'), '-jump-vm1-nsg')]"
+        }
+    },
+    "resources": [
+
+        // Virtual network
+
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('vnetSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ],
+                "enableDdosProtection": false
+            }
+        },
+
+        // Public IP addresses for the outbound traffic via the load balancer.
+
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('publicIpNameOutbound1')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddressVersion": "IPv4"
+            }
+        },
+
+        // Public IP prefix for the outbound traffic via the load balancer.
+
+        {
+            "type": "Microsoft.Network/publicipprefixes",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('publicIpNameOutbound2')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "prefixLength": 31,
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+
+        // Public Standard load balancer
+
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('lbName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpNameOutbound1'))]",
+                "[resourceId('Microsoft.Network/publicipprefixes', variables('publicIpNameOutbound2'))]"
+            ],
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('lbFrontendNameOutbound1')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpNameOutbound1'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[variables('lbFrontendNameOutbound2')]",
+                        "properties": {
+                            "publicIPPrefix": {
+                                "id": "[resourceId('Microsoft.Network/publicipprefixes', variables('publicIpNameOutbound2'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('lbBackendPoolName')]",
+                        "properties": {
+                            "outboundRules": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/outboundRules', variables('lbName'), variables('lbOutboundRuleName'))]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "loadBalancingRules": [],
+                "inboundNatRules": [],
+                "inboundNatPools": [],
+                "outboundRules": [
+                    {
+                        "name": "[variables('lbOutboundRuleName')]",
+                        "properties": {
+                            "frontendIPConfigurations": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), variables('lbFrontendNameOutbound1'))]"
+                                },
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), variables('lbFrontendNameOutbound2'))]"
+                                }
+                            ],
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]"
+                            },
+                            "allocatedOutboundPorts": 10000, //63992,
+                            "protocol": "All",
+                            "enableTcpReset": false,
+                            "idleTimeoutInMinutes": 15
+                        }
+                    }
+                ]
+            }
+        },
+
+        // Backend virtual machines
+
+        {
+            "copy": {
+                "name": "backendVmCopy",
+                "count": "[length(variables('backendVm'))]"
+            },
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('backendVm')[copyIndex()].vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('backendVm')[copyIndex()].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('backendVm')[copyIndex()].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('backendVm')[copyIndex()].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('backendVm')[copyIndex()].computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "backendVmCopy",
+                "count": "[length(variables('backendVm'))]"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('backendVm')[copyIndex()].nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('backendVm')[copyIndex()].nsgName)]",
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vnetSubnetName'))]"
+                            },
+                            "privateIPAddress": "[variables('backendVm')[copyIndex()].privateIPAddress]",
+                            "privateIPAllocationMethod": "Static",
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[variables('backendVm')[copyIndex()].lbBackendPoolId]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('backendVm')[copyIndex()].nsgName)]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "backendVmCopy",
+                "count": "[length(variables('backendVm'))]"
+            },
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('backendVm')[copyIndex()].nsgName]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+
+        // Jump virtual machine
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('jumpVm').vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('jumpVm').nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('jumpVm').osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('jumpVm').nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('jumpVm').computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('jumpVm').nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('jumpVm').ipName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpVm').nsgName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vnetSubnetName'))]"
+                            },
+                            "privateIPAddress": "[variables('jumpVm').privateIPAddress]",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('jumpVm').ipName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpVm').nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('jumpVm').ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('jumpVm').domainNameLabel]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('jumpVm').nsgName]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        }
+    ],
+    "outputs": {}
+}
