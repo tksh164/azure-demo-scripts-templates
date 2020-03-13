@@ -27,7 +27,12 @@ $responseBody = @(
 )
 
 $response = [HttpResponseContext] @{
-    StatusCode = [HttpStatusCode]::OK
-    Body       = $responseBody | ConvertTo-Json
+    StatusCode  = [HttpStatusCode]::OK
+    ContentType ='text/json'
+    Headers     = @{
+        'Cache-Control' = 'no-store,no-cache,must-revalidate'
+        'Pragma'        = 'no-cache'
+    }
+    Body        = $responseBody | ConvertTo-Json
 }
 Push-OutputBinding -Name Response -Value $response
