@@ -19,13 +19,13 @@ All the below names are the default value.
             - Virtual machine in the backend of the load balancer.
             - OS disk: `lboutonly-backend-vm1-osdisk`
             - Network interface: `lboutonly-backend-vm1-nic`
-                - Private IP address: `10.0.0.10` - Static
+                - Private IP address: `10.0.0.10`, Static
             - Network security group: `lboutonly-backend-vm1-nsg`
         - Virtual machine: `lboutonly-backend-vm2`
             - Virtual machine in the backend of the load balancer.
             - OS disk: `lboutonly-backend-vm2-osdisk`
             - Network interface: `lboutonly-backend-vm2-nic`
-                - Private IP address: `10.0.0.11` - Static
+                - Private IP address: `10.0.0.11`, Static
             - Network security group: `lboutonly-backend-vm2-nsg`
         - Virtual machine: `lboutonly-jump-vm1`
             - For RDP connection from Internet.
@@ -37,8 +37,10 @@ All the below names are the default value.
 
 ### Non-deployments
 
-- Any services were not configured on the backend virtual machines.
+- n/a
 
 ## Notes
 
+- The backend virtual machines have Web Server role (IIS) installed.
+- The jump virtual machine has Wireshark and Chromium Edge installer under "C:\\work".
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
