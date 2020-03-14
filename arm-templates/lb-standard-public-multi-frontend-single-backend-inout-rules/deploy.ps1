@@ -37,7 +37,7 @@ if ($ValidateOnly)
         TemplateFile      = $TemplateFile
     }
 
-    if (Test-Path -PathType Container -LiteralPath $TemplateParametersFile)
+    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
     {
         $params.TemplateParameterFile = $TemplateParametersFile
     }
@@ -64,7 +64,7 @@ else
         ErrorVariable     = 'errorMessages'
     }
 
-    if (Test-Path -PathType Container -LiteralPath $TemplateParametersFile)
+    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
     {
         $params.TemplateParameterFile = $TemplateParametersFile
     }
