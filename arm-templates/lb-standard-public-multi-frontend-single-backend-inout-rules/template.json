@@ -58,7 +58,8 @@
                 "nicName": "[concat(variables('prefix'), '-backend-vm1-nic')]",
                 "privateIPAddress": "10.0.0.10",
                 "lbBackendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]",
-                "nsgName": "[concat(variables('prefix'), '-backend-vm1-nsg')]"
+                "nsgName": "[concat(variables('prefix'), '-backend-vm1-nsg')]",
+                "installWindowsFeature": true
             },
             {
                 "vmName": "[concat(variables('prefix'), '-backend-vm2')]",
@@ -67,7 +68,8 @@
                 "nicName": "[concat(variables('prefix'), '-backend-vm2-nic')]",
                 "privateIPAddress": "10.0.0.11",
                 "lbBackendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]",
-                "nsgName": "[concat(variables('prefix'), '-backend-vm2-nsg')]"
+                "nsgName": "[concat(variables('prefix'), '-backend-vm2-nsg')]",
+                "installWindowsFeature": true
             }
         ],
 
@@ -81,7 +83,8 @@
             "privateIPAddress": "10.0.0.5",
             "ipName": "[concat(variables('prefix'), '-jump-vm1-ip')]",
             "domainNameLabel": "[concat(variables('prefix'), '-jump-vm1-', variables('uniqueSuffix'))]",
-            "nsgName": "[concat(variables('prefix'), '-jump-vm1-nsg')]"
+            "nsgName": "[concat(variables('prefix'), '-jump-vm1-nsg')]",
+            "downloadFile": true
         }
     },
     "resources": [
@@ -375,6 +378,44 @@
                 ]
             }
         },
+        {
+            "copy": {
+                "name": "backendVmCopy",
+                "count": "[length(variables('backendVm'))]"
+            },
+            "condition": "[variables('backendVm')[copyIndex()].installWindowsFeature]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(variables('backendVm')[copyIndex()].vmName, '/Microsoft.Powershell.DSC')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('backendVm')[copyIndex()].vmName)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.80",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "wmfVersion": "latest",
+                    "configuration": {
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/dsc-vm-extension/dscvmext.zip",
+                        "script": "dscvmext.ps1",
+                        "function": "install-windows-feature"
+                    },
+                    "privacy": {
+                        "dataCollection": "enable"
+                    },
+                    "configurationArguments": {
+                        "FeatureNameList": [
+                            "Web-Server",
+                            "Web-Mgmt-Console"
+                        ]
+                    }
+                },
+                "protectedSettings": {}
+            }
+        },
 
         // Jump virtual machine
 
@@ -495,6 +536,43 @@
                         }
                     }
                 ]   
+            }
+        },
+        {
+            "condition": "[variables('jumpVm').downloadFile]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(variables('jumpVm').vmName, '/Microsoft.Powershell.DSC')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('jumpVm').vmName)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.80",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "wmfVersion": "latest",
+                    "configuration": {
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/dsc-vm-extension/dscvmext.zip",
+                        "script": "dscvmext.ps1",
+                        "function": "download-file"
+                    },
+                    "privacy": {
+                        "dataCollection": "enable"
+                    },
+                    "configurationArguments": {
+                        "UrlList": [
+                            // Wireshark
+                            "https://1.as.dl.wireshark.org/win64/Wireshark-win64-3.2.2.exe",
+                            // Microsoft Edge Beta channel
+                            "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?ProductreleaseID=Edge&platform=Default&version=Edge&source=EdgeInsiderPage&Channel=Beta&language=en"
+                        ],
+                        "DownloadFolderPath": "C:\\work"
+                    }
+                },
+                "protectedSettings": {}
             }
         }
     ],
