@@ -20,8 +20,14 @@ All the below names are the default value.
             - Virtual machine in the backend of the load balancer.
             - OS disk: `lboutip-backend-vm1-osdisk`
             - Network interface: `lboutip-backend-vm1-nic`
-                - Private IP address: `10.0.0.10` - Static
+                - Private IP address: `10.0.0.10`, Static
             - Network security group: `lboutip-backend-vm1-nsg`
+        - Virtual machine: `lboutip-backend-vm2`
+            - Virtual machine in the backend of the load balancer.
+            - OS disk: `lboutip-backend-vm2-osdisk`
+            - Network interface: `lboutip-backend-vm2-nic`
+                - Private IP address: `10.0.0.11`, Static
+            - Network security group: `lboutip-backend-vm2-nsg`
         - Virtual machine: `lboutip-jump-vm1`
             - For RDP connection from Internet.
             - OS disk: `lboutip-jump-vm1-osdisk`
@@ -32,8 +38,10 @@ All the below names are the default value.
 
 ### Non-deployments
 
-- Any services were not configured on the backend virtual machine.
+- n/a
 
 ## Notes
 
+- The backend virtual machines have Web Server role (IIS) installed.
+- The jump virtual machine has Wireshark and Chromium Edge installer under "C:\\work".
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
