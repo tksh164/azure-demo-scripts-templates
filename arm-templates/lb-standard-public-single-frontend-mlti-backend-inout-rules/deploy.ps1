@@ -33,10 +33,15 @@ New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -T
 if ($ValidateOnly)
 {
     $params = @{
-        ResourceGroupName     = $ResourceGroupName
-        TemplateFile          = $TemplateFile
-        TemplateParameterFile = $TemplateParametersFile
+        ResourceGroupName = $ResourceGroupName
+        TemplateFile      = $TemplateFile
     }
+
+    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
+    {
+        $params.TemplateParameterFile = $TemplateParametersFile
+    }
+
     $errorMessages = Format-ValidationOutput (Test-AzResourceGroupDeployment @params @OptionalParameters)
 
     if ($errorMessages)
@@ -51,14 +56,19 @@ if ($ValidateOnly)
 else
 {
     $params = @{
-        Name                  = ('{0}-{1}'-f (Get-ChildItem -LiteralPath $TemplateFile).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
-        ResourceGroupName     = $ResourceGroupName
-        TemplateFile          = $TemplateFile
-        TemplateParameterFile = $TemplateParametersFile
-        Force                 = $true
-        Verbose               = $true
-        ErrorVariable         = 'errorMessages'
+        Name              = ('{0}-{1}'-f (Get-ChildItem -LiteralPath $TemplateFile).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
+        ResourceGroupName = $ResourceGroupName
+        TemplateFile      = $TemplateFile
+        Force             = $true
+        Verbose           = $true
+        ErrorVariable     = 'errorMessages'
     }
+
+    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
+    {
+        $params.TemplateParameterFile = $TemplateParametersFile
+    }
+
     New-AzResourceGroupDeployment @params @OptionalParameters
 
     if ($errorMessages)
