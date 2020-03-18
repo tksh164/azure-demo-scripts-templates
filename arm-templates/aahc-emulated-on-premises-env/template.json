@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "numOfAttendees": {
+        "numberOfAttendees": {
             "type": "int",
             "defaultValue": 10,
             "minValue": 1,
@@ -71,7 +71,7 @@
                 "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones"
             }
         },
-        "deployVNetGatewayRelatedResources": {
+        "deployVirtualNetworkGatewayRelatedResources": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
@@ -81,9 +81,9 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "deployVNetGatewayRelatedResources": "[parameters('deployVNetGatewayRelatedResources')]",
+        "deployVNetGatewayRelatedResources": "[parameters('deployVirtualNetworkGatewayRelatedResources')]",
 
-        "numOfAttendees": "[parameters('numOfAttendees')]",
+        "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
         "attendeeIpAddressOffset": "[add(100, variables('attendeeOffset'))]",
         "attendeeNatPortOffset": "[add(5000, variables('attendeeOffset'))]",
