@@ -1,0 +1,459 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for jumpbox VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for jumpbox VMs."
+            }
+        },
+        "vmOsImage": {
+            "type": "string",
+            "defaultValue": "2019-Datacenter",
+            "allowedValues": [
+                "2019-Datacenter-smalldisk",
+                "2019-Datacenter"
+            ],
+            "metadata": {
+                "description": "The OS image for jumpbox VM."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_D2s_v3",
+            "allowedValues": [
+                "Standard_D2s_v3"
+            ],
+            "metadata": {
+                "description": "The virtual machine size of jumpbox VM."
+            }
+        },
+        "vmOsDiskStorageType": {
+            "type": "string",
+            "defaultValue": "Premium_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "The OS disk storage type of jumpbox VM."
+            }
+        },
+        "dailyAutoshutdownTime": {
+            "type": "string",
+            "defaultValue": "23:30",
+            "metadata": {
+                "description": "The time of day the auto-shutdown of jumpbox VM will occur."
+            }
+        },
+        "autoshutdownTimeZone": {
+            "type": "string",
+            "defaultValue": "Pacific Standard Time",
+            "metadata": {
+                "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "deployVNetGatewayRelatedResources": false,
+
+        "numOfAttendees": 3,
+        "attendeeOffset": 1,
+        "attendeeIpAddressOffset": "[add(100, variables('attendeeOffset'))]",
+        "attendeeNatPortOffset": "[add(5000, variables('attendeeOffset'))]",
+
+        "vnetName": "emulated-on-premises-vnet",
+        "jumpboxSubnetName": "jumpbox-sn",
+
+        "jumpboxSubnetNsgName": "jumpbox-sn-nsg",
+
+        "vnetGatewayName": "on-premfirewall-vng",
+        "vnetGatewayIpName": "[concat(variables('vnetGatewayName'), '-pip')]",
+        "vnetGatewayConnectionSharedKey": "define-your-shared-key-123",
+
+        "jumpboxVmName": "jumpbox",
+        "jumpboxVmSize": "[parameters('vmSize')]",
+        "jumpboxOsDiskStorageType": "[parameters('vmOsDiskStorageType')]",
+        "jumpboxOsImageSku": "[parameters('vmOsImage')]",
+        "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
+        "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
+
+        "avSetName": "[concat(variables('jumpboxVmName'), '-avset')]",
+
+        "lbIpName": "[concat(variables('jumpboxVmName'), '-lb-pip')]",
+        "lbName": "[concat(variables('jumpboxVmName'), '-lb')]",
+        "lbFrontendIpConfigName": "LoadBalancerFrontEnd",
+        "lbBackendPoolName": "jumpbox-bepool"
+    },
+    "resources": [
+        {
+            "comments": "VNet for emulated on-premises network.",
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpboxSubnetNsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.152.101.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "adds-svc-sn",
+                        "properties": {
+                            "addressPrefix": "10.152.101.0/27"
+                        }
+                    },
+                    {
+                        "name": "[variables('jumpboxSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.152.101.32/27",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpboxSubnetNsgName'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "10.152.101.224/27"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "comments": "NSG for jumpboxes.",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('jumpboxSubnetNsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Allow_RDP_In",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 1000,
+                            "protocol": "Tcp",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+
+        {
+            "comments": "Local Network Gateways for attendees.",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.Network/localNetworkGateways",
+            "apiVersion": "2019-11-01",
+            "name": "[concat('attendee-', copyIndex(variables('attendeeIpAddressOffset')), '-lng')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "gatewayIpAddress": "[concat(copyIndex(variables('attendeeIpAddressOffset')), '.0.0.0')]",
+                "localNetworkAddressSpace": {
+                    "addressPrefixes": [
+                        "[concat('10.', copyIndex(variables('attendeeIpAddressOffset')), '.0.0/22')]"
+                    ]
+                }
+            }
+        },
+
+        {
+            "comments": "Public IP Address for VPN VNet gateway.",
+            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('vnetGatewayIpName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "comments": "VPN VNet gateway as on-premises side firewall.",
+            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('vnetGatewayName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/VirtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vnetGatewayIpName'))]"
+            ],
+            "properties": {
+                "gatewayType": "Vpn",
+                "ipConfigurations": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/VirtualNetworks/subnets', variables('vnetName'), 'GatewaySubnet')]"
+                            },
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vnetGatewayIpName'))]"
+                            }
+                        }
+                    }
+                ],
+                "vpnType": "RouteBased",
+                "vpnGatewayGeneration": "Generation1",
+                "sku": {
+                    "name": "VpnGw1",
+                    "tier": "VpnGw1"
+                }
+            }
+        },
+
+        {
+            "comments": "Connections for attendees.",
+            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.Network/connections",
+            "apiVersion": "2019-11-01",
+            "name": "[concat('attendee-', copyIndex(variables('attendeeIpAddressOffset')), '-lng')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('vnetGatewayName'))]",
+                "[resourceId('Microsoft.Network/localNetworkGateways', concat('attendee-', copyIndex(variables('attendeeIpAddressOffset')), '-lng'))]"
+            ],
+            "properties": {
+                "virtualNetworkGateway1": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('vnetGatewayName'))]"
+                },
+                "localNetworkGateway2": {
+                    "id": "[resourceId('Microsoft.Network/localNetworkGateways', concat('attendee-', copyIndex(variables('attendeeIpAddressOffset')), '-lng'))]"
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": 10,
+                "sharedKey": "[variables('vnetGatewayConnectionSharedKey')]"
+            }
+        },
+
+        {
+            "comments": "Public IP Address for LB.",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('lbIpName')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "comments": "LB for inbound RDP connection to jumpbox VMs.",
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('lbName')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('lbIpName'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('lbFrontendIpConfigName')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('lbIpName'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('lbBackendPoolName')]"
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "Inbound NAT rule on LB for attendee's jumpbox VMs.",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(variables('lbName'), '/rdp-jumpbox', copyIndex(variables('attendeeOffset')))]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+            ],
+            "properties": {
+                "frontendIPConfiguration": {
+                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), variables('lbFrontendIpConfigName'))]"
+                },
+                "protocol": "Tcp",
+                "frontendPort": "[copyIndex(variables('attendeeNatPortOffset'))]",
+                "backendPort": 3389
+            }
+        },
+
+        {
+            "comments": "Availability set for attendee's jumpbox VMs.",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('avSetName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 2
+            },
+            "sku": {
+                "name": "Aligned"
+            }
+        },
+
+        {
+            "comments": "VM as attendee's jumpbox.",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')), '-nic1'))]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('jumpboxVmSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('jumpboxOsDiskStorageType')]"
+                        },
+                        "caching": "ReadWrite"
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[variables('jumpboxOsImageSku')]",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')), '-nic1'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                }
+            }
+        },
+        {
+            "comments": "Network interface for attendee's jump box VM.",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')), '-nic1')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('jumpboxSubnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "Auto-shutdown schedule for attendee's jump box VM.",
+            "copy": {
+                "name": "numOfAttendees",
+                "count": "[variables('numOfAttendees')]"
+            },
+            "type": "Microsoft.DevTestLab/schedules",
+            "apiVersion": "2018-09-15",
+            "name": "[concat('shutdown-computevm-', variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset'))))]"
+            ],
+            "properties": {
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset'))))]",
+                "status": "Enabled",
+                "taskType": "ComputeVmShutdownTask",
+                "timeZoneId": "[variables('jumpboxVmAutoshutdownTimeZoneId')]",
+                "dailyRecurrence": {
+                    "time": "[variables('jumpboxVmAutoshutdownDailyRecurrenceTime')]"
+                },
+                "notificationSettings": {
+                    "status": "Disabled"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
