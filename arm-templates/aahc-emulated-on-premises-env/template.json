@@ -2,9 +2,18 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "numOfAttendees": {
+            "type": "int",
+            "defaultValue": 10,
+            "minValue": 1,
+            "maxValue": 16,
+            "metadata": {
+                "description": "Number of attendees."
+            }
+        },
         "adminUserName": {
             "type": "string",
-            "defaultValue": "vmadmin",
+            "defaultValue": "localadmin",
             "metadata": {
                 "description": "The admin user name for jumpbox VMs."
             }
@@ -19,8 +28,8 @@
             "type": "string",
             "defaultValue": "2019-Datacenter",
             "allowedValues": [
-                "2019-Datacenter-smalldisk",
-                "2019-Datacenter"
+                "2019-Datacenter",
+                "2019-Datacenter-smalldisk"
             ],
             "metadata": {
                 "description": "The OS image for jumpbox VM."
@@ -61,13 +70,20 @@
             "metadata": {
                 "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones"
             }
+        },
+        "deployVNetGatewayRelatedResources": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Set false if you don't need VNet gateway related resources."
+            }
         }
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "deployVNetGatewayRelatedResources": false,
+        "deployVNetGatewayRelatedResources": "[parameters('deployVNetGatewayRelatedResources')]",
 
-        "numOfAttendees": 3,
+        "numOfAttendees": "[parameters('numOfAttendees')]",
         "attendeeOffset": 1,
         "attendeeIpAddressOffset": "[add(100, variables('attendeeOffset'))]",
         "attendeeNatPortOffset": "[add(5000, variables('attendeeOffset'))]",
