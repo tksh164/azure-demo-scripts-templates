@@ -27,22 +27,26 @@
         "vmOsImage": {
             "type": "object",
             "defaultValue": {
+                "name": "Windows 10",
                 "sku": "19h1-pro",
                 "offer": "Windows-10",
                 "publisher": "MicrosoftWindowsDesktop"
             },
             "allowedValues": [
                 {
+                    "name": "Windows 10 Pro",
                     "sku": "19h1-pro",
                     "offer": "Windows-10",
                     "publisher": "MicrosoftWindowsDesktop"
                 },
                 {
+                    "name": "Windows Server 2019 Datacenter",
                     "sku": "2019-Datacenter",
                     "offer": "WindowsServer",
                     "publisher": "MicrosoftWindowsServer"
                 },
                 {
+                    "name": "Windows Server 2019 Datacenter (smalldisk)",
                     "sku": "2019-Datacenter-smalldisk",
                     "offer": "WindowsServer",
                     "publisher": "MicrosoftWindowsServer"
