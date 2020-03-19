@@ -128,7 +128,7 @@
 
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
-        "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType').storageAccountType]",
+        "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType')]",
         "jumpboxOsImageReference": {
             "publisher": "[parameters('vmOsImage').publisher]",
             "offer": "[parameters('vmOsImage').offer]",
