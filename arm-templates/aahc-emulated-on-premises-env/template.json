@@ -224,7 +224,7 @@
                 "gatewayType": "Vpn",
                 "ipConfigurations": [
                     {
-                        "name": "default",
+                        "name": "gwipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
