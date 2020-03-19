@@ -5,6 +5,7 @@
         "comments": "This template deploys the emulated an on-premises environment for AAHC."
     },
     "parameters": {
+        // Comment
         "numberOfAttendees": {
             "type": "int",
             "defaultValue": 10,
