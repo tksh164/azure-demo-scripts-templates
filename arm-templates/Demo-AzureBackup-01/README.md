@@ -56,3 +56,8 @@ All the below names are the default value.
 
 - First, you do make the domain controller. Next, join the Azure Backup Server to the AD domain. Those steps are needed before the setup Azure Backup Server because of the effect of DNS settings.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
+
+## TODO
+
+- marsagent-vm1
+- azbackup-law
