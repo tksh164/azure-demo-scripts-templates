@@ -27,20 +27,25 @@
         "vmOsImage": {
             "type": "object",
             "defaultValue": {
-                "publisher": "MicrosoftWindowsServer",
-                "offer": "WindowsServer",
-                "sku": "2019-Datacenter"
+                "sku": "19h1-pro",
+                "offer": "Windows-10",
+                "publisher": "MicrosoftWindowsDesktop"
             },
             "allowedValues": [
                 {
-                    "publisher": "MicrosoftWindowsServer",
-                    "offer": "WindowsServer",
-                    "sku": "2019-Datacenter"
+                    "sku": "19h1-pro",
+                    "offer": "Windows-10",
+                    "publisher": "MicrosoftWindowsDesktop"
                 },
                 {
-                    "publisher": "MicrosoftWindowsServer",
+                    "sku": "2019-Datacenter",
                     "offer": "WindowsServer",
-                    "sku": "2019-Datacenter-smalldisk"
+                    "publisher": "MicrosoftWindowsServer"
+                },
+                {
+                    "sku": "2019-Datacenter-smalldisk",
+                    "offer": "WindowsServer",
+                    "publisher": "MicrosoftWindowsServer"
                 }
             ],
             "metadata": {
@@ -112,7 +117,12 @@
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
         "jumpboxOsDiskStorageType": "[parameters('vmOsDiskStorageType')]",
-        "jumpboxOsImage": "[parameters('vmOsImage')]",
+        "jumpboxOsImageReference": {
+            "publisher": "[parameters('vmOsImage').publisher]",
+            "offer": "[parameters('vmOsImage').offer]",
+            "sku": "[parameters('vmOsImage').sku]",
+            "version": "latest"
+        },
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
 
@@ -398,12 +408,7 @@
                         },
                         "caching": "ReadWrite"
                     },
-                    "imageReference": {
-                        "publisher": "[variables('jumpboxOsImage').publisher]",
-                        "offer": "[variables('jumpboxOsImage').offer]",
-                        "sku": "[variables('jumpboxOsImage').sku]",
-                        "version": "latest"
-                    }
+                    "imageReference": "[variables('jumpboxOsImageReference')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
