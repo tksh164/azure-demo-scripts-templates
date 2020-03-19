@@ -25,11 +25,23 @@
             }
         },
         "vmOsImage": {
-            "type": "string",
-            "defaultValue": "2019-Datacenter",
+            "type": "object",
+            "defaultValue": {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2019-Datacenter"
+            },
             "allowedValues": [
-                "2019-Datacenter",
-                "2019-Datacenter-smalldisk"
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk"
+                }
             ],
             "metadata": {
                 "description": "The OS image for jumpbox VM."
@@ -100,7 +112,7 @@
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
         "jumpboxOsDiskStorageType": "[parameters('vmOsDiskStorageType')]",
-        "jumpboxOsImageSku": "[parameters('vmOsImage')]",
+        "jumpboxOsImage": "[parameters('vmOsImage')]",
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
 
@@ -387,9 +399,9 @@
                         "caching": "ReadWrite"
                     },
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "[variables('jumpboxOsImageSku')]",
+                        "publisher": "[variables('jumpboxOsImage').publisher]",
+                        "offer": "[variables('jumpboxOsImage').offer]",
+                        "sku": "[variables('jumpboxOsImage').sku]",
                         "version": "latest"
                     }
                 },
