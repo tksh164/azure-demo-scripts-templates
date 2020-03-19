@@ -14,17 +14,19 @@
                 "description": "Number of attendees."
             }
         },
-        "adminUserName": {
+        "administratorUsername": {
             "type": "string",
             "defaultValue": "localadmin",
             "metadata": {
-                "description": "The admin user name for jumpbox VMs."
+                "description": "The administrator username for the jumpbox VMs."
             }
         },
-        "adminPassword": {
+        "administratorPassword": {
             "type": "secureString",
+            "minLength": 12,
+            "maxLength": 123,
             "metadata": {
-                "description": "The admin user password for jumpbox VMs."
+                "description": "The administrator password for the jumpbox VMs."
             }
         },
         "vmOsImage": {
@@ -56,7 +58,7 @@
                 }
             ],
             "metadata": {
-                "description": "The OS image for jumpbox VM."
+                "description": "The OS image for the jumpbox VMs."
             }
         },
         "vmSize": {
@@ -68,7 +70,7 @@
                 "Standard_B2ms"
             ],
             "metadata": {
-                "description": "The virtual machine size of jumpbox VM."
+                "description": "The virtual machine size of the jumpbox VMs."
             }
         },
         "vmOsDiskStorageType": {
@@ -80,21 +82,21 @@
                 "Standard_LRS"
             ],
             "metadata": {
-                "description": "The OS disk storage type of jumpbox VM."
+                "description": "The OS disk storage type of the jumpbox VMs."
             }
         },
         "dailyAutoshutdownTime": {
             "type": "string",
             "defaultValue": "23:30",
             "metadata": {
-                "description": "The time of day the auto-shutdown of jumpbox VM will occur."
+                "description": "The time of day the auto-shutdown of the jumpbox VM will occur."
             }
         },
         "autoshutdownTimeZone": {
             "type": "string",
             "defaultValue": "Pacific Standard Time",
             "metadata": {
-                "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones"
+                "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on <a href='https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones'>here</a>"
             }
         },
         "deployVirtualNetworkGatewayRelatedResources": {
@@ -429,8 +431,8 @@
                 },
                 "osProfile": {
                     "computerName": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
-                    "adminUsername": "[parameters('adminUserName')]",
-                    "adminPassword": "[parameters('adminPassword')]",
+                    "adminUsername": "[parameters('administratorUsername')]",
+                    "adminPassword": "[parameters('administratorPassword')]",
                     "windowsConfiguration": {
                         "enableAutomaticUpdates": true,
                         "provisionVmAgent": true
