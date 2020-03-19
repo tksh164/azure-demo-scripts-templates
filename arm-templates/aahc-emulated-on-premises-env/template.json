@@ -466,7 +466,8 @@
                     "time": "[variables('jumpboxVmAutoshutdownDailyRecurrenceTime')]"
                 },
                 "notificationSettings": {
-                    "status": "Disabled"
+                    "status": "Disabled",
+                    "timeInMinutes": 15
                 }
             }
         }
