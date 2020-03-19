@@ -56,7 +56,9 @@
             "type": "string",
             "defaultValue": "Standard_D2s_v3",
             "allowedValues": [
-                "Standard_D2s_v3"
+                "Standard_D2s_v3",
+                "Standard_DS1_v2",
+                "Standard_B2ms"
             ],
             "metadata": {
                 "description": "The virtual machine size of jumpbox VM."
