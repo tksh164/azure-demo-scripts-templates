@@ -443,7 +443,6 @@
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('jumpboxSubnetName'))]",
                 "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
                 "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lbName'), concat(variables('inboundNatRuleNamePrefix'), copyIndex(variables('attendeeOffset'))))]"
             ],
