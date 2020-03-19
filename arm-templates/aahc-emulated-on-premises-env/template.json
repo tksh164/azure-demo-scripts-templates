@@ -131,7 +131,8 @@
         "lbIpName": "[concat(variables('jumpboxVmName'), '-lb-pip')]",
         "lbName": "[concat(variables('jumpboxVmName'), '-lb')]",
         "lbFrontendIpConfigName": "LoadBalancerFrontEnd",
-        "lbBackendPoolName": "jumpbox-bepool"
+        "lbBackendPoolName": "jumpbox-bepool",
+        "inboundNatRuleNamePrefix": "rdp-jumpbox"
     },
     "resources": [
         {
@@ -348,7 +349,7 @@
             },
             "type": "Microsoft.Network/loadBalancers/inboundNatRules",
             "apiVersion": "2019-11-01",
-            "name": "[concat(variables('lbName'), '/rdp-jumpbox', copyIndex(variables('attendeeOffset')))]",
+            "name": "[concat(variables('lbName'), '/', variables('inboundNatRuleNamePrefix'), copyIndex(variables('attendeeOffset')))]",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
@@ -440,7 +441,9 @@
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('jumpboxSubnetName'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
+                "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lbName'), concat(variables('inboundNatRuleNamePrefix'), copyIndex(variables('attendeeOffset'))))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -454,6 +457,11 @@
                             "loadBalancerBackendAddressPools": [
                                 {
                                     "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lbName'), concat(variables('inboundNatRuleNamePrefix'), copyIndex(variables('attendeeOffset'))))]"
                                 }
                             ]
                         }
