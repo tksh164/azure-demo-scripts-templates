@@ -75,16 +75,28 @@
                 "description": "The virtual machine size of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2079859'>Learn more about Virtual Machine sizes</a>"
             }
         },
-        "vmOsDiskStorageType": {
+        "vmOsDiskType": {
             "type": "string",
-            "defaultValue": "Premium_LRS",
+            "defaultValue": {
+                "": "Premium SSD",
+                "storageAccountType": "Premium_LRS"
+            },
             "allowedValues": [
-                "Premium_LRS",
-                "StandardSSD_LRS",
-                "Standard_LRS"
+                {
+                    "": "Premium SSD",
+                    "storageAccountType": "Premium_LRS"
+                },
+                {
+                    "": "Standard SSD",
+                    "storageAccountType": "StandardSSD_LRS"
+                },
+                {
+                    "": "Standard HDD",
+                    "storageAccountType": "Standard_LRS"
+                }
             ],
             "metadata": {
-                "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about managed disk types</a>"
+                "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>"
             }
         },
         "dailyAutoshutdownTime": {
@@ -132,7 +144,7 @@
 
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
-        "jumpboxOsDiskStorageType": "[parameters('vmOsDiskStorageType')]",
+        "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType').storageAccountType]",
         "jumpboxOsImageReference": {
             "publisher": "[parameters('vmOsImage').publisher]",
             "offer": "[parameters('vmOsImage').offer]",
@@ -421,7 +433,7 @@
                         "name": "[concat(variables('jumpboxVmName'), copyIndex(variables('attendeeOffset')))]",
                         "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "[variables('jumpboxOsDiskStorageType')]"
+                            "storageAccountType": "[variables('jumpboxOsDiskStorageAccountType')]"
                         },
                         "caching": "ReadWrite"
                     },
