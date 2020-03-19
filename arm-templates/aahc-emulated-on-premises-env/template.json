@@ -34,13 +34,13 @@
         "vmOsImage": {
             "type": "object",
             "defaultValue": {
-                "sku": "19h1-pro",
+                "sku": "19h2-pro",
                 "offer": "Windows-10",
                 "publisher": "MicrosoftWindowsDesktop"
             },
             "allowedValues": [
                 {
-                    "sku": "19h1-pro",
+                    "sku": "19h2-pro",
                     "offer": "Windows-10",
                     "publisher": "MicrosoftWindowsDesktop"
                 },
