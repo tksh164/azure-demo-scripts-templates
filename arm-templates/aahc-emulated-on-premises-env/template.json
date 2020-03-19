@@ -27,7 +27,7 @@
         "vmOsImage": {
             "type": "object",
             "defaultValue": {
-                "name": "Windows 10 Pro",
+                "": "Windows 10 Pro",
                 "publisher": "MicrosoftWindowsDesktop",
                 "offer": "Windows-10",
                 "sku": "19h1-pro"
