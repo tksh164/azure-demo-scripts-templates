@@ -1,0 +1,52 @@
+digraph "Deployment by this template" {
+
+    graph [fontcolor="#2D3436" fontname="Sans-Serif" fontsize="18" label="Deployment by this template" nodesep="0.60" pad="0.5" rankdir="TB" ranksep="0.75" splines="ortho"]
+    node [fixedsize="true" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="14" imagescale="true" labelloc="b" shape="box" style="rounded" height="2.1" width="1.4"]
+    edge [color="#7B8894"]
+
+    subgraph "cluster_virtual_network" {
+
+        graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize="16" label="Virtual Network" labeljust="l" pencolor="#AEB6BE" margin="20" rankdir="LR" shape="box" style="rounded"]
+
+        subgraph "cluster_subnet" {
+
+            graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize="16" label="Subnet" labeljust="l" pencolor="#AEB6BE" rankdir="LR" shape="box" style="rounded"]
+
+            "jumpbox_vm" [label="Jumpbox VM" shape="none" image="./resources/virtual-machines-ready.svg"]
+            "jumpbox_vm_nic" [label="Netwrok interface" shape="none" image="./resources/network-interfaces-ready.svg"]
+            "jumpbox_vm_nsg" [label="NSG" shape="none" image="./resources/network-security-groups-ready.svg"]
+
+            subgraph "cluster_backend_pool" {
+
+                graph [bgcolor="#ECE8F6" fontname="Sans-Serif" fontsize="16" label="Backend Pool" labeljust="l" pencolor="#AEB6BE" rankdir="LR" shape="box" style="rounded"]
+
+                "backend_vm2" [label="Backend VM2" shape="none" image="./resources/virtual-machines-ready.svg"]
+                "backend_vm2_nic" [label="Netwrok interface" shape="none" image="./resources/network-interfaces-ready.svg"]
+                "backend_vm2_nsg" [label="NSG" shape="none" image="./resources/network-security-groups-ready.svg"]
+
+                "backend_vm1" [label="Backend VM1" shape="none" image="./resources/virtual-machines-ready.svg"]
+                "backend_vm1_nic" [label="Netwrok interface" shape="none" image="./resources/network-interfaces-ready.svg"]
+                "backend_vm1_nsg" [label="NSG" shape="none" image="./resources/network-security-groups-ready.svg"]
+            }
+        }
+    }
+
+    "lb" [label="Public Standard LB" shape="none" image="./resources/load-balancers-ready.svg"]
+    "lb_frontend_ip1" [label="Public IP address" shape="none" image="./resources/public-ip-addresses-ready.svg"]
+    "lb_frontend_ip2" [label="Public IP Prefix" shape="none" image="./resources/public-ip-prefixes-ready.svg"]
+    "lb_frontend_ip1" -> "lb" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "lb_frontend_ip2" -> "lb" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+
+    "lb" -> "backend_vm1_nic" [color="" dir="forward" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "lb" -> "backend_vm2_nic" [color="" dir="forward" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+
+    "backend_vm1_nic" -> "backend_vm1" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "backend_vm1_nic" -> "backend_vm1_nsg" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "backend_vm2_nic" -> "backend_vm2" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "backend_vm2_nic" -> "backend_vm2_nsg" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+
+    "jumpbox_vm_ip" [label="Public IP address" shape="none" image="./resources/public-ip-addresses-ready.svg"]
+    "jumpbox_vm_ip" -> "jumpbox_vm_nic" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "jumpbox_vm_nic" -> "jumpbox_vm" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+    "jumpbox_vm_nic" -> "jumpbox_vm_nsg" [color="" dir="none" fontcolor="#2D3436" fontname="Sans-Serif" fontsize="13" style="" xlabel=""]
+}
