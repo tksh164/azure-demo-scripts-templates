@@ -36,11 +36,13 @@ All the below names are the default value.
             - Public IP address: `lboutip-jump-vm1-ip`
             - Network security group: `lboutip-jump-vm1-nsg`
 
-![Deployment by this template](./deployment.svg)
-
 ### Non-deployments
 
 - n/a
+
+### Diagram
+
+![Deployment by this template](./deployment.svg)
 
 ## Notes
 
