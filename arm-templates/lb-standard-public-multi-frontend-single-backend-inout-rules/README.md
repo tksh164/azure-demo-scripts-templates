@@ -42,7 +42,7 @@ All the below names are the default value.
 
 ### Diagram
 
-![Deployment by this template](./deployment.svg)
+![Diagram](./diagram.svg)
 
 ## Notes
 
