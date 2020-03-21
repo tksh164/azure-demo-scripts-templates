@@ -98,18 +98,11 @@
             "metadata": {
                 "description": "The time zone ID for auto-shutdown time. You can find your time zone ID on <a href='https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones'>here</a>"
             }
-        },
-        "deployVirtualNetworkGatewayRelatedResources": {
-            "type": "bool",
-            "defaultValue": true,
-            "metadata": {
-                "description": "Set false if you don't need VNet gateway related resources."
-            }
         }
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "deployVNetGatewayRelatedResources": "[parameters('deployVirtualNetworkGatewayRelatedResources')]",
+        "deployVNetGatewayRelatedResources": true,
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
