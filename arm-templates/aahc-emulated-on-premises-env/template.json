@@ -198,7 +198,7 @@
 
         {
             "comments": "NSG for jumpboxes.",
-            "condition": "[variables('deployJumpboxVmRelatedResources')]",
+            "condition": "[or(variables('deployEmulatedOnPremisesEnvRelatedResources'), variables('deployJumpboxVmRelatedResources'))]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-11-01",
             "name": "[variables('jumpboxSubnetNsgName')]",
