@@ -13,11 +13,18 @@
                 "description": "Number of attendees."
             }
         },
+        "deployVirtualNetworkGatewayRelatedResources": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "To deploy the virtual network gateway related resources, select true. If you do not deploy the virtual network gateway related resources, select false."
+            }
+        },
         "deployJumpboxVm": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "description": "To deploy the jumpbox VMs for attendees, select true. If you do not deploy the the jumpbox VMs, select false and input the dummy parameters to the following."
+                "description": "To deploy the jumpbox VMs for attendees, select true. If you do not deploy the jumpbox VMs, select false and input the dummy parameters to the following."
             }
         },
         "username": {
@@ -109,7 +116,7 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "deployVNetGatewayRelatedResources": true,
+        "deployVNetGatewayRelatedResources": "[parameters('deployVirtualNetworkGatewayRelatedResources')]",
         "deployJumpboxVmRelatedResources": "[parameters('deployJumpboxVm')]",
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
