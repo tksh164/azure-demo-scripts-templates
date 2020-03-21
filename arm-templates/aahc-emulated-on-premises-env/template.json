@@ -13,6 +13,13 @@
                 "description": "Number of attendees."
             }
         },
+        "deployJumpboxVm": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "To deploy the jumpbox VMs for attendees, select true. If you do not deploy the the jumpbox VMs, select false and input the dummy parameters to the following."
+            }
+        },
         "username": {
             "type": "string",
             "defaultValue": "localadmin",
@@ -103,6 +110,7 @@
     "variables": {
         "location": "[resourceGroup().location]",
         "deployVNetGatewayRelatedResources": true,
+        "deployJumpboxVmRelatedResources": "[parameters('deployJumpboxVm')]",
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
@@ -303,6 +311,7 @@
 
         {
             "comments": "Public IP Address for LB.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "name": "[variables('lbIpName')]",
@@ -317,6 +326,7 @@
         },
         {
             "comments": "LB for inbound RDP connection to jumpbox VMs.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "type": "Microsoft.Network/loadBalancers",
             "apiVersion": "2019-11-01",
             "name": "[variables('lbName')]",
@@ -347,6 +357,7 @@
         },
         {
             "comments": "Inbound NAT rule on LB for attendee's jumpbox VMs.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
@@ -370,6 +381,7 @@
 
         {
             "comments": "Availability set for attendee's jumpbox VMs.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "2019-07-01",
             "name": "[variables('avSetName')]",
@@ -385,6 +397,7 @@
 
         {
             "comments": "VM as attendee's jumpbox.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
@@ -435,6 +448,7 @@
         },
         {
             "comments": "Network interface for attendee's jump box VM.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
@@ -474,6 +488,7 @@
         },
         {
             "comments": "Auto-shutdown schedule for attendee's jump box VM.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
