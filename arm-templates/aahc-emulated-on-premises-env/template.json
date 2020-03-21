@@ -13,11 +13,11 @@
                 "description": "Number of attendees."
             }
         },
-        "deployVirtualNetworkGatewayRelatedResources": {
+        "deployEmulatedOnPremisesEnvironment": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "description": "To deploy the virtual network gateway related resources, select true. If you do not deploy the virtual network gateway related resources, select false."
+                "description": "To deploy the emulated on-premises environment, select true. If you do not deploy the emulated on-premises environment, select false."
             }
         },
         "deployJumpboxVm": {
@@ -116,7 +116,7 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "deployVNetGatewayRelatedResources": "[parameters('deployVirtualNetworkGatewayRelatedResources')]",
+        "deployEmulatedOnPremisesEnvRelatedResources": "[parameters('deployEmulatedOnPremisesEnvironment')]",
         "deployJumpboxVmRelatedResources": "[parameters('deployJumpboxVm')]",
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
@@ -242,7 +242,7 @@
 
         {
             "comments": "Public IP Address for VPN VNet gateway.",
-            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "condition": "[variables('deployEmulatedOnPremisesEnvRelatedResources')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "name": "[variables('vnetGatewayIpName')]",
@@ -253,7 +253,7 @@
         },
         {
             "comments": "VPN VNet gateway as on-premises side firewall.",
-            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "condition": "[variables('deployEmulatedOnPremisesEnvRelatedResources')]",
             "type": "Microsoft.Network/virtualNetworkGateways",
             "apiVersion": "2019-11-01",
             "name": "[variables('vnetGatewayName')]",
@@ -289,7 +289,7 @@
 
         {
             "comments": "Connections for attendees.",
-            "condition": "[variables('deployVNetGatewayRelatedResources')]",
+            "condition": "[variables('deployEmulatedOnPremisesEnvRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
