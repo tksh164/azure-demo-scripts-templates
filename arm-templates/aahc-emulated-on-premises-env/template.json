@@ -156,6 +156,7 @@
     "resources": [
         {
             "comments": "VNet for emulated on-premises network.",
+            "condition": "[or(variables('deployEmulatedOnPremisesEnvRelatedResources'), variables('deployJumpboxVmRelatedResources'))]",
             "type": "Microsoft.Network/VirtualNetworks",
             "apiVersion": "2019-11-01",
             "name": "[variables('vnetName')]",
@@ -197,6 +198,7 @@
 
         {
             "comments": "NSG for jumpboxes.",
+            "condition": "[variables('deployJumpboxVmRelatedResources')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-11-01",
             "name": "[variables('jumpboxSubnetNsgName')]",
@@ -222,6 +224,7 @@
 
         {
             "comments": "Local Network Gateways for attendees.",
+            "condition": "[variables('deployEmulatedOnPremisesEnvRelatedResources')]",
             "copy": {
                 "name": "numOfAttendees",
                 "count": "[variables('numOfAttendees')]"
