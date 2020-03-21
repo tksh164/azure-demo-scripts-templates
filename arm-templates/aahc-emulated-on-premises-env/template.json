@@ -7,9 +7,8 @@
     "parameters": {
         "numberOfAttendees": {
             "type": "int",
-            "defaultValue": 10,
+            "defaultValue": 8,
             "minValue": 1,
-            "maxValue": 16,
             "metadata": {
                 "description": "Number of attendees."
             }
