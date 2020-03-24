@@ -3,24 +3,32 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageSyncServicesNamePrefix": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "afslab"
         },
         "storageAccountNamePrefix": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "afslab"
+        },
+        "fileShareName": {
+            "type": "string",
+            "defaultValue": "filesync-group1-share1"
         }
     },
     "variables": {
         "uniqueSuffix": "[concat('0', toLower(take(uniqueString(resourceGroup().id), 3)))]",
+        "location": "[resourceGroup().location]",
 
         "storageSyncServicesName": "[concat(parameters('storageSyncServicesNamePrefix'), variables('uniqueSuffix'), '-storagesync')]",
-        "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), variables('uniqueSuffix'))]"
+        "storageAccountName": "[concat(parameters('storageAccountNamePrefix'), variables('uniqueSuffix'))]",
+        "fileShareName": "[parameters('fileShareName')]"
     },
     "resources": [
         {
             "type": "Microsoft.StorageSync/storageSyncServices",
             "apiVersion": "2019-06-01",
             "name": "[variables('storageSyncServicesName')]",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('location')]",
             "properties": {},
             "tags": {}
         },
@@ -28,7 +36,7 @@
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-04-01",
             "name": "[variables('storageAccountName')]",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('location')]",
             "sku": {
                 "name": "Standard_LRS",
                 "tier": "Standard"
@@ -53,8 +61,15 @@
                     },
                     "keySource": "Microsoft.Storage"
                 }
-            },
-            "tags": {}
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccountName'), '/default/', variables('fileShareName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ]
         }
     ]
 }
