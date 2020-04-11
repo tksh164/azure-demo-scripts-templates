@@ -9,8 +9,8 @@ This template deploys the emulated an on-premises environment for AAHC. You can 
 | Name | Description |
 |----|----|
 | Number Of Attendees | Number of attendees. |
-| Deploy Emulated On Premises Environment | To deploy the emulated on-premises environment, select true. If you do not deploy the emulated on-premises environment, select false. |
-| Deploy Jumpbox Vm | To deploy the jumpbox VMs for attendees, select true. If you do not deploy the jumpbox VMs, select false and input the dummy parameters to the following. |
+| Deploy Emulated On Premises Environment | To deploy the emulated on-premises environment, select <strong>true</strong>. If you do not deploy the emulated on-premises environment, select <strong>false</strong>. |
+| Deploy Jumpbox Vm | To deploy the jumpbox VMs for attendees, select <strong>true</strong>. If you do not deploy the jumpbox VMs, select <strong>false</strong> and input the dummy parameters to the following. |
 | Username | The administrator username for the jumpbox VMs. |
 | Password | The administrator password for the jumpbox VMs. |
 | Vm Os Image | The operating system image for the jumpbox VMs. |
