@@ -17,7 +17,7 @@
             "type": "bool",
             "defaultValue": true,
             "metadata": {
-                "description": "To deploy the emulated on-premises environment, select true. If you do not deploy the emulated on-premises environment, select false."
+                "description": "To deploy the emulated on-premises environment, select **true**. If you do not deploy the emulated on-premises environment, select **false**."
             }
         },
         "deployJumpboxVm": {
