@@ -470,7 +470,7 @@
             "properties": {
                 "securityRules": [
                     {
-                        "name": "RDP",
+                        "name": "AllowRdpInbound",
                         "properties": {
                             "direction": "Inbound",
                             "priority": 500,
