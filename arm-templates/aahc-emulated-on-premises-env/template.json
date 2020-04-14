@@ -119,7 +119,12 @@
             "namespace": "aahc",
             "members": {
                 "osImageIndex": {
-                    "parameters": [],
+                    "parameters": [
+                        {
+                            "type": "string",
+                            "name": "label"
+                        }
+                    ],
                     "output": {
                         "type": "int",
                         "value": 0
