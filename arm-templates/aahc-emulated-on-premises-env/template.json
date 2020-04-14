@@ -98,31 +98,6 @@
             }
         }
     },
-    "functions": [
-        {
-            "namespace": "aahc",
-            "members": {
-                "osImageIndex": {
-                    "parameters": [
-                        {
-                            "type": "string",
-                            "name": "label"
-                        }
-                    ],
-                    "output": {
-                        "type": "int",
-                        "value": "[
-                            if(equals(parameters('label'), 'Windows 10 Pro'), 0,
-                            if(equals(parameters('label'), 'Windows Server 2019 Datacenter'), 1,
-                            if(equals(parameters('label'), 'Windows Server 2019 Datacenter (Small disk)'), 2,
-                            0
-                            )))
-                        ]"
-                    }
-                }
-            }
-        }
-    ],
     "variables": {
         "location": "[resourceGroup().location]",
         "deployEmulatedOnPremisesEnvRelatedResources": "[parameters('deployEmulatedOnPremisesEnvironment')]",
@@ -147,6 +122,13 @@
                 "version": "latest"
             }
         ],
+        "osImageIndex": "[
+            if(equals(parameters('vmOsImage'), 'Windows 10 Pro'), 0,
+            if(equals(parameters('vmOsImage'), 'Windows Server 2019 Datacenter'), 1,
+            if(equals(parameters('vmOsImage'), 'Windows Server 2019 Datacenter (Small disk)'), 2,
+            0
+            )))
+        ]",
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
@@ -165,7 +147,7 @@
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
         "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType')]",
-        "jumpboxOsImageReference": "[variables('osImageDefinition')[aahc.osImageIndex(parameters('vmOsImage'))]]",
+        "jumpboxOsImageReference": "[variables('osImageDefinition')[variables('osImageIndex')]]",
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
 
