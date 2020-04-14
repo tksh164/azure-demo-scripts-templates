@@ -45,28 +45,12 @@
             }
         },
         "vmOsImage": {
-            "type": "object",
-            "defaultValue": {
-                "sku": "19h2-pro",
-                "offer": "Windows-10",
-                "publisher": "MicrosoftWindowsDesktop"
-            },
+            "type": "string",
+            "defaultValue": "Windows 10 Pro",
             "allowedValues": [
-                {
-                    "sku": "19h2-pro",
-                    "offer": "Windows-10",
-                    "publisher": "MicrosoftWindowsDesktop"
-                },
-                {
-                    "sku": "2019-Datacenter",
-                    "offer": "WindowsServer",
-                    "publisher": "MicrosoftWindowsServer"
-                },
-                {
-                    "sku": "2019-Datacenter-smalldisk",
-                    "offer": "WindowsServer",
-                    "publisher": "MicrosoftWindowsServer"
-                }
+                "Windows 10 Pro",
+                "Windows Server 2019 Datacenter",
+                "Windows Server 2019 Datacenter (Small disk)"
             ],
             "metadata": {
                 "description": "The operating system image for the jumpbox VMs."
@@ -137,6 +121,26 @@
         "location": "[resourceGroup().location]",
         "deployEmulatedOnPremisesEnvRelatedResources": "[parameters('deployEmulatedOnPremisesEnvironment')]",
         "deployJumpboxVmRelatedResources": "[parameters('deployJumpboxVm')]",
+        "osImageDefinition": [
+            {
+                "publisher": "MicrosoftWindowsDesktop",
+                "offer": "Windows-10",
+                "sku": "19h2-pro",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2019-Datacenter",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2019-Datacenter-smalldisk",
+                "version": "latest"
+            }
+        ],
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
@@ -155,12 +159,7 @@
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
         "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType')]",
-        "jumpboxOsImageReference": {
-            "publisher": "[parameters('vmOsImage').publisher]",
-            "offer": "[parameters('vmOsImage').offer]",
-            "sku": "[parameters('vmOsImage').sku]",
-            "version": "latest"
-        },
+        "jumpboxOsImageReference": "[variables('osImageDefinition')[aahc.osImageIndex(parameters('vmOsImage'))]]",
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
 
