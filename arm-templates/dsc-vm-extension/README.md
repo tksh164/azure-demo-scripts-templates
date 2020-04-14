@@ -39,6 +39,8 @@ All the below names are the default value.
 
 ### Example for raw-configuration
 
+This example set registry value and after that restart the computer. The DSC configuration defines by the ARM template.
+
 ```json
 {
     "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -71,6 +73,7 @@ All the below names are the default value.
                         {
                             RebootNodeIfNeeded = $true
                         }
+
                         # Enable IP forwarding and reboot the OS to apply the IP forwarding registry settings.
                         $regPath = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters'
                         $regName = 'IPEnableRouter'
@@ -95,6 +98,8 @@ All the below names are the default value.
 ```
 
 ### Example for install-windows-feature
+
+This example installs `Web-Server` and `Web-Mgmt-Console` features.
 
 ```json
 {
@@ -133,6 +138,8 @@ All the below names are the default value.
 ```
 
 ### Example for download-file
+
+This example downloads Wireshark and Microsoft Edge Beta channel setup files to `C:\work`.
 
 ```json
 {
