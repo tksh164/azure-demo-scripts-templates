@@ -39,7 +39,7 @@ All the below names are the default value.
 
 ### Example for raw-configuration
 
-This example set registry value and after that restart the computer. The DSC configuration defines by the ARM template.
+This example sets registry value and after that restart the computer. The DSC configuration defines by the ARM template.
 
 ```json
 {
