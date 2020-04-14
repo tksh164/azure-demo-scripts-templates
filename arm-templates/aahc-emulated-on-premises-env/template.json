@@ -114,6 +114,8 @@
             }
         }
     },
+    "functions": [
+    ],
     "variables": {
         "location": "[resourceGroup().location]",
         "deployEmulatedOnPremisesEnvRelatedResources": "[parameters('deployEmulatedOnPremisesEnvironment')]",
