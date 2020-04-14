@@ -78,3 +78,15 @@ configuration download-file
         }
     }
 }
+
+configuration raw-configuration
+{
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $RawConfig
+    )
+
+    Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
+    Invoke-Expression -Command $RawConfig
+}
