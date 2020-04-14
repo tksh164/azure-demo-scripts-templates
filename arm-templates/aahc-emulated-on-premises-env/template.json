@@ -127,7 +127,9 @@
                     ],
                     "output": {
                         "type": "int",
-                        "value": "[if(equals(parameters('label'), 'Windows 10 Pro'), 0, if(equals(parameters('label'), 'Windows Server 2019 Datacenter'), 1, 0))]"
+                        "value": "[if(equals(parameters('label'), 'Windows 10 Pro'), 0,
+                                   if(equals(parameters('label'), 'Windows Server 2019 Datacenter'), 1,
+                                   0))]"
                     }
                 }
             }
