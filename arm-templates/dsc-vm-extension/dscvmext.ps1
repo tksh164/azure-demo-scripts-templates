@@ -12,8 +12,8 @@ configuration install-windows-feature
     {
         WindowsFeatureSet windows-features
         {
-            Name   = $FeatureNameList.ToArray()
             Ensure = 'Present'
+            Name   = $FeatureNameList.ToArray()
         }
     }
 }
