@@ -10,7 +10,7 @@ All the below names are the default value.
 
 - Resource group: Specified existing resource group through the parameter.
 - Virtual network: Specified existing virtual network through the parameter.
-    - Subnet: Specified through the parameter.
+    - Subnet: Specified existing subnet through the parameter.
         - Availability set: `nva-as`
             - NVA virtual machine: `nva-vm1`
                 - OS disk: `nva-vm1-osdisk`
