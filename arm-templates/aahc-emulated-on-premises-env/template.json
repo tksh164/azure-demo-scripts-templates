@@ -70,11 +70,11 @@
         },
         "vmOsDiskType": {
             "type": "string",
-            "defaultValue": "Premium_LRS",
+            "defaultValue": "Premium SSD",
             "allowedValues": [
-                "Premium_LRS",
-                "StandardSSD_LRS",
-                "Standard_LRS"
+                "Standard HDD",
+                "Standard SSD",
+                "Premium SSD"
             ],
             "metadata": {
                 "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>"
@@ -153,6 +153,11 @@
                 "version": "latest"
             }
         ],
+        "diskTypeDefinition": [
+            "Standard_LRS",
+            "StandardSSD_LRS",
+            "Premium_LRS"
+        ],
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
@@ -170,7 +175,7 @@
 
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
-        "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType')]",
+        "jumpboxOsDiskStorageAccountType": "[variables('diskTypeDefinition')[aahc.diskTypeIndex(parameters('vmOsDiskType'))]]",
         "jumpboxOsImageReference": "[variables('osImageDefinition')[aahc.osImageIndex(parameters('vmOsImage'))]]",
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
