@@ -247,7 +247,7 @@
                 "settings": {
                     "wmfVersion": "latest",
                     "configuration": {
-                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/dsc-vm-extension/dscvmext.zip",
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/adds-first-dc-vm/dsc-adds-config/dsc-adds-config.zip",
                         "script": "dsc-adds-config.ps1",
                         "function": "setup-adds-first-dc"
                     },
