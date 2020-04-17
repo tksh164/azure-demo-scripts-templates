@@ -8,8 +8,8 @@ Deploy a Windows-based network virtual appliance virtual machine into an existin
 
 All the below names are the default value.
 
-- Resource group: Specified through the parameter.
-- Virtual network: Specified through the parameter.
+- Resource group: Specified existing resource group through the parameter.
+- Virtual network: Specified existing virtual network through the parameter.
     - Subnet: Specified through the parameter.
         - Availability set: `nva-as`
             - NVA virtual machine: `nva-vm1`
