@@ -46,11 +46,11 @@
         },
         "vmOsImage": {
             "type": "string",
-            "defaultValue": "Windows 10 Pro",
+            "defaultValue": "Windows 10 Pro (127 GiB)",
             "allowedValues": [
-                "Windows 10 Pro",
-                "Windows Server 2019 Datacenter",
-                "Windows Server 2019 Datacenter (Small disk)"
+                "Windows 10 Pro (127 GiB)",
+                "Windows Server 2019 Datacenter (127 GiB)",
+                "Windows Server 2019 Datacenter (30 GiB)"
             ],
             "metadata": {
                 "description": "The operating system image for the jumpbox VMs."
@@ -111,7 +111,19 @@
                     ],
                     "output": {
                         "type": "int",
-                        "value": "[if(equals(parameters('label'), 'Windows 10 Pro'), 0, if(equals(parameters('label'), 'Windows Server 2019 Datacenter'), 1, if(equals(parameters('label'), 'Windows Server 2019 Datacenter (Small disk)'), 2, 0)))]"
+                        "value": "[if(equals(parameters('label'), 'Windows 10 Pro (127 GiB)'), 0, if(equals(parameters('label'), 'Windows Server 2019 Datacenter (127 GiB)'), 1, if(equals(parameters('label'), 'Windows Server 2019 Datacenter (30 GiB)'), 2, 0)))]"
+                    }
+                },
+                "diskTypeIndex": {
+                    "parameters": [
+                        {
+                            "type": "string",
+                            "name": "label"
+                        }
+                    ],
+                    "output": {
+                        "type": "int",
+                        "value": "[if(equals(parameters('label'), 'Standard HDD'), 0, if(equals(parameters('label'), 'Standard SSD'), 1, if(equals(parameters('label'), 'Premium SSD'), 2, 1)))]"
                     }
                 }
             }
