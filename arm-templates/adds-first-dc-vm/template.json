@@ -1,0 +1,357 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "existingVNetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of vNet that to deploy the domain controller virtual machine."
+            }
+        },
+        "existingVNetLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of vNet that to deploy the domain controller virtual machine."
+            }
+        },
+        "existingSubnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of subnet that to deploy the domain controller virtual machine."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for the domain controller virtual machine."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for the domain controller virtual machine."
+            }
+        },
+        "domainName": {
+            "type": "string",
+            "defaultValue": "lab.contoso.com",
+            "metadata": {
+                "description": "The domain name for the new AD DS forest."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+            "metadata": {
+                "description": "Do not need change this value."
+            }
+        }
+    },
+    "variables": {
+
+        // Common
+
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+        "prefix": "dc",
+
+        // Virtual network
+
+        "nvaSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVNetName'), parameters('existingSubnetName'))]",
+
+        // Availability set for the domain controller virtual machine
+
+        "avSetName": "[concat(variables('prefix'), '-as')]",
+        
+        // Domain controller virtual machine
+
+        "dcVm": {
+            "vmName": "[concat(variables('prefix'), '-vm1')]",
+            "computerName": "[concat(variables('prefix'), 'vm1')]",
+            "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
+            "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
+            "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
+            "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]"
+        },
+        
+        // AD DS domain
+
+        "adds": {
+            "domainName": "[parameters('domainName')]",
+            "dataVolumeDriveLetter": "S",
+            "dataVolumeLabel": "ADDS Data"
+        },
+
+        // LB for the inbound RDP NAT to the domain controller
+
+        "lb": {
+            "lbName": "[concat(variables('prefix'), '-lb')]",
+            "lbIpName": "[concat(variables('prefix'), '-lb-ip')]",
+            "domainNameLabel": "[concat(variables('prefix'), '-lb-', variables('uniqueSuffix'))]",
+            "frontendIpConfigName": "lb-frontend",
+            "natRuleName": "rdp-dc"
+        }
+    },
+    "resources": [
+
+        // Domain controller virtual machine
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('dcVm').vmName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]",
+                "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('dcVm').osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "Attach",
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]"
+                            }
+                        }
+                    ]                    
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('dcVm').computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('dcVm').dataDiskName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "sku": {
+                "name": "StandardSSD_LRS"
+            },
+            "properties": {
+                "diskSizeGB": 4,
+                "creationData": {
+                    "createOption": "empty"
+                }
+            }
+        },        
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-12-01",
+            "name": "[variables('dcVm').nicName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lb').lbName, variables('lb').natRuleName)]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcVm').nsgName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('nvaSubnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lb').lbName, variables('lb').natRuleName)]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "enableIPForwarding": true,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcVm').nsgName)]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-12-01",
+            "name": "[variables('dcVm').nsgName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "AllowRdpInbound",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(variables('dcVm').vmName, '/Microsoft.Powershell.DSC')]",
+            "location": "[parameters('existingVNetLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('dcVm').vmName)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.80",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "wmfVersion": "latest",
+                    "configuration": {
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/dsc-vm-extension/dscvmext.zip",
+                        "script": "dsc-adds-config.ps1",
+                        "function": "setup-adds-first-dc"
+                    },
+                    "privacy": {
+                        "dataCollection": "enable"
+                    },
+                    "configurationArguments": {
+                        "DomainName": "[variables('adds').domainName]",
+                        "DataVolumeDriveLetter": "[variables('adds').dataVolumeDriveLetter]",
+                        "DataVolumeLabel": "[variables('adds').dataVolumeLabel]"
+                    }
+                },
+                "protectedSettings": {
+                    "configurationArguments": {
+                        "CredentialForAddsInstall": {
+                            "UserName": "[parameters('adminUserName')]",
+                            "Password": "[parameters('adminPassword')]"
+                        },
+                        "SafeModeAdministratorPassword": {
+                            "UserName": "[parameters('adminUserName')]",
+                            "Password": "[parameters('adminPassword')]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Availability set for the domain controller virtual machine
+
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('avSetName')]",
+            "location": "[parameters('existingVNetLocation')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 2
+            }
+        },
+
+        // Load balancer for the inbound RDP NAT to the domain controller
+
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2019-12-01",
+            "name": "[variables('lb').lbName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('lb').lbIpName)]"
+            ],
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('lb').frontendIpConfigName]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('lb').lbIpName)]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(variables('lb').lbName, '/', variables('lb').natRuleName)]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', variables('lb').lbName)]"
+            ],
+            "properties": {
+                "frontendIPConfiguration": {
+                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lb').lbName, variables('lb').frontendIpConfigName)]"
+                },
+                "protocol": "Tcp",
+                "frontendPort": 33891,
+                "backendPort": 3389,
+                "idleTimeoutInMinutes": 4,
+                "enableTcpReset": false,
+                "enableFloatingIP": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-12-01",
+            "name": "[variables('lb').lbIpName]",
+            "location": "[parameters('existingVNetLocation')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('lb').domainNameLabel]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
