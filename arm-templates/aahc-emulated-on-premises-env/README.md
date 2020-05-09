@@ -17,4 +17,4 @@ This template deploys the emulated an on-premises environment for AAHC. You can 
 | Vm Size | The virtual machine size of the jumpbox VMs. [Learn more about Virtual Machine sizes](http://go.microsoft.com/fwlink/?LinkId=2079859) |
 | Vm Os Disk Type | The OS disk storage type of the jumpbox VMs. [Learn more about disk types](http://go.microsoft.com/fwlink/?LinkId=2077396) |
 | Daily Autoshutdown Time | The time of day the auto-shutdown of the jumpbox VM will occur. |
-| Autoshutdown Time Zone | The time zone ID for auto-shutdown time. You can find your time zone ID on [here](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones) |
+| Autoshutdown Time Zone | The time zone ID for auto-shutdown time. |
