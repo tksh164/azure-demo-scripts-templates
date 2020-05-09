@@ -10,7 +10,7 @@
             "defaultValue": 8,
             "minValue": 1,
             "metadata": {
-                "displayName": "Number of attendees",
+                "displayName": "Number of attendees1",
                 "description": "Number of attendees."
             }
         },
