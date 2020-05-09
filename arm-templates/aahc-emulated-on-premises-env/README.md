@@ -6,6 +6,8 @@ This template deploys the emulated an on-premises environment for AAHC. You can 
 
 ## Parameters
 
+The following table summarizes parameters for the template.
+
 | Name | Description |
 | ---- | ---- |
 | Number Of Attendees | Number of attendees. |
