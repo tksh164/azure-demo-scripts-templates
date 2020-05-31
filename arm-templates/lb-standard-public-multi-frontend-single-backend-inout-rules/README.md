@@ -42,7 +42,7 @@ All the below names are the default value.
 
 ### Diagram
 
-![Diagram](./diagram.svg)
+![Diagram](./diagram.drawio.svg)
 
 ## Notes
 
