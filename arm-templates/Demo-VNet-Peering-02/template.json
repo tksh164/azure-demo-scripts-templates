@@ -1,0 +1,246 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "prefix": "peering",
+
+        "vnet1": {
+            "name": "[concat(variables('prefix'), '-vnet1')]",
+            "location": "[variables('location')]",
+            "addressPrefix": "10.0.0.0/16",
+            "subnets": [
+                {
+                    "name": "subnet1",
+                    "properties": {
+                        "addressPrefix": "10.0.0.0/24"
+                    }
+                },
+                {
+                    "name": "subnet2",
+                    "properties": {
+                        "addressPrefix": "10.0.1.0/24"
+                    }
+                }
+            ]
+        },
+
+        "vnet2": {
+            "name": "[concat(variables('prefix'), '-vnet2')]",
+            "location": "[variables('location')]",
+            "addressPrefix": "172.16.0.0/16",
+            "subnets": [
+                {
+                    "name": "subnet1",
+                    "properties": {
+                        "addressPrefix": "172.16.0.0/24"
+                    }
+                }
+            ]
+        },
+
+        "vnet3": {
+            "name": "[concat(variables('prefix'), '-vnet3')]",
+            "location": "[variables('location')]",
+            "addressPrefix": "192.168.0.0/16",
+            "subnets": [
+                {
+                    "name": "subnet1",
+                    "properties": {
+                        "addressPrefix": "192.168.0.0/24"
+                    }
+                },
+                {
+                    "name": "subnet2",
+                    "properties": {
+                        "addressPrefix": "192.168.1.0/24"
+                    }
+                },
+                {
+                    "name": "subnet3",
+                    "properties": {
+                        "addressPrefix": "192.168.2.0/24"
+                    }
+                }
+            ]
+        },
+
+        "vnet1VNet2PeeringName": "vnet1-vnet2-peering",
+        "vnet1VNet3PeeringName": "vnet1-vnet3-peering",
+
+        "vnet2VNet1PeeringName": "vnet2-vnet1-peering",
+        "vnet2VNet3PeeringName": "vnet2-vnet3-peering",
+
+        "vnet3VNet1PeeringName": "vnet3-vnet1-peering",
+        "vnet3VNet2PeeringName": "vnet3-vnet2-peering"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-12-01",
+            "location": "[variables('vnet1').location]",
+            "name": "[variables('vnet1').name]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnet1').addressPrefix]"
+                    ]
+                },
+                "subnets": "[variables('vnet1').subnets]"
+            },
+            "resources": [
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet1').location]",
+                    "name": "[variables('vnet1VNet2PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]"
+                        }
+                    }
+                },
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet1').location]",
+                    "name": "[variables('vnet1VNet3PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                        }
+                    }
+                }
+            ]
+        },
+
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-12-01",
+            "location": "[variables('vnet2').location]",
+            "name": "[variables('vnet2').name]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnet2').addressPrefix]"
+                    ]
+                },
+                "subnets": "[variables('vnet2').subnets]"
+            },
+            "resources": [
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet2').location]",
+                    "name": "[variables('vnet2VNet1PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]"
+                        }
+                    }
+                },
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet2').location]",
+                    "name": "[variables('vnet2VNet3PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                        }
+                    }
+                }
+            ]
+        },
+
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-12-01",
+            "location": "[variables('vnet3').location]",
+            "name": "[variables('vnet3').name]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnet3').addressPrefix]"
+                    ]
+                },
+                "subnets": "[variables('vnet3').subnets]"
+            },
+            "resources": [
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet3').location]",
+                    "name": "[variables('vnet3VNet1PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet1').name)]"
+                        }
+                    }
+                },
+                {
+                    "type": "virtualNetworkPeerings",
+                    "apiVersion": "2019-12-01",
+                    "location": "[variables('vnet3').location]",
+                    "name": "[variables('vnet3VNet2PeeringName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet3').name)]"
+                    ],
+                    "properties": {
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet2').name)]"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}
