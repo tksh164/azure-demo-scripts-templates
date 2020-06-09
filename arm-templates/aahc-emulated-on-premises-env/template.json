@@ -20,6 +20,13 @@
                 "description": "To deploy the emulated on-premises environment, select <strong>true</strong>. If you do not deploy the emulated on-premises environment, select <strong>false<strong>."
             }
         },
+        "vpnConnectionSharedKey": {
+            "type": "string",
+            "defaultValue": "define-your-shared-key-1234",
+            "metadata": {
+                "description": "The shared key for the site-to-site VPN connection."
+            }
+        },
         "deployJumpboxVm": {
             "type": "bool",
             "defaultValue": false,
@@ -359,7 +366,7 @@
 
         "vnetGatewayName": "on-premfirewall-vng",
         "vnetGatewayIpName": "[concat(variables('vnetGatewayName'), '-pip')]",
-        "vnetGatewayConnectionSharedKey": "define-your-shared-key-123",
+        "vnetGatewayConnectionSharedKey": "[parameters('vpnConnectionSharedKey')]",
 
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
