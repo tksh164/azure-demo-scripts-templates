@@ -29,7 +29,7 @@
         },
         "deployJumpboxVm": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": true,
             "metadata": {
                 "description": "To deploy the jumpbox VMs for attendees, select <strong>true</strong>. If you do not deploy the jumpbox VMs, select <strong>false</strong> and input the dummy parameters to the following."
             }
