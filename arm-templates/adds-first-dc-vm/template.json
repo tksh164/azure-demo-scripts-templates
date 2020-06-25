@@ -57,7 +57,7 @@
 
         // Virtual network
 
-        "nvaSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVNetName'), parameters('existingSubnetName'))]",
+        "existingSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVNetName'), parameters('existingSubnetName'))]",
 
         // Availability set for the domain controller virtual machine
 
@@ -191,7 +191,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[variables('nvaSubnetId')]"
+                                "id": "[variables('existingSubnetId')]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "loadBalancerInboundNatRules": [
