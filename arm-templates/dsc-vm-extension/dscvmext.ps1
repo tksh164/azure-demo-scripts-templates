@@ -48,14 +48,43 @@ configuration download-file
             }
 
             TestScript = {
-                $false
+                $result = $true
+                foreach ($url in $using:UrlList) {
+                    Write-Verbose -Message ('URL: {0}' -f $url)
+
+                    $tempFilePath = Join-Path -Path $using:DownloadFolderPath -ChildPath (New-Guid).Guid.ToString()
+                    Write-Verbose -Message ('TempFilePath: {0}' -f $tempFilePath)
+
+                    $response = Invoke-WebRequest -Method Head -Uri $url -OutFile $tempFilePath -UseBasicParsing -PassThru
+                    Remove-Item -LiteralPath $tempFilePath -Force
+                    Write-Verbose -Message ('StatusCode: {0}' -f $response.StatusCode)
+
+                    $downloadedFileName =
+                        if ($response.Headers.ContainsKey('Content-Disposition') -and
+                            ($response.Headers['Content-Disposition'] -match '.*filename=(.+)')) {
+                            $Matches[1]
+                        } else {
+                            $uri = [Uri]$url
+                            $uri.Segments[$uri.Segments.Length - 1]
+                        }
+                    Write-Verbose -Message ('DownloadedFileName: {0}' -f $downloadedFileName)
+                    
+                    $donwnloadedFilePath = Join-Path -Path $using:DownloadFolderPath -ChildPath $downloadedFileName
+                    $result = $result -and (Test-Path -PathType Leaf -LiteralPath $donwnloadedFilePath)
+                    if ($result) {
+                        Write-Verbose -Message ('The "{0}" had already downloaded.' -f $donwnloadedFilePath)
+                    } else {
+                        Write-Verbose -Message ('The "{0}" had not download yet.' -f $donwnloadedFilePath)
+                    }
+                }
+                $result
             }
 
             SetScript = {
                 foreach ($url in $using:UrlList) {
                     Write-Verbose -Message ('URL: {0}' -f $url)
 
-                    $tempFilePath = $using:DownloadFolderPath + [System.IO.Path]::DirectorySeparatorChar + (New-Guid).Guid.ToString()
+                    $tempFilePath = Join-Path -Path $using:DownloadFolderPath -ChildPath (New-Guid).Guid.ToString()
                     Write-Verbose -Message ('TempFilePath: {0}' -f $tempFilePath)
 
                     $response = Invoke-WebRequest -Method Get -Uri $url -OutFile $tempFilePath -UseBasicParsing -PassThru
@@ -71,6 +100,12 @@ configuration download-file
                         }
                     Write-Verbose -Message ('DownloadedFileName: {0}' -f $downloadedFileName)
                     
+                    # Delete the file if the file already exist then rename the new file.
+                    $donwnloadedFilePath = Join-Path -Path $using:DownloadFolderPath -ChildPath $downloadedFileName
+                    if (Test-Path -PathType Leaf -LiteralPath $donwnloadedFilePath)
+                    {
+                        Remove-Item -LiteralPath $donwnloadedFilePath -Force
+                    }
                     Rename-Item -Path $tempFilePath -NewName $downloadedFileName
                 }
             }
