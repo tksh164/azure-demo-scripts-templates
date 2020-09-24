@@ -65,8 +65,10 @@ PS > .\deploy.ps1
 ### Non-deployments
 
 - The guest OS configurations.
+- The internal load balancer is not configured.
+- The application gateway is not configured.
 - The Recovery Services vault is not configured.
-- The Loa Analytics workspace is not configured.
+- The Log Analytics workspace is not configured.
 
 ## Notes
 
