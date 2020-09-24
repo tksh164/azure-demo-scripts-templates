@@ -69,12 +69,14 @@
         // AD DS Domain controllers
 
         "addsVmPrefix": "adds-dc",
+        "addsVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_F2s_v2
         "addsVmAvailabilitySet": {
             "name": "[concat(variables('addsVmPrefix'), '-as')]"
         },
         "addsVms": [
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm1')]",
+                "vmSize": "[variables('addsVmSizeDefault')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('addsVmPrefix'), '-vm1-datadisk1')]"
@@ -84,6 +86,7 @@
             },
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm2')]",
+                "vmSize": "[variables('addsVmSizeDefault')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('addsVmPrefix'), '-vm2-datadisk1')]"
@@ -96,12 +99,14 @@
         // Database servers
 
         "databaseVmPrefix": "database",
+        "databaseVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_D4s_v3
         "databaseVmAvailabilitySet": {
             "name": "[concat(variables('databaseVmPrefix'), '-as')]"
         },
         "databaseVms": [
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm1')]",
+                "vmSize": "[variables('databaseVmSizeDefault')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('databaseVmPrefix'), '-vm1-datadisk1')]"
@@ -111,6 +116,7 @@
             },
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm2')]",
+                "vmSize": "[variables('databaseVmSizeDefault')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('databaseVmPrefix'), '-vm2-datadisk1')]"
@@ -123,12 +129,14 @@
         // Web servers
 
         "webVmPrefix": "web",
+        "webVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_D2s_v3
         "webVmAvailabilitySet": {
             "name": "[concat(variables('webVmPrefix'), '-as')]"
         },
         "webVms": [
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm1')]",
+                "vmSize": "[variables('webVmSizeDefault')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm1-datadisk1')]"
@@ -138,6 +146,7 @@
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm2')]",
+                "vmSize": "[variables('webVmSizeDefault')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm2-datadisk1')]"
@@ -147,6 +156,7 @@
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm3')]",
+                "vmSize": "[variables('webVmSizeDefault')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm3-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm3-datadisk1')]"
@@ -806,7 +816,7 @@
                                     "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('addsVmAvailabilitySet').name)]"
                                 },                
                                 "hardwareProfile": {
-                                    "vmSize": "Standard_F2s_v2"
+                                    "vmSize": "[parameters('addsVms')[copyIndex()].vmSize]"
                                 },
                                 "storageProfile": {
                                     "osDisk": {
@@ -993,7 +1003,7 @@
                                     "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('databaseVmAvailabilitySet').name)]"
                                 },                
                                 "hardwareProfile": {
-                                    "vmSize": "Standard_D4s_v3"
+                                    "vmSize": "[parameters('databaseVms')[copyIndex()].vmSize]"
                                 },
                                 "storageProfile": {
                                     "osDisk": {
@@ -1191,7 +1201,7 @@
                                     "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('webVmAvailabilitySet').name)]"
                                 },                
                                 "hardwareProfile": {
-                                    "vmSize": "Standard_D2s_v3"
+                                    "vmSize": "[parameters('webVms')[copyIndex()].vmSize]"
                                 },
                                 "storageProfile": {
                                     "osDisk": {
