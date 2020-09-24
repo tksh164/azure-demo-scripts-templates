@@ -134,7 +134,7 @@
 
         "databaseIlbPrefix": "database",
         "databaseIlb": {
-            "name": "[concat(variables('databaseIlbPrefix'), '-ilb')]"
+            "name": "[concat(variables('databaseIlbPrefix'), '-lbi')]"
         },
 
         // Web servers
