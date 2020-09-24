@@ -859,7 +859,7 @@
                                 },
                                 "diagnosticsProfile": {
                                     "bootDiagnostics": {
-                                        "enabled": false
+                                        "enabled": true
                                     }
                                 }
                             }
@@ -1029,7 +1029,7 @@
                                 },
                                 "diagnosticsProfile": {
                                     "bootDiagnostics": {
-                                        "enabled": false
+                                        "enabled": true
                                     }
                                 }
                             }
@@ -1277,7 +1277,7 @@
                                 },
                                 "diagnosticsProfile": {
                                     "bootDiagnostics": {
-                                        "enabled": false
+                                        "enabled": true
                                     }
                                 }
                             }
