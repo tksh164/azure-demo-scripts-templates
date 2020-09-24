@@ -124,6 +124,13 @@
             }
         ],
 
+        // Internal load balancer for database servers.
+
+        "databaseIlbPrefix": "database",
+        "databaseIlb": {
+            "name": "[concat(variables('databaseIlbPrefix'), '-ilb')]"
+        },
+
         // Web servers
 
         "webVmPrefix": "web",
@@ -1025,6 +1032,73 @@
                                         "enabled": false
                                     }
                                 }
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Internal load balancer for DB VMs.
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "internalLoadBalancerForDatabaseVMs",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "dbSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                    },
+                    "databaseIlb": {
+                        "value": "[variables('databaseIlb')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "dbSubnetId": {
+                            "type": "string"
+                        },
+                        "databaseIlb": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/loadBalancers",
+                            "apiVersion": "2020-05-01",
+                            "name": "[parameters('databaseIlb').name]",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "dependsOn": [],
+                            "properties": {
+                                "frontendIPConfigurations": [
+                                    {
+                                        "name": "LoadBalancerFrontEnd",
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "subnet": {
+                                                "id": "[parameters('dbSubnetId')]"
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ],
