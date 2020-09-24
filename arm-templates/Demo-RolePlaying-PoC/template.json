@@ -70,9 +70,6 @@
 
         "addsVmPrefix": "adds-dc",
         "addsVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_F2s_v2
-        "addsVmAvailabilitySet": {
-            "name": "[concat(variables('addsVmPrefix'), '-as')]"
-        },
         "addsVms": [
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm1')]",
@@ -82,7 +79,8 @@
                     "[concat(variables('addsVmPrefix'), '-vm1-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm1-nic')]",
-                "privateIpAddress": "10.0.0.10"
+                "privateIpAddress": "10.0.0.10",
+                "zone": "1"
             },
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm2')]",
@@ -92,7 +90,8 @@
                     "[concat(variables('addsVmPrefix'), '-vm2-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm2-nic')]",
-                "privateIpAddress": "10.0.0.11"
+                "privateIpAddress": "10.0.0.11",
+                "zone": "2"
             }
         ],
 
@@ -100,9 +99,6 @@
 
         "databaseVmPrefix": "database",
         "databaseVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_D4s_v3
-        "databaseVmAvailabilitySet": {
-            "name": "[concat(variables('databaseVmPrefix'), '-as')]"
-        },
         "databaseVms": [
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm1')]",
@@ -112,7 +108,8 @@
                     "[concat(variables('databaseVmPrefix'), '-vm1-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm1-nic')]",
-                "privateIpAddress": "10.0.1.10"
+                "privateIpAddress": "10.0.1.10",
+                "zone": "1"
             },
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm2')]",
@@ -122,7 +119,8 @@
                     "[concat(variables('databaseVmPrefix'), '-vm2-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm2-nic')]",
-                "privateIpAddress": "10.0.1.11"
+                "privateIpAddress": "10.0.1.11",
+                "zone": "3"
             }
         ],
 
@@ -130,9 +128,6 @@
 
         "webVmPrefix": "web",
         "webVmSizeDefault": "Standard_B2ms",  // Actual sizing: Standard_D2s_v3
-        "webVmAvailabilitySet": {
-            "name": "[concat(variables('webVmPrefix'), '-as')]"
-        },
         "webVms": [
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm1')]",
@@ -142,7 +137,8 @@
                     "[concat(variables('webVmPrefix'), '-vm1-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('webVmPrefix'), '-vm1-nic')]",
-                "privateIpAddress": "10.0.2.10"
+                "privateIpAddress": "10.0.2.10",
+                "zone": "1"
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm2')]",
@@ -152,7 +148,8 @@
                     "[concat(variables('webVmPrefix'), '-vm2-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('webVmPrefix'), '-vm2-nic')]",
-                "privateIpAddress": "10.0.2.11"
+                "privateIpAddress": "10.0.2.11",
+                "zone": "2"
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm3')]",
@@ -162,7 +159,8 @@
                     "[concat(variables('webVmPrefix'), '-vm3-datadisk1')]"
                 ],
                 "nicName": "[concat(variables('webVmPrefix'), '-vm3-nic')]",
-                "privateIpAddress": "10.0.2.12"
+                "privateIpAddress": "10.0.2.12",
+                "zone": "3"
             }
         ],
 
@@ -703,9 +701,6 @@
                     "addsSubnetId": {
                         "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.adds]"
                     },
-                    "addsVmAvailabilitySet": {
-                        "value": "[variables('addsVmAvailabilitySet')]"
-                    },
                     "addsVms": {
                         "value": "[variables('addsVms')]"
                     },
@@ -726,9 +721,6 @@
                         "addsSubnetId": {
                             "type": "string"
                         },
-                        "addsVmAvailabilitySet": {
-                            "type": "object"
-                        },
                         "addsVms": {
                             "type": "array"
                         },
@@ -740,19 +732,6 @@
                         }
                     },
                     "resources": [
-                        {
-                            "type": "Microsoft.Compute/availabilitySets",
-                            "apiVersion": "2019-03-01",
-                            "name": "[parameters('addsVmAvailabilitySet').name]",
-                            "location": "[parameters('location')]",
-                            "sku": {
-                                "name": "Aligned"
-                            },
-                            "properties": {
-                                "platformUpdateDomainCount": 5,
-                                "platformFaultDomainCount": 2
-                            }
-                        },
                         {
                             "copy": {
                                 "name": "dcVmNetworkInterfacesCopy",
@@ -787,6 +766,9 @@
                             "apiVersion": "2018-06-01",
                             "name": "[parameters('addsVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
+                            "zones": [
+                                "[parameters('addsVms')[copyIndex()].zone]"
+                            ],
                             "sku": {
                                 "name": "Standard_LRS"
                             },
@@ -807,14 +789,13 @@
                             "name": "[parameters('addsVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('addsVmAvailabilitySet').name)]",
                                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('addsVms')[copyIndex()].nicName)]",
                                 "[resourceId('Microsoft.Compute/disks', parameters('addsVms')[copyIndex()].dataDiskName[0])]"
                             ],
+                            "zones": [
+                                "[parameters('addsVms')[copyIndex()].zone]"
+                            ],
                             "properties": {
-                                "availabilitySet": {
-                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('addsVmAvailabilitySet').name)]"
-                                },                
                                 "hardwareProfile": {
                                     "vmSize": "[parameters('addsVms')[copyIndex()].vmSize]"
                                 },
@@ -891,9 +872,6 @@
                     "databaseSubnetId": {
                         "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
                     },
-                    "databaseVmAvailabilitySet": {
-                        "value": "[variables('databaseVmAvailabilitySet')]"
-                    },
                     "databaseVms": {
                         "value": "[variables('databaseVms')]"
                     },
@@ -914,9 +892,6 @@
                         "databaseSubnetId": {
                             "type": "string"
                         },
-                        "databaseVmAvailabilitySet": {
-                            "type": "object"
-                        },
                         "databaseVms": {
                             "type": "array"
                         },
@@ -928,19 +903,6 @@
                         }
                     },
                     "resources": [
-                        {
-                            "type": "Microsoft.Compute/availabilitySets",
-                            "apiVersion": "2019-03-01",
-                            "name": "[parameters('databaseVmAvailabilitySet').name]",
-                            "location": "[parameters('location')]",
-                            "sku": {
-                                "name": "Aligned"
-                            },
-                            "properties": {
-                                "platformUpdateDomainCount": 5,
-                                "platformFaultDomainCount": 2
-                            }
-                        },
                         {
                             "copy": {
                                 "name": "dcVmNetworkInterfacesCopy",
@@ -975,6 +937,9 @@
                             "apiVersion": "2018-06-01",
                             "name": "[parameters('databaseVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
+                            "zones": [
+                                "[parameters('databaseVms')[copyIndex()].zone]"
+                            ],
                             "sku": {
                                 "name": "Premium_LRS"
                             },
@@ -995,13 +960,12 @@
                             "name": "[parameters('databaseVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('databaseVmAvailabilitySet').name)]",
                                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('databaseVms')[copyIndex()].nicName)]"
                             ],
+                            "zones": [
+                                "[parameters('databaseVms')[copyIndex()].zone]"
+                            ],
                             "properties": {
-                                "availabilitySet": {
-                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('databaseVmAvailabilitySet').name)]"
-                                },                
                                 "hardwareProfile": {
                                     "vmSize": "[parameters('databaseVms')[copyIndex()].vmSize]"
                                 },
@@ -1081,9 +1045,6 @@
                     "appGatewayBackendAddressPoolId": {
                         "value": "[reference(concat('Microsoft.Resources/deployments/', 'applicationGateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
                     },
-                    "webVmAvailabilitySet": {
-                        "value": "[variables('webVmAvailabilitySet')]"
-                    },
                     "webVms": {
                         "value": "[variables('webVms')]"
                     },
@@ -1107,9 +1068,6 @@
                         "appGatewayBackendAddressPoolId": {
                             "type": "string"
                         },
-                        "webVmAvailabilitySet": {
-                            "type": "object"
-                        },
                         "webVms": {
                             "type": "array"
                         },
@@ -1121,19 +1079,6 @@
                         }
                     },
                     "resources": [
-                        {
-                            "type": "Microsoft.Compute/availabilitySets",
-                            "apiVersion": "2019-03-01",
-                            "name": "[parameters('webVmAvailabilitySet').name]",
-                            "location": "[parameters('location')]",
-                            "sku": {
-                                "name": "Aligned"
-                            },
-                            "properties": {
-                                "platformUpdateDomainCount": 5,
-                                "platformFaultDomainCount": 2
-                            }
-                        },
                         {
                             "copy": {
                                 "name": "dcVmNetworkInterfacesCopy",
@@ -1173,6 +1118,9 @@
                             "apiVersion": "2018-06-01",
                             "name": "[parameters('webVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
+                            "zones": [
+                                "[parameters('webVms')[copyIndex()].zone]"
+                            ],
                             "sku": {
                                 "name": "Standard_LRS"
                             },
@@ -1193,13 +1141,12 @@
                             "name": "[parameters('webVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Compute/availabilitySets', parameters('webVmAvailabilitySet').name)]",
                                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('webVms')[copyIndex()].nicName)]"
                             ],
+                            "zones": [
+                                "[parameters('webVms')[copyIndex()].zone]"
+                            ],
                             "properties": {
-                                "availabilitySet": {
-                                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('webVmAvailabilitySet').name)]"
-                                },                
                                 "hardwareProfile": {
                                     "vmSize": "[parameters('webVms')[copyIndex()].vmSize]"
                                 },
