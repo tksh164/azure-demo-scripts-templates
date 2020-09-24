@@ -204,7 +204,7 @@
 
         "imageStorePrivateEndpoint": {
             "name": "imagestore-privateendpoint",
-            "connectionName": "imagestore-privateendpoint-connection",
+            "connectionName": "imagestore-privateendpoint-connection"
         },
 
         // Private DNS zone for private endpoint
@@ -1619,7 +1619,7 @@
                         }
                     },
                     "variables": {
-                        "virtualNetworkLinkName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStorePrivateEndpointPrivateDnsZone').virtualNetworkLinkName)]",
+                        "virtualNetworkLinkName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStorePrivateEndpointPrivateDnsZone').virtualNetworkLinkName)]"
                     },
                     "resources": [
                         {
