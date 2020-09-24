@@ -713,7 +713,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "addsDomainControllersVMs",
             "dependsOn": [],
             "properties": {
@@ -812,7 +812,7 @@
                                 "count": "[length(parameters('addsVms'))]"
                             },
                             "type": "Microsoft.Compute/virtualMachines",
-                            "apiVersion": "2019-03-01",
+                            "apiVersion": "2020-06-01",
                             "name": "[parameters('addsVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
@@ -884,7 +884,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "databaseVMs",
             "dependsOn": [],
             "properties": {
@@ -936,7 +936,7 @@
                                 "count": "[length(parameters('databaseVms'))]"
                             },
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2019-07-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('databaseVms')[copyIndex()].nicName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [],
@@ -961,7 +961,7 @@
                                 "count": "[length(parameters('databaseVms'))]"
                             },
                             "type": "Microsoft.Compute/disks",
-                            "apiVersion": "2018-06-01",
+                            "apiVersion": "2019-07-01",
                             "name": "[parameters('databaseVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
                             "zones": [
@@ -983,7 +983,7 @@
                                 "count": "[length(parameters('databaseVms'))]"
                             },
                             "type": "Microsoft.Compute/virtualMachines",
-                            "apiVersion": "2019-03-01",
+                            "apiVersion": "2020-06-01",
                             "name": "[parameters('databaseVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
@@ -1054,7 +1054,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "internalLoadBalancerForDatabaseVMs",
             "dependsOn": [],
             "properties": {
@@ -1121,7 +1121,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "webVMs",
             "dependsOn": [],
             "properties": {
@@ -1179,7 +1179,7 @@
                                 "count": "[length(parameters('webVms'))]"
                             },
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2019-07-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('webVms')[copyIndex()].nicName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [],
@@ -1209,7 +1209,7 @@
                                 "count": "[length(parameters('webVms'))]"
                             },
                             "type": "Microsoft.Compute/disks",
-                            "apiVersion": "2018-06-01",
+                            "apiVersion": "2019-07-01",
                             "name": "[parameters('webVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
                             "zones": [
@@ -1231,7 +1231,7 @@
                                 "count": "[length(parameters('webVms'))]"
                             },
                             "type": "Microsoft.Compute/virtualMachines",
-                            "apiVersion": "2019-03-01",
+                            "apiVersion": "2020-06-01",
                             "name": "[parameters('webVms')[copyIndex()].vmName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
@@ -1302,7 +1302,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "applicationGateway",
             "dependsOn": [],
             "properties": {
@@ -1346,7 +1346,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/publicIPAddresses",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('appGateway').ipAddressName]",
                             "location": "[parameters('location')]",
                             "sku": {
@@ -1359,7 +1359,7 @@
                         },
                         {
                             "type": "Microsoft.Network/applicationGateways",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('appGateway').name]",
                             "location": "[parameters('location')]",
                             "zones": "[parameters('appGateway').zones]",
@@ -1480,7 +1480,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "imageStore",
             "dependsOn": [],
             "properties": {
@@ -1520,13 +1520,13 @@
                         }
                     },
                     "variables": {
-                        "privateEndpointApiVersion": "2019-09-01",
+                        "privateEndpointApiVersion": "2020-05-01",
                         "privateEndpointId": "[resourceId('Microsoft.Network/privateEndpoints', parameters('imageStorePrivateEndpoint').name)]"
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Storage/storageAccounts",
-                            "apiVersion": "2019-04-01",
+                            "apiVersion": "2019-06-01",
                             "name": "[parameters('imageStoreStorageAccount').name]",
                             "location": "[parameters('location')]",
                             "kind": "StorageV2",
@@ -1585,7 +1585,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "privateDnsZone",
             "dependsOn": [],
             "properties": {
@@ -1659,7 +1659,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "privateEndpointARecord",
             "dependsOn": [],
             "properties": {
@@ -1721,7 +1721,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "firewall",
             "dependsOn": [],
             "properties": {
@@ -1757,7 +1757,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/publicIpAddresses",
-                            "apiVersion": "2019-02-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('firewall').ipAddressName]",
                             "location": "[parameters('location')]",
                             "sku": {
@@ -1770,7 +1770,7 @@
                         },
                         {
                             "type": "Microsoft.Network/azureFirewalls",
-                            "apiVersion": "2019-06-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('firewall').name]",
                             "location": "[parameters('location')]",
                             "zones": "[parameters('firewall').zones]",
@@ -1844,7 +1844,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "firewallRouteTable",
             "dependsOn": [],
             "properties": {
@@ -1875,7 +1875,7 @@
                         {
                             "name": "[parameters('firewall').routeTableName]",
                             "type": "Microsoft.Network/routeTables",
-                            "apiVersion": "2019-02-01",
+                            "apiVersion": "2020-05-01",
                             "location": "[parameters('location')]",
                             "dependsOn": [],
                             "properties": {
@@ -1898,7 +1898,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "firewallRoute",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')]"
@@ -1936,7 +1936,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/routeTables/routes",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[concat(parameters('firewall').routeTableName, '/', parameters('firewall').routeName)]",
                             "location": "[parameters('location')]",
                             "dependsOn": [],
@@ -1956,7 +1956,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "bastion",
             "dependsOn": [],
             "properties": {
@@ -1992,7 +1992,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/publicIPAddresses",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('bastion').ipAddressName]",
                             "location": "[parameters('location')]",
                             "sku": {
@@ -2004,7 +2004,7 @@
                         },
                         {
                             "type": "Microsoft.Network/bastionHosts",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('bastion').name]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
@@ -2037,7 +2037,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "logAnalyticsWorkspace",
             "dependsOn": [],
             "properties": {
@@ -2067,7 +2067,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.OperationalInsights/workspaces",
-                            "apiVersion": "2015-11-01-preview",
+                            "apiVersion": "2020-03-01-preview",
                             "name": "[parameters('logAnalyticsWorkspace').name]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -2089,7 +2089,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "recoveryServicesVault",
             "dependsOn": [],
             "properties": {
@@ -2119,7 +2119,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.RecoveryServices/vaults",
-                            "apiVersion": "2016-06-01",
+                            "apiVersion": "2018-01-10",
                             "name": "[parameters('rsVault').name]",
                             "location": "[parameters('location')]",
                             "sku": {
