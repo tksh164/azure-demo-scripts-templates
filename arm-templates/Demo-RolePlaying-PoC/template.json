@@ -202,6 +202,11 @@
         "firewallPrefix": "firewall",
         "firewall": {
             "name": "[concat(variables('firewallPrefix'))]",
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ],
             "ipAddressName": "[concat(variables('firewallPrefix'), '-ip')]",
             "routeTableName": "[concat(variables('firewallPrefix'), '-route')]",
             "routeName": "firewall"
@@ -1684,7 +1689,7 @@
                             "apiVersion": "2019-06-01",
                             "name": "[parameters('firewall').name]",
                             "location": "[parameters('location')]",
-                            "zones": [],
+                            "zones": "[parameters('firewall').zones]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/publicIpAddresses', parameters('firewall').ipAddressName)]"
                             ],
