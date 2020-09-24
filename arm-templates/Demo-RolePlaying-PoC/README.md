@@ -8,22 +8,23 @@ PS > .\deploy.ps1
 
 ## Template overview
 
+![Architecture](./architecture.drawio.svg)
+
 ### Deployments
 
 - Resource group: `demo-roleplaying-poc`
     - VNet: `poc-vnet`
         - Subnet: `adds-subnet`
             - Network security group: `adds-subnet-nsg`
-            - Availability set: `adds-dc-as`
-                - Virtual Machine: `adds-dc-vm1`
-                    - OS disk: `adds-dc-vm1-osdisk`
-                    - Data disk: `adds-dc-vm1-datadisk1`
-                - Virtual Machine: `adds-dc-vm2`
-                    - OS disk: `adds-dc-vm2-osdisk`
-                    - Data disk: `adds-dc-vm2-datadisk1`
+            - Virtual Machine: `adds-dc-vm1`
+                - OS disk: `adds-dc-vm1-osdisk`
+                - Data disk: `adds-dc-vm1-datadisk1`
+            - Virtual Machine: `adds-dc-vm2`
+                - OS disk: `adds-dc-vm2-osdisk`
+                - Data disk: `adds-dc-vm2-datadisk1`
         - Subnet: `database-subnet`
             - Network security group: `database-subnet-nsg`
-            - Availability set: `database-as`
+            - Internal load balancer: `database-lbi`
                 - Virtual Machine: `database-vm1`
                     - OS disk: `database-vm1-osdisk`
                     - Data disk: `database-vm1-datadisk1`
@@ -32,20 +33,19 @@ PS > .\deploy.ps1
                     - Data disk: `database-vm2-datadisk1`
         - Subnet: `web-subnet`
             - Network security group: `web-subnet-nsg`
-            - Availability set: `web-as`
-                - Virtual Machine: `web-vm1`
-                    - OS disk: `web-vm1-osdisk`
-                    - Data disk: `web-vm1-datadisk1`
-                - Virtual Machine: `web-vm2`
-                    - OS disk: `web-vm1-osdisk`
-                    - Data disk: `web-vm1-datadisk1`
-                - Virtual Machine: `web-vm3`
-                    - OS disk: `web-vm1-osdisk`
-                    - Data disk: `web-vm1-datadisk1`
+            - Virtual Machine: `web-vm1`
+                - OS disk: `web-vm1-osdisk`
+                - Data disk: `web-vm1-datadisk1`
+            - Virtual Machine: `web-vm2`
+                - OS disk: `web-vm1-osdisk`
+                - Data disk: `web-vm1-datadisk1`
+            - Virtual Machine: `web-vm3`
+                - OS disk: `web-vm1-osdisk`
+                - Data disk: `web-vm1-datadisk1`
         - Subnet: `appgateway-subnet`
             - Network security group: `appgateway-subnet-nsg`
-            - Application gateway: `waf-ag`
-                - Public IP address: `waf-ag-ip`
+            - Application gateway: `web-waf-agw`
+                - Public IP address: `web-waf-agw-ip`
         - Subnet: `AzureFirewallSubnet`
             - Firewall: `firewall`
                 - Public IP address: `firewall-ip`
