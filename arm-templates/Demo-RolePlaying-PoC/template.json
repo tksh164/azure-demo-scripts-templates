@@ -183,10 +183,10 @@
 
         // Application gateway
 
-        "appGwPrefix": "waf",
+        "appGwPrefix": "web",
         "appGateway": {
-            "name": "[concat(variables('appGwPrefix'), '-ag')]",
-            "ipAddressName": "[concat(variables('appGwPrefix'), '-ag-ip')]",
+            "name": "[concat(variables('appGwPrefix'), '-waf-agw')]",
+            "ipAddressName": "[concat(variables('appGwPrefix'), '-waf-agw-ip')]",
             "zones": [
                 "1",
                 "2",
@@ -241,7 +241,7 @@
 
         "logAnalyticsWorkspacePrefix": "monitor",
         "logAnalyticsWorkspace": {
-            "name": "[concat(variables('logAnalyticsWorkspacePrefix'), variables('uniqueSuffix'), '-law')]"
+            "name": "[concat(variables('logAnalyticsWorkspacePrefix'), variables('uniqueSuffix'), '-log')]"
         },
 
         // Recovery Services vault
