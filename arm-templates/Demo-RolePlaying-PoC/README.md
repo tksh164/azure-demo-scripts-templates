@@ -8,7 +8,7 @@ PS > .\deploy.ps1
 
 ## Template overview
 
-![Architecture](./architecture.drawio.svg)
+![Template overview](./template.drawio.svg)
 
 ### Deployments
 
