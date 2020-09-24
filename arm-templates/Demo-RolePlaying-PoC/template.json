@@ -1262,7 +1262,7 @@
                                         {
                                             "createOption": "Attach",
                                             "lun": 0,
-                                            "caching": "ReadOnly",
+                                            "caching": "ReadWrite",
                                             "managedDisk": {
                                                 "id": "[resourceId('Microsoft.Compute/disks', parameters('webVms')[copyIndex()].dataDiskName[0])]"
                                             }
