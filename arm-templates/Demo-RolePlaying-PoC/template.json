@@ -169,7 +169,12 @@
         "appGwPrefix": "waf",
         "appGateway": {
             "name": "[concat(variables('appGwPrefix'), '-ag')]",
-            "ipAddressName": "[concat(variables('appGwPrefix'), '-ag-ip')]"
+            "ipAddressName": "[concat(variables('appGwPrefix'), '-ag-ip')]",
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ]
         },
 
         // Storage account
@@ -1268,7 +1273,7 @@
                             "apiVersion": "2019-09-01",
                             "name": "[parameters('appGateway').name]",
                             "location": "[parameters('location')]",
-                            "zones": [],
+                            "zones": "[parameters('appGateway').zones]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('appGateway').ipAddressName)]"
                             ],
