@@ -1531,7 +1531,7 @@
                             "location": "[parameters('location')]",
                             "kind": "StorageV2",
                             "sku": {
-                                "name": "Standard_RAGRS"
+                                "name": "Standard_RAGZRS"
                             },
                             "properties": {
                                 "accessTier": "Hot",
