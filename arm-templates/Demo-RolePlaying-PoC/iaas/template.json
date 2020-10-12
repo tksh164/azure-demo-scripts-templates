@@ -6,13 +6,13 @@
             "type": "string",
             "defaultValue": "vmadmin",
             "metadata": {
-                "description": "The admin user name for both side VMs."
+                "description": "The admin user name for virtual machines."
             }
         },
         "adminPassword": {
             "type": "secureString",
             "metadata": {
-                "description": "The admin user password for both side VMs."
+                "description": "The admin user password for virtual machines."
             }
         }
     },
@@ -257,7 +257,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2020-06-01",
             "name": "networkSecurityGroup",
             "dependsOn": [],
             "properties": {
@@ -293,7 +293,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('nsgNames').adds]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -351,7 +351,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('nsgNames').database]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -389,7 +389,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('nsgNames').web]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -430,7 +430,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('nsgNames').appGateway]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -471,7 +471,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('nsgNames').bastion]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -572,7 +572,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2020-06-01",
             "name": "virtualNetwork",
             "dependsOn": [],
             "properties": {
@@ -614,7 +614,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/virtualNetworks",
-                            "apiVersion": "2019-09-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('vnet').name]",
                             "location": "[parameters('location')]",
                             "dependsOn":[],
@@ -713,7 +713,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "addsDomainControllersVMs",
             "dependsOn": [],
             "properties": {
@@ -765,7 +765,7 @@
                                 "count": "[length(parameters('addsVms'))]"
                             },
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2019-07-01",
+                            "apiVersion": "2020-05-01",
                             "name": "[parameters('addsVms')[copyIndex()].nicName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [],
@@ -790,7 +790,7 @@
                                 "count": "[length(parameters('addsVms'))]"
                             },
                             "type": "Microsoft.Compute/disks",
-                            "apiVersion": "2018-06-01",
+                            "apiVersion": "2019-07-01",
                             "name": "[parameters('addsVms')[copyIndex()].dataDiskName[0]]",
                             "location": "[parameters('location')]",
                             "zones": [
@@ -884,7 +884,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "databaseVMs",
             "dependsOn": [],
             "properties": {
@@ -1054,7 +1054,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "internalLoadBalancerForDatabaseVMs",
             "dependsOn": [],
             "properties": {
@@ -1121,7 +1121,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "webVMs",
             "dependsOn": [],
             "properties": {
@@ -1302,7 +1302,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "applicationGateway",
             "dependsOn": [],
             "properties": {
@@ -1480,7 +1480,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "imageStore",
             "dependsOn": [],
             "properties": {
@@ -1585,7 +1585,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "privateDnsZone",
             "dependsOn": [],
             "properties": {
@@ -1659,7 +1659,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "privateEndpointARecord",
             "dependsOn": [],
             "properties": {
@@ -1721,7 +1721,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "firewall",
             "dependsOn": [],
             "properties": {
@@ -1844,7 +1844,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "firewallRouteTable",
             "dependsOn": [],
             "properties": {
@@ -1898,7 +1898,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "firewallRoute",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')]"
@@ -1956,7 +1956,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "bastion",
             "dependsOn": [],
             "properties": {
@@ -2037,7 +2037,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "logAnalyticsWorkspace",
             "dependsOn": [],
             "properties": {
@@ -2089,7 +2089,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
+            "apiVersion": "2020-06-01",
             "name": "recoveryServicesVault",
             "dependsOn": [],
             "properties": {
