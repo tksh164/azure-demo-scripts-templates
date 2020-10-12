@@ -6,13 +6,13 @@
             "type": "string",
             "defaultValue": "vmadmin",
             "metadata": {
-                "description": "The admin user name for both side VMs."
+                "description": "The admin user name for virtual machines."
             }
         },
         "adminPassword": {
             "type": "secureString",
             "metadata": {
-                "description": "The admin user password for both side VMs."
+                "description": "The admin user password for virtual machines."
             }
         }
     },
