@@ -2,17 +2,83 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "webVirtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_D2s_v3",
+                "Standard_B2ms"
+            ],
+            "metadata": {
+                "description": "The virtual machine size for web servers."
+            }
+        },
+        "webVirtualMachineDiskSku": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS"
+            ],
+            "metadata": {
+                "description": "The virtual machine's disk SKU for web servers."
+            }
+        },
+        "databaseVirtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_D4s_v3",
+                "Standard_B2ms"
+            ],
+            "metadata": {
+                "description": "The virtual machine size for database servers."
+            }
+        },
+        "databaseVirtualMachineDiskSku": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS"
+            ],
+            "metadata": {
+                "description": "The virtual machine's disk SKU for database servers."
+            }
+        },
+        "addsVirtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_F2s_v2",
+                "Standard_B2ms"
+            ],
+            "metadata": {
+                "description": "The virtual machine size for AD DS domain controller servers."
+            }
+        },
+        "addsVirtualMachineDiskSku": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS"
+            ],
+            "metadata": {
+                "description": "The virtual machine's disk SKU for AD DS domain controller servers."
+            }
+        },
         "adminUserName": {
             "type": "string",
             "defaultValue": "vmadmin",
             "metadata": {
-                "description": "The admin user name for virtual machines."
+                "description": "The admin user name for all virtual machines."
             }
         },
         "adminPassword": {
             "type": "secureString",
             "metadata": {
-                "description": "The admin user password for virtual machines."
+                "description": "The admin user password for all virtual machines."
             }
         }
     },
@@ -69,29 +135,27 @@
         // AD DS Domain controllers
 
         "addsVmPrefix": "adds-dc",
-        "addsVmSizeDefault": "Standard_B2ms",       // Real size: Standard_F2s_v2
-        "addsVmDiskSkuDefault": "StandardSSD_LRS",  // Real SKU: Premium_LRS
         "addsVms": [
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm1')]",
-                "vmSize": "[variables('addsVmSizeDefault')]",
+                "vmSize": "[parameters('addsVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('addsVmPrefix'), '-vm1-datadisk1')]"
                 ],
-                "diskSku": "[variables('addsVmDiskSkuDefault')]",
+                "diskSku": "[parameters('addsVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm1-nic')]",
                 "privateIpAddress": "10.0.0.10",
                 "zone": "1"
             },
             {
                 "vmName": "[concat(variables('addsVmPrefix'), '-vm2')]",
-                "vmSize": "[variables('addsVmSizeDefault')]",
+                "vmSize": "[parameters('addsVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('addsVmPrefix'), '-vm2-datadisk1')]"
                 ],
-                "diskSku": "[variables('addsVmDiskSkuDefault')]",
+                "diskSku": "[parameters('addsVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm2-nic')]",
                 "privateIpAddress": "10.0.0.11",
                 "zone": "2"
@@ -101,29 +165,27 @@
         // Database servers
 
         "databaseVmPrefix": "database",
-        "databaseVmSizeDefault": "Standard_B2ms",       // Real size: Standard_D4s_v3
-        "databaseVmDiskSkuDefault": "StandardSSD_LRS",  // Real SKU: Premium_LRS
         "databaseVms": [
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm1')]",
-                "vmSize": "[variables('databaseVmSizeDefault')]",
+                "vmSize": "[parameters('databaseVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('databaseVmPrefix'), '-vm1-datadisk1')]"
                 ],
-                "diskSku": "[variables('databaseVmDiskSkuDefault')]",
+                "diskSku": "[parameters('databaseVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm1-nic')]",
                 "privateIpAddress": "10.0.1.10",
                 "zone": "1"
             },
             {
                 "vmName": "[concat(variables('databaseVmPrefix'), '-vm2')]",
-                "vmSize": "[variables('databaseVmSizeDefault')]",
+                "vmSize": "[parameters('databaseVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('databaseVmPrefix'), '-vm2-datadisk1')]"
                 ],
-                "diskSku": "[variables('databaseVmDiskSkuDefault')]",
+                "diskSku": "[parameters('databaseVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm2-nic')]",
                 "privateIpAddress": "10.0.1.11",
                 "zone": "3"
@@ -140,41 +202,39 @@
         // Web servers
 
         "webVmPrefix": "web",
-        "webVmSizeDefault": "Standard_B2ms",       // Real size: Standard_D2s_v3
-        "webVmDiskSkuDefault": "StandardSSD_LRS",  // Real SKU: Premium_LRS
         "webVms": [
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm1')]",
-                "vmSize": "[variables('webVmSizeDefault')]",
+                "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm1-datadisk1')]"
                 ],
-                "diskSku": "[variables('webVmDiskSkuDefault')]",
+                "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm1-nic')]",
                 "privateIpAddress": "10.0.2.10",
                 "zone": "1"
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm2')]",
-                "vmSize": "[variables('webVmSizeDefault')]",
+                "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm2-datadisk1')]"
                 ],
-                "diskSku": "[variables('webVmDiskSkuDefault')]",
+                "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm2-nic')]",
                 "privateIpAddress": "10.0.2.11",
                 "zone": "2"
             },
             {
                 "vmName": "[concat(variables('webVmPrefix'), '-vm3')]",
-                "vmSize": "[variables('webVmSizeDefault')]",
+                "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm3-osdisk')]",
                 "dataDiskName": [
                     "[concat(variables('webVmPrefix'), '-vm3-datadisk1')]"
                 ],
-                "diskSku": "[variables('webVmDiskSkuDefault')]",
+                "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm3-nic')]",
                 "privateIpAddress": "10.0.2.12",
                 "zone": "3"
