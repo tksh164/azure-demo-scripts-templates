@@ -1,5 +1,5 @@
 param (
-    [string] $ResourceGroupName = 'demo-roleplaying-poc',
+    [string] $ResourceGroupName = 'roleplaying-poc-iaas',
     [string] $ResourceGroupLocation = 'Japan East',
     [string] $TemplateFile = 'template.json',
     [string] $TemplateParametersFile = 'parameters.json',
