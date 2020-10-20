@@ -30,6 +30,7 @@ PS > .\deploy.ps1
                 - Data disk: `adds-dc-vm2-datadisk1`
         - Subnet: `database-subnet`
             - Network security group: `database-subnet-nsg`
+            - Private endpoint: `wsfccloudwitness-privateendpoint`
             - Internal load balancer: `database-lbi`
                 - Virtual Machine: `database-vm1`
                     - OS disk: `database-vm1-osdisk`
@@ -39,6 +40,7 @@ PS > .\deploy.ps1
                     - Data disk: `database-vm2-datadisk1`
         - Subnet: `web-subnet`
             - Network security group: `web-subnet-nsg`
+            - Private endpoint: `imagestore-privateendpoint`
             - Virtual Machine: `web-vm1`
                 - OS disk: `web-vm1-osdisk`
                 - Data disk: `web-vm1-datadisk1`
@@ -61,8 +63,9 @@ PS > .\deploy.ps1
                 - Public IP address: `bastion-ip`
     - Route table: `firewall-route`
         - Associated subnets: `adds-subnet`, `database-subnet`
+    - Storage account: `wsfccloudwitness####`
+    - Private DNS zone: `privatelink.blob.core.windows.net`
     - Storage account: `imagestore####`
-    - Private endpoint: `imagestore-privateendpoint`
     - Private DNS zone: `privatelink.file.core.windows.net`
     - Log Analytics workspace: `monitor####-law`
     - Recovery Services vault: `backup####-rsv`

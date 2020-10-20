@@ -199,6 +199,26 @@
             "name": "[concat(variables('databaseIlbPrefix'), '-lbi')]"
         },
 
+        // Storage account for WSFC cloud witness
+
+        "wsfcCloudWitnessStorageAccount": {
+            "name": "[concat('wsfccloudwitness', variables('uniqueSuffix'))]"
+        },
+
+        // Private endpoint for WSFC cloud witness
+
+        "wsfcCloudWitnessPrivateEndpoint": {
+            "name": "wsfccloudwitness-privateendpoint",
+            "connectionName": "wsfccloudwitness-privateendpoint-connection"
+        },
+
+        // Private DNS zone for private endpoint for WSFC cloud witness
+
+        "wsfcCloudWitnessPrivateEndpointPrivateDnsZone": {
+            "name": "privatelink.blob.core.windows.net",
+            "virtualNetworkLinkName": "wsfccloudwitness-privateendpoint-link"
+        },
+
         // Web servers
 
         "webVmPrefix": "web",
@@ -254,24 +274,24 @@
             ]
         },
 
-        // Storage account
+        // Storage account for image/video store
 
         "imageStoreStorageAccount": {
             "name": "[concat('imagestore', variables('uniqueSuffix'))]"
         },
 
-        // Private endpoint
+        // Private endpoint for image/video store
 
         "imageStorePrivateEndpoint": {
             "name": "imagestore-privateendpoint",
             "connectionName": "imagestore-privateendpoint-connection"
         },
 
-        // Private DNS zone for private endpoint
+        // Private DNS zone for private endpoint for image/video store
 
         "imageStorePrivateEndpointPrivateDnsZone": {
             "name": "privatelink.file.core.windows.net",
-            "virtualNetworkLinkName": "privateendpoint-link"
+            "virtualNetworkLinkName": "imagestore-privateendpoint-link"
         },
 
         // Firewall
@@ -704,7 +724,8 @@
                                             },
                                             "routeTable": {
                                                 "id": "[parameters('firewallRouteTableId')]"
-                                            }
+                                            },
+                                            "privateEndpointNetworkPolicies": "Disabled"
                                         }
                                     },
                                     {
@@ -1177,6 +1198,247 @@
             }
         },
 
+        // Storage account for WSFC cloud witness for DB servers
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "wsfcCloudWitness",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "databaseSubnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                    },
+                    "wsfcCloudWitnessStorageAccount": {
+                        "value": "[variables('wsfcCloudWitnessStorageAccount')]"
+                    },
+                    "wsfcCloudWitnessPrivateEndpoint": {
+                        "value": "[variables('wsfcCloudWitnessPrivateEndpoint')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "databaseSubnetId": {
+                            "type": "string"
+                        },
+                        "wsfcCloudWitnessStorageAccount": {
+                            "type": "object"
+                        },
+                        "wsfcCloudWitnessPrivateEndpoint": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "privateEndpointApiVersion": "2020-05-01",
+                        "privateEndpointId": "[resourceId('Microsoft.Network/privateEndpoints', parameters('wsfcCloudWitnessPrivateEndpoint').name)]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "apiVersion": "2019-06-01",
+                            "name": "[parameters('wsfcCloudWitnessStorageAccount').name]",
+                            "location": "[parameters('location')]",
+                            "kind": "StorageV2",
+                            "sku": {
+                                "name": "Standard_LRS"
+                            },
+                            "properties": {
+                                "accessTier": "Hot",
+                                "supportsHttpsTrafficOnly": true,
+                                "networkAcls": {
+                                    "defaultAction": "Deny",
+                                    "virtualNetworkRules": [],
+                                    "ipRules": [],
+                                    "bypass": "AzureServices"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "[variables('privateEndpointApiVersion')]",
+                            "name": "[parameters('wsfcCloudWitnessPrivateEndpoint').name]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('wsfcCloudWitnessStorageAccount').name)]"
+                            ],
+                            "properties": {
+                                "privateLinkServiceConnections": [
+                                    {
+                                        "name": "[parameters('wsfcCloudWitnessPrivateEndpoint').connectionName]",
+                                        "properties": {
+                                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('wsfcCloudWitnessStorageAccount').name)]",
+                                            "groupIds": [
+                                                "blob"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "manualPrivateLinkServiceConnections": [],
+                                "subnet": {
+                                    "id": "[parameters('databaseSubnetId')]"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateEndpointNetworkInterfaceId": {
+                            "type": "string",
+                            "value": "[reference(variables('privateEndpointId'), variables('privateEndpointApiVersion')).networkInterfaces[0].id]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Private DNS zone for the images store's private endpoint
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "wsfcCloudWitnessPrivateDnsZone",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "vnetId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.vnetId.value]"
+                    },
+                    "privateEndpointNetworkInterfaceId": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'wsfcCloudWitness')).outputs.privateEndpointNetworkInterfaceId.value]"
+                    },
+                    "privateEndpointPrivateDnsZone": {
+                        "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "vnetId": {
+                            "type": "string"
+                        },
+                        "privateEndpointNetworkInterfaceId": {
+                            "type": "string"
+                        },
+                        "privateEndpointPrivateDnsZone": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "virtualNetworkLinkName": "[concat(parameters('privateEndpointPrivateDnsZone').name, '/', parameters('privateEndpointPrivateDnsZone').virtualNetworkLinkName)]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones",
+                            "apiVersion": "2018-09-01",
+                            "name": "[parameters('privateEndpointPrivateDnsZone').name]",
+                            "location": "global",
+                            "properties": {}
+                        },
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                            "apiVersion": "2018-09-01",
+                            "name": "[variables('virtualNetworkLinkName')]",
+                            "location": "global",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateEndpointPrivateDnsZone').name)]"
+                            ],
+                            "properties": {
+                                "registrationEnabled": false,
+                                "virtualNetwork": {
+                                    "id": "[parameters('vnetId')]"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateEndpointPrivateIpAddress": {
+                            "type": "string",
+                            "value": "[reference(parameters('privateEndpointNetworkInterfaceId'), '2019-09-01').ipConfigurations[0].properties.privateIPAddress]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // A record for the WSFC cloud witness's private endpoint
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "wsfcCloudWitnessPrivateEndpointARecord",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "privateEndpointPrivateIpAddress": {
+                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'wsfcCloudWitnessPrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                    },
+                    "privateEndpointPrivateDnsZone": {
+                        "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('wsfcCloudWitnessStorageAccount').name]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "privateEndpointPrivateIpAddress": {
+                            "type": "string"
+                        },
+
+                        "privateEndpointPrivateDnsZone": {
+                            "type": "object"
+                        },
+                        "storageAccountName": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "privateEndpointARecordName": "[concat(parameters('privateEndpointPrivateDnsZone').name, '/', parameters('storageAccountName'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/A",
+                            "apiVersion": "2018-09-01",
+                            "name": "[variables('privateEndpointARecordName')]",
+                            "location": "global",
+                            "properties": {
+                                "ttl": 3600,
+                                "aRecords": [
+                                    {
+                                        "ipv4Address": "[parameters('privateEndpointPrivateIpAddress')]"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
         // Web server virtual machines
 
         {
@@ -1536,7 +1798,7 @@
             }
         },
 
-        // Image store
+        // Storage account for image/video store
 
         {
             "type": "Microsoft.Resources/deployments",
@@ -1646,7 +1908,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "privateDnsZone",
+            "name": "imageStorePrivateDnsZone",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1660,7 +1922,7 @@
                     "privateEndpointNetworkInterfaceId": {
                         "value": "[reference(concat('Microsoft.Resources/deployments/', 'imageStore')).outputs.privateEndpointNetworkInterfaceId.value]"
                     },
-                    "imageStorePrivateEndpointPrivateDnsZone": {
+                    "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
                     }
                 },
@@ -1674,18 +1936,18 @@
                         "privateEndpointNetworkInterfaceId": {
                             "type": "string"
                         },
-                        "imageStorePrivateEndpointPrivateDnsZone": {
+                        "privateEndpointPrivateDnsZone": {
                             "type": "object"
                         }
                     },
                     "variables": {
-                        "virtualNetworkLinkName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStorePrivateEndpointPrivateDnsZone').virtualNetworkLinkName)]"
+                        "virtualNetworkLinkName": "[concat(parameters('privateEndpointPrivateDnsZone').name, '/', parameters('privateEndpointPrivateDnsZone').virtualNetworkLinkName)]"
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Network/privateDnsZones",
                             "apiVersion": "2018-09-01",
-                            "name": "[parameters('imageStorePrivateEndpointPrivateDnsZone').name]",
+                            "name": "[parameters('privateEndpointPrivateDnsZone').name]",
                             "location": "global",
                             "properties": {}
                         },
@@ -1695,7 +1957,7 @@
                             "name": "[variables('virtualNetworkLinkName')]",
                             "location": "global",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('imageStorePrivateEndpointPrivateDnsZone').name)]"
+                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateEndpointPrivateDnsZone').name)]"
                             ],
                             "properties": {
                                 "registrationEnabled": false,
@@ -1720,7 +1982,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "privateEndpointARecord",
+            "name": "imageStorePrivateEndpointARecord",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1729,12 +1991,12 @@
                 },
                 "parameters": {
                     "privateEndpointPrivateIpAddress": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'privateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'imageStorePrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
                     },
-                    "imageStorePrivateEndpointPrivateDnsZone": {
+                    "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
                     },
-                    "imageStoreStorageAccountName": {
+                    "storageAccountName": {
                         "value": "[variables('imageStoreStorageAccount').name]"
                     }
                 },
@@ -1746,21 +2008,21 @@
                             "type": "string"
                         },
 
-                        "imageStorePrivateEndpointPrivateDnsZone": {
+                        "privateEndpointPrivateDnsZone": {
                             "type": "object"
                         },
-                        "imageStoreStorageAccountName": {
+                        "storageAccountName": {
                             "type": "string"
                         }
                     },
                     "variables": {
-                        "imageStorePrivateEndpointARecordName": "[concat(parameters('imageStorePrivateEndpointPrivateDnsZone').name, '/', parameters('imageStoreStorageAccountName'))]"
+                        "privateEndpointARecordName": "[concat(parameters('privateEndpointPrivateDnsZone').name, '/', parameters('storageAccountName'))]"
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Network/privateDnsZones/A",
                             "apiVersion": "2018-09-01",
-                            "name": "[variables('imageStorePrivateEndpointARecordName')]",
+                            "name": "[variables('privateEndpointARecordName')]",
                             "location": "global",
                             "properties": {
                                 "ttl": 3600,
