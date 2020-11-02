@@ -26,7 +26,7 @@ n/a
 
 ### Deployments
 
-- Resource group: `lab-privatelink-dynamic`
+- Resource group: `lab-privatelink-static`
     - VNet: `provider-vnet`
         - Subnet: `private-link-service-subnet`
             - Network interface for private link service NAT: `provider-plnk.nic.<GUID>`
