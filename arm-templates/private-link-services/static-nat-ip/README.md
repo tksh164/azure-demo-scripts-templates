@@ -29,10 +29,10 @@ n/a
 - Resource group: `lab-privatelink-static`
     - VNet: `provider-vnet`
         - Subnet: `private-link-service-subnet`
-            - Network interface for private link service NAT: `provider-plnk.nic.<GUID>`
+            - Network interface for private link service NAT: `provider-pls.nic.<GUID>`
         - Subnet: `backend-subnet`
             - Internal load balancer: `backend-lbi`
-    - Private link service: `provider-plnk`
+    - Private link service: `provider-pls`
 
 ### Non-deployments
 

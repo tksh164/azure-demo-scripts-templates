@@ -242,8 +242,8 @@
                         }
                     },
                     "variables": {
-                        "privateLinkServiceName": "provider-plnk",
-                        "ipConfigName": "provider-plnk-ip-config"
+                        "privateLinkServiceName": "provider-pls",
+                        "ipConfigName": "provider-pls-ip-config"
                     },
                     "resources": [
                         {
