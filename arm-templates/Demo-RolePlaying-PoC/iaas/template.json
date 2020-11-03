@@ -141,7 +141,7 @@
                 "vmSize": "[parameters('addsVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('addsVmPrefix'), '-vm1-datadisk1')]"
+                    "[concat(variables('addsVmPrefix'), '-vm1-disk1')]"
                 ],
                 "diskSku": "[parameters('addsVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm1-nic')]",
@@ -153,7 +153,7 @@
                 "vmSize": "[parameters('addsVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('addsVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('addsVmPrefix'), '-vm2-datadisk1')]"
+                    "[concat(variables('addsVmPrefix'), '-vm2-disk1')]"
                 ],
                 "diskSku": "[parameters('addsVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('addsVmPrefix'), '-vm2-nic')]",
@@ -171,7 +171,7 @@
                 "vmSize": "[parameters('databaseVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('databaseVmPrefix'), '-vm1-datadisk1')]"
+                    "[concat(variables('databaseVmPrefix'), '-vm1-disk1')]"
                 ],
                 "diskSku": "[parameters('databaseVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm1-nic')]",
@@ -183,7 +183,7 @@
                 "vmSize": "[parameters('databaseVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('databaseVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('databaseVmPrefix'), '-vm2-datadisk1')]"
+                    "[concat(variables('databaseVmPrefix'), '-vm2-disk1')]"
                 ],
                 "diskSku": "[parameters('databaseVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('databaseVmPrefix'), '-vm2-nic')]",
@@ -208,15 +208,15 @@
         // Private endpoint for WSFC cloud witness
 
         "wsfcCloudWitnessPrivateEndpoint": {
-            "name": "wsfccloudwitness-privateendpoint",
-            "connectionName": "wsfccloudwitness-privateendpoint-connection"
+            "name": "wsfccloudwitness-pe",
+            "connectionName": "wsfccloudwitness-pe-connection"
         },
 
         // Private DNS zone for private endpoint for WSFC cloud witness
 
         "wsfcCloudWitnessPrivateEndpointPrivateDnsZone": {
             "name": "privatelink.blob.core.windows.net",
-            "virtualNetworkLinkName": "wsfccloudwitness-privateendpoint-link"
+            "virtualNetworkLinkName": "wsfccloudwitness-pe-link"
         },
 
         // Web servers
@@ -228,7 +228,7 @@
                 "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm1-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('webVmPrefix'), '-vm1-datadisk1')]"
+                    "[concat(variables('webVmPrefix'), '-vm1-disk1')]"
                 ],
                 "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm1-nic')]",
@@ -240,7 +240,7 @@
                 "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm2-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('webVmPrefix'), '-vm2-datadisk1')]"
+                    "[concat(variables('webVmPrefix'), '-vm2-disk1')]"
                 ],
                 "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm2-nic')]",
@@ -252,7 +252,7 @@
                 "vmSize": "[parameters('webVirtualMachineSize')]",
                 "osDiskName": "[concat(variables('webVmPrefix'), '-vm3-osdisk')]",
                 "dataDiskName": [
-                    "[concat(variables('webVmPrefix'), '-vm3-datadisk1')]"
+                    "[concat(variables('webVmPrefix'), '-vm3-disk1')]"
                 ],
                 "diskSku": "[parameters('webVirtualMachineDiskSku')]",
                 "nicName": "[concat(variables('webVmPrefix'), '-vm3-nic')]",
@@ -266,7 +266,7 @@
         "appGwPrefix": "web",
         "appGateway": {
             "name": "[concat(variables('appGwPrefix'), '-waf-agw')]",
-            "ipAddressName": "[concat(variables('appGwPrefix'), '-waf-agw-ip')]",
+            "ipAddressName": "[concat(variables('appGwPrefix'), '-waf-agw-pip')]",
             "zones": [
                 "1",
                 "2",
@@ -283,38 +283,38 @@
         // Private endpoint for image/video store
 
         "imageStorePrivateEndpoint": {
-            "name": "imagestore-privateendpoint",
-            "connectionName": "imagestore-privateendpoint-connection"
+            "name": "imagestore-pe",
+            "connectionName": "imagestore-pe-connection"
         },
 
         // Private DNS zone for private endpoint for image/video store
 
         "imageStorePrivateEndpointPrivateDnsZone": {
             "name": "privatelink.file.core.windows.net",
-            "virtualNetworkLinkName": "imagestore-privateendpoint-link"
+            "virtualNetworkLinkName": "imagestore-pe-link"
         },
 
         // Firewall
 
         "firewallPrefix": "firewall",
         "firewall": {
-            "name": "[concat(variables('firewallPrefix'))]",
+            "name": "[concat(variables('firewallPrefix'), '-fwl')]",
             "zones": [
                 "1",
                 "2",
                 "3"
             ],
-            "ipAddressName": "[concat(variables('firewallPrefix'), '-ip')]",
+            "ipAddressName": "[concat(variables('firewallPrefix'), '-pip')]",
             "routeTableName": "[concat(variables('firewallPrefix'), '-route')]",
-            "routeName": "firewall"
+            "routeName": "outbound-firewall"
         },
 
         // Bastion
 
-        "bastionPrefix": "bastion",
+        "bastionPrefix": "ops-access",
         "bastion": {
-            "name": "[concat(variables('bastionPrefix'))]",
-            "ipAddressName": "[concat(variables('bastionPrefix'), '-ip')]"
+            "name": "[concat(variables('bastionPrefix'), '-bstn')]",
+            "ipAddressName": "[concat(variables('bastionPrefix'), '-pip')]"
         },
 
         // Log Analytics
