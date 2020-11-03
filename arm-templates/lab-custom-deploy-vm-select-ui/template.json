@@ -38,93 +38,135 @@
     "variables": {
     },
     "resources": [
-        // {
-        //     "type": "Microsoft.Network/virtualNetworks",
-        //     "apiVersion": "2020-05-01",
-        //     "name": "customdeploy-vnet",
-        //     "location": "[parameters('location')]",
-        //     "properties": {
-        //         "addressSpace": {
-        //             "addressPrefixes": [
-        //                 "10.0.0.0/16"
-        //             ]
-        //         },
-        //         "subnets": [
-        //             {
-        //                 "name": "default",
-        //                 "properties": {
-        //                     "addressPrefix": "10.0.0.0/24"
-        //                 }
-        //             }
-        //         ]
-        //     }
-        // },
-        // {
-        //     "type": "Microsoft.Compute/virtualMachines",
-        //     "apiVersion": "2020-06-01",
-        //     "name": "vm1",
-        //     "location": "[parameters('location')]",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Network/networkInterfaces', 'vm1-nic')]"
-        //     ],
-        //     "properties": {
-        //         "hardwareProfile": {
-        //             "vmSize": "[parameters('vmSize')]"
-        //         },
-        //         "storageProfile": {
-        //             "osDisk": {
-        //                 "createOption": "fromImage",
-        //                 "managedDisk": {
-        //                     "storageAccountType": "Standard_LRS"
-        //                 }
-        //             },
-        //             "imageReference": {
-        //                 "publisher": "Canonical",
-        //                 "offer": "UbuntuServer",
-        //                 "sku": "18.04-LTS",
-        //                 "version": "latest"
-        //             }
-        //         },
-        //         "networkProfile": {
-        //             "networkInterfaces": [
-        //                 {
-        //                     "id": "[resourceId('Microsoft.Network/networkInterfaces', 'vm1-nic')]"
-        //                 }
-        //             ]
-        //         },
-        //         "osProfile": {
-        //             "computerName": "vm1",
-        //             "adminUsername": "[parameters('adminUsername')]",
-        //             "adminPassword": "[parameters('adminPassword')]"
-        //         },
-        //         "diagnosticsProfile": {
-        //             "bootDiagnostics": {
-        //                 "enabled": true
-        //             }
-        //         }
-        //     }
-        // },
-        // {
-        //     "type": "Microsoft.Network/networkInterfaces",
-        //     "apiVersion": "2020-05-01",
-        //     "name": "vm1-nic",
-        //     "location": "[parameters('location')]",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Network/virtualNetworks', 'customdeploy-vnet')]"
-        //     ],
-        //     "properties": {
-        //         "ipConfigurations": [
-        //             {
-        //                 "name": "ipconfig1",
-        //                 "properties": {
-        //                     "subnet": {
-        //                         "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'customdeploy-vnet', 'default')]"
-        //                     },
-        //                     "privateIPAllocationMethod": "Dynamic"
-        //                 }
-        //             }
-        //         ]
-        //     }
-        // }
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "name": "customdeploy-vnet",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2020-06-01",
+            "name": "vm1",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', 'vm1-nic')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'vm1-nic')]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "vm1",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "vm1-nic",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', 'customdeploy-vnet')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'customdeploy-vnet', 'default')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                "vmSize": "[parameters('VmSize')]"
+                },
+                "storageProfile": {
+                "osDisk": {
+                    "createOption": "fromImage",
+                    "managedDisk": {
+                    "storageAccountType": "[variables('osDiskType')]"
+                    }
+                },
+                "imageReference": {
+                    "publisher": "Canonical",
+                    "offer": "UbuntuServer",
+                    "sku": "[parameters('ubuntuOSVersion')]",
+                    "version": "latest"
+                }
+                },
+                "networkProfile": {
+                "networkInterfaces": [
+                    {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                    }
+                ]
+                },
+                "osProfile": {
+                "computerName": "[parameters('vmName')]",
+                "adminUsername": "[parameters('adminUsername')]",
+                "adminPassword": "[parameters('adminPasswordOrKey')]",
+                "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                }
+            }
+        }
     ]
 }
