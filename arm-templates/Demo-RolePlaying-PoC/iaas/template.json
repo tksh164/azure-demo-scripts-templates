@@ -668,10 +668,10 @@
                         "value": "[variables('vnet')]"
                     },
                     "nsgIds": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'networkSecurityGroup')).outputs.nsgIds]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'networkSecurityGroup')).outputs.nsgIds]"
                     },
                     "firewallRouteTableId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'firewallRouteTable')).outputs.firewallRouteTableId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')).outputs.firewallRouteTableId.value]"
                     }
                 },
                 "template": {
@@ -807,7 +807,7 @@
                         "value": "[variables('location')]"
                     },
                     "addsSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.adds]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.adds]"
                     },
                     "addsVms": {
                         "value": "[variables('addsVms')]"
@@ -978,7 +978,7 @@
                         "value": "[variables('location')]"
                     },
                     "databaseSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
                     },
                     "databaseVms": {
                         "value": "[variables('databaseVms')]"
@@ -1148,7 +1148,7 @@
                         "value": "[variables('location')]"
                     },
                     "dbSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
                     },
                     "databaseIlb": {
                         "value": "[variables('databaseIlb')]"
@@ -1215,7 +1215,7 @@
                         "value": "[variables('location')]"
                     },
                     "databaseSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
                     },
                     "wsfcCloudWitnessStorageAccount": {
                         "value": "[variables('wsfcCloudWitnessStorageAccount')]"
@@ -1317,10 +1317,10 @@
                 },
                 "parameters": {
                     "vnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.vnetId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.vnetId.value]"
                     },
                     "privateEndpointNetworkInterfaceId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'wsfcCloudWitness')).outputs.privateEndpointNetworkInterfaceId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'wsfcCloudWitness')).outputs.privateEndpointNetworkInterfaceId.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
@@ -1391,7 +1391,7 @@
                 },
                 "parameters": {
                     "privateEndpointPrivateIpAddress": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'wsfcCloudWitnessPrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'wsfcCloudWitnessPrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
@@ -1456,10 +1456,10 @@
                         "value": "[variables('location')]"
                     },
                     "webSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.web]"
                     },
                     "appGatewayBackendAddressPoolId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'applicationGateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'applicationGateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
                     },
                     "webVms": {
                         "value": "[variables('webVms')]"
@@ -1637,7 +1637,7 @@
                         "value": "[variables('location')]"
                     },
                     "appGatewaySubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.appGateway]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.appGateway]"
                     },
                     "appGateway": {
                         "value": "[variables('appGateway')]"
@@ -1815,7 +1815,7 @@
                         "value": "[variables('location')]"
                     },
                     "webSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.web]"
                     },
                     "imageStoreStorageAccount": {
                         "value": "[variables('imageStoreStorageAccount')]"
@@ -1917,10 +1917,10 @@
                 },
                 "parameters": {
                     "vnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.vnetId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.vnetId.value]"
                     },
                     "privateEndpointNetworkInterfaceId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'imageStore')).outputs.privateEndpointNetworkInterfaceId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'imageStore')).outputs.privateEndpointNetworkInterfaceId.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
@@ -1991,7 +1991,7 @@
                 },
                 "parameters": {
                     "privateEndpointPrivateIpAddress": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/' , 'imageStorePrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'imageStorePrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
@@ -2056,7 +2056,7 @@
                         "value": "[variables('location')]"
                     },
                     "firewallSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.firewall]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.firewall]"
                     },
                     "firewall": {
                         "value": "[variables('firewall')]"
@@ -2155,7 +2155,7 @@
                     "outputs": {
                         "firewallPrivateIpAddress": {
                             "type": "string",
-                            "value": "[reference(concat('Microsoft.Network/azureFirewalls/', parameters('firewall').name)).ipConfigurations[0].properties.privateIPAddress]"
+                            "value": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('firewall').name)).ipConfigurations[0].properties.privateIPAddress]"
                         }
                     }
                 }
@@ -2235,7 +2235,7 @@
                         "value": "[variables('location')]"
                     },
                     "firewallPrivateIpAddress": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'firewall')).outputs.firewallPrivateIpAddress.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'firewall')).outputs.firewallPrivateIpAddress.value]"
                     },
                     "firewall": {
                         "value": "[variables('firewall')]"
@@ -2291,7 +2291,7 @@
                         "value": "[variables('location')]"
                     },
                     "bastionSubnetId": {
-                        "value": "[reference(concat('Microsoft.Resources/deployments/', 'virtualNetwork')).outputs.subnetIds.value.bastion]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.bastion]"
                     },
                     "bastion": {
                         "value": "[variables('bastion')]"
