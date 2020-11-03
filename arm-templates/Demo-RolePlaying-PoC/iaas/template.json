@@ -338,7 +338,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "networkSecurityGroup",
+            "name": "network-security-groups",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -653,7 +653,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "virtualNetwork",
+            "name": "virtual-network",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -668,10 +668,10 @@
                         "value": "[variables('vnet')]"
                     },
                     "nsgIds": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'networkSecurityGroup')).outputs.nsgIds]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'network-security-groups')).outputs.nsgIds]"
                     },
                     "firewallRouteTableId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')).outputs.firewallRouteTableId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'firewall-route-table')).outputs.firewallRouteTableId.value]"
                     }
                 },
                 "template": {
@@ -795,7 +795,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "addsDomainControllerVMs",
+            "name": "adds-domain-controller-vms",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -807,7 +807,7 @@
                         "value": "[variables('location')]"
                     },
                     "addsSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.adds]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.adds]"
                     },
                     "addsVms": {
                         "value": "[variables('addsVms')]"
@@ -966,7 +966,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "databaseVMs",
+            "name": "database-vms",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -978,7 +978,7 @@
                         "value": "[variables('location')]"
                     },
                     "databaseSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.database]"
                     },
                     "databaseVms": {
                         "value": "[variables('databaseVms')]"
@@ -1136,7 +1136,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "internalLoadBalancerForDatabaseVMs",
+            "name": "internal-load-balancer-for-database-vms",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1148,7 +1148,7 @@
                         "value": "[variables('location')]"
                     },
                     "dbSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.database]"
                     },
                     "databaseIlb": {
                         "value": "[variables('databaseIlb')]"
@@ -1203,7 +1203,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "wsfcCloudWitness",
+            "name": "wsfc-cloud-witness",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1215,7 +1215,7 @@
                         "value": "[variables('location')]"
                     },
                     "databaseSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.database]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.database]"
                     },
                     "wsfcCloudWitnessStorageAccount": {
                         "value": "[variables('wsfcCloudWitnessStorageAccount')]"
@@ -1308,7 +1308,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "wsfcCloudWitnessPrivateDnsZone",
+            "name": "wsfc-cloud-witness-private-dns-zone",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1317,10 +1317,10 @@
                 },
                 "parameters": {
                     "vnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.vnetId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.vnetId.value]"
                     },
                     "privateEndpointNetworkInterfaceId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'wsfcCloudWitness')).outputs.privateEndpointNetworkInterfaceId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'wsfc-cloud-witness')).outputs.privateEndpointNetworkInterfaceId.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
@@ -1382,7 +1382,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "wsfcCloudWitnessPrivateEndpointARecord",
+            "name": "wsfc-cloud-witness-private-endpoint-a-record",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1391,7 +1391,7 @@
                 },
                 "parameters": {
                     "privateEndpointPrivateIpAddress": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'wsfcCloudWitnessPrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'wsfc-cloud-witness-private-dns-zone')).outputs.privateEndpointPrivateIpAddress.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('wsfcCloudWitnessPrivateEndpointPrivateDnsZone')]"
@@ -1444,7 +1444,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "webVMs",
+            "name": "web-vms",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1456,10 +1456,10 @@
                         "value": "[variables('location')]"
                     },
                     "webSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.web]"
                     },
                     "appGatewayBackendAddressPoolId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'applicationGateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'application-gateway')).outputs.appGatewayComponentIds.value.backendAddressPool]"
                     },
                     "webVms": {
                         "value": "[variables('webVms')]"
@@ -1625,7 +1625,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "applicationGateway",
+            "name": "application-gateway",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1637,7 +1637,7 @@
                         "value": "[variables('location')]"
                     },
                     "appGatewaySubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.appGateway]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.appGateway]"
                     },
                     "appGateway": {
                         "value": "[variables('appGateway')]"
@@ -1803,7 +1803,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "imageStore",
+            "name": "image-store",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1815,7 +1815,7 @@
                         "value": "[variables('location')]"
                     },
                     "webSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.web]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.web]"
                     },
                     "imageStoreStorageAccount": {
                         "value": "[variables('imageStoreStorageAccount')]"
@@ -1908,7 +1908,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "imageStorePrivateDnsZone",
+            "name": "image-store-private-dns-zone",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1917,10 +1917,10 @@
                 },
                 "parameters": {
                     "vnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.vnetId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.vnetId.value]"
                     },
                     "privateEndpointNetworkInterfaceId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'imageStore')).outputs.privateEndpointNetworkInterfaceId.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'image-store')).outputs.privateEndpointNetworkInterfaceId.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
@@ -1982,7 +1982,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "imageStorePrivateEndpointARecord",
+            "name": "image-store-private-endpoint-a-record",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -1991,7 +1991,7 @@
                 },
                 "parameters": {
                     "privateEndpointPrivateIpAddress": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'imageStorePrivateDnsZone')).outputs.privateEndpointPrivateIpAddress.value]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments' , 'image-store-private-dns-zone')).outputs.privateEndpointPrivateIpAddress.value]"
                     },
                     "privateEndpointPrivateDnsZone": {
                         "value": "[variables('imageStorePrivateEndpointPrivateDnsZone')]"
@@ -2056,7 +2056,7 @@
                         "value": "[variables('location')]"
                     },
                     "firewallSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.firewall]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.firewall]"
                     },
                     "firewall": {
                         "value": "[variables('firewall')]"
@@ -2167,7 +2167,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "firewallRouteTable",
+            "name": "firewall-route-table",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -2221,9 +2221,9 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "firewallRoute",
+            "name": "firewall-route",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'firewallRouteTable')]"
+                "[resourceId('Microsoft.Resources/deployments', 'firewall-route-table')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -2291,7 +2291,7 @@
                         "value": "[variables('location')]"
                     },
                     "bastionSubnetId": {
-                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetwork')).outputs.subnetIds.value.bastion]"
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtual-network')).outputs.subnetIds.value.bastion]"
                     },
                     "bastion": {
                         "value": "[variables('bastion')]"
@@ -2360,7 +2360,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "logAnalyticsWorkspace",
+            "name": "log-analytics-workspace",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
@@ -2412,7 +2412,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "recoveryServicesVault",
+            "name": "recovery-services-vault",
             "dependsOn": [],
             "properties": {
                 "mode": "Incremental",
