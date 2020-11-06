@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+
+        "prefix": "demo",
+        "vWan": {
+            "name": "[concat(variables('prefix'), '-wan')]"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-05-01",
+            "location": "[variables('location')]",
+            "name": "[variables('vWan').name]",
+            "properties": {
+                "virtualHubs": [],
+                "vpnSites": [],
+                "type": "Standard"
+            },
+            "type": "Microsoft.Network/virtualWans"
+        }
+    ]
+}
