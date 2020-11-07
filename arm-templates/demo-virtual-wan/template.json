@@ -5,23 +5,88 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
+        "prefix": "azvwan",
+        
+        "vnets": [
+            {
+                "name": "[concat(variables('prefix'), '-japan', '-vnet')]",
+                "location": "japaneast",
+                "addressPrefixes": [
+                    "10.1.0.0/16"
+                ],
+                "subnets": [
+                    {
+                        "name": "default",
+                        "addressPrefix": "10.1.0.0/24"
+                    }
+                ]
+            }
+        ],
 
-        "prefix": "demo",
         "vWan": {
-            "name": "[concat(variables('prefix'), '-wan')]"
+            "name": "[concat(variables('prefix'), '-wan')]",
+            "vHubs": [
+                {
+                    "name": "[concat(variables('prefix'), '-japan', '-hub')]",
+                    "location": "japaneast",
+                    "addressPrefix": "10.0.0.0/24"
+                }
+            ]
         }
     },
     "resources": [
+
+        // Virtual network
+
         {
+            "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-05-01",
-            "location": "[variables('location')]",
+            "name": "[variables('vnets')[0].name]",
+            "location": "[variables('vnets')[0].location]",
+            "dependsOn":[],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[variables('vnets')[0].addressPrefixes]"
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('vnets')[0].subnets[0].name]",
+                        "properties": {
+                            "addressPrefix": "[variables('vnets')[0].subnets[0].addressPrefix]"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": []
+            }
+        },
+
+        // Virtual WAN
+
+        {
+            "type": "Microsoft.Network/virtualWans",
+            "apiVersion": "2020-05-01",
             "name": "[variables('vWan').name]",
+            "location": "[variables('location')]",
             "properties": {
                 "virtualHubs": [],
                 "vpnSites": [],
                 "type": "Standard"
-            },
-            "type": "Microsoft.Network/virtualWans"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualHubs",
+            "apiVersion": "2020-05-01",
+            "name": "[variables('vWan').vHubs[0].name]",
+            "location": "[variables('vWan').vHubs[0].location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualWans', variables('vWan').name)]"
+            ],
+            "properties": {
+                "addressPrefix": "[variables('vWan').vHubs[0].addressPrefix]",
+                "virtualWan": {
+                    "id": "[resourceId('Microsoft.Network/virtualWans', variables('vWan').name)]"
+                }                
+            }
         }
     ]
 }
