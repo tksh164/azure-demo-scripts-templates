@@ -7,32 +7,256 @@
             {}
         ],
         "steps": [
-            {
-                "name": "storageConfig",
-                "label": "Storage settings",
-                "elements": [
-                    {
-                        "name": "storageAccounts",
-                        "type": "Microsoft.Storage.MultiStorageAccountCombo",
-                        "label": {
-                            "prefix": "Storage account name prefix",
-                            "type": "Storage account type"
-                        },
-                        "defaultValue": {
-                            "prefix": "stracct",
-                            "type": "Standard_LRS"
-                        },
-                        "constraints": {
-                            "allowedTypes": [
-                                "Premium_LRS",
-                                "Standard_LRS",
-                                "Standard_GRS"
-                            ]
-                        },
-                        "count": 2
-                    }
-                ]
-            },
+			{
+				"name": "attendees",
+				"label": "Attendees",
+				"elements": [
+					{
+						"name": "numOfAttendees",
+						"type": "Microsoft.Common.Slider",
+						"label": "Number of attendees",
+						"subLabel": "attendees",
+						"min": 1,
+						"max": 20,
+						"defaultValue": 10,
+						"showStepMarkers": true,
+						"toolTip": "Number of attendees.",
+						"constraints": {
+							"required": true
+						},
+						"visible": true
+					}
+				]
+			},
+			{
+				"name": "EmulatedOnPremisesEnv",
+				"label": "Emulated on-premises environment",
+				"elements": [
+					{
+						"name": "legalAccept",
+						"type": "Microsoft.Common.CheckBox",
+						"label": "Deploy emulated on-premises environment",
+						"constraints": {
+							"required": false
+						}
+					},
+					{
+						"name": "vpnSharedKey",
+						"type": "Microsoft.Common.TextBox",
+						"label": "VPN connection shared key",
+						"defaultValue": "contoso123",
+						"toolTip": "Use only allowed characters",
+						"placeholder": "",
+						"constraints": {
+							"required": true,
+							"validations": [
+								{
+									"regex": "^[a-z0-9A-Z]{1,30}$",
+									"message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+								},
+								{
+									"isValid": "[startsWith(steps('resourceConfig').nameInstance, 'contoso')]",
+									"message": "Must start with 'contoso'."
+								}
+							]
+						},
+						"visible": true
+					}
+				]
+			},
+			{
+				"name": "jumpboxVm",
+				"label": "Jumpbox VM",
+				"elements": [
+					{
+						"name": "deployJumpboxVm",
+						"type": "Microsoft.Common.CheckBox",
+						"label": "Deploy jumpbox VM",
+						"constraints": {
+							"required": false
+						}
+					},
+					{
+						"name": "section1",
+						"type": "Microsoft.Common.Section",
+						"label": "Credential",
+						"elements": [
+							{
+								"name": "jumpVmAdminUserName",
+								"type": "Microsoft.Compute.UserNameTextBox",
+								"label": "User name",
+								"defaultValue": "",
+								"toolTip": "",
+								"constraints": {
+									"required": true,
+									"regex": "^[a-z0-9A-Z]{1,30}$",
+									"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+								},
+								"osPlatform": "Windows",
+								"visible": true
+							},					
+							{
+								"name": "jumpVmAdminCredential",
+								"type": "Microsoft.Compute.CredentialsCombo",
+								"label": {
+									"password": "Password",
+									"confirmPassword": "Confirm password"
+								},
+								"toolTip": {
+									"password": ""
+								},
+								"constraints": {
+									"required": true,
+									"customPasswordRegex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+									"customValidationMessage": "The password must be alphanumeric, contain at least 12 characters, and have at least 1 letter and 1 number."
+								},
+								"options": {
+									"hideConfirmation": false
+								},
+								"osPlatform": "Windows",
+								"visible": true
+							}
+						],
+						"visible": true
+					},
+					{
+						"name": "jumpVmSettings",
+						"type": "Microsoft.Common.Section",
+						"label": "Virtual machine settings",
+						"elements": [
+							{
+								"name": "jumpVmOsImage",
+								"type": "Microsoft.Common.DropDown",
+								"label": "OS image",
+								"placeholder": "",
+								"defaultValue": "Windows 10 Pro (127 GiB)",
+								"toolTip": "",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Windows 10 Pro (127 GiB)",
+											"value": "one"
+										},
+										{
+											"label": "Windows Server 2019 Datacenter (127 GiB)",
+											"value": "two"
+										},
+										{
+											"label": "Windows Server 2019 Datacenter (30 GiB)",
+											"value": "three"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "element1",
+								"type": "Microsoft.Compute.SizeSelector",
+								"label": "Size",
+								"toolTip": "",
+								"recommendedSizes": [
+									"Standard_D1",
+									"Standard_D2",
+									"Standard_D3"
+								],
+								"constraints": {
+									"allowedSizes": [],
+									"excludedSizes": [],
+									"numAvailabilityZonesRequired": 3,
+									"zone": "3"
+								},
+								"options": {
+									"hideDiskTypeFilter": false
+								},
+								"osPlatform": "Windows",
+								"imageReference": {
+									"publisher": "MicrosoftWindowsServer",
+									"offer": "WindowsServer",
+									"sku": "2012-R2-Datacenter"
+								},
+								"count": 2,
+								"visible": true
+							},
+							{
+								"name": "dropDown1",
+								"type": "Microsoft.Common.DropDown",
+								"label": "OS disk type",
+								"placeholder": "",
+								"defaultValue": "Value two",
+								"toolTip": "",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Value one",
+											"value": "one"
+										},
+										{
+											"label": "Value two",
+											"value": "two"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							}
+						],
+						"visible": true
+					},
+					{
+						"name": "autoshutdown",
+						"type": "Microsoft.Common.Section",
+						"label": "Autoshutdown",
+						"elements": [
+							{
+								"name": "autoshutdownTime",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Example drop down",
+								"placeholder": "",
+								"defaultValue": "Value two",
+								"toolTip": "",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Value one",
+											"value": "one"
+										},
+										{
+											"label": "Value two",
+											"value": "two"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "autoshutdownTimeZone",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Example drop down",
+								"placeholder": "",
+								"defaultValue": "Value two",
+								"toolTip": "",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Value one",
+											"value": "one"
+										},
+										{
+											"label": "Value two",
+											"value": "two"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							}
+						],
+						"visible": true
+            		}
+				]
+			},
             {
                 "name": "tags",
                 "label": "Tags",
