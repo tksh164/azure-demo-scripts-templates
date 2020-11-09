@@ -12,15 +12,15 @@
 				"label": "Attendees",
 				"elements": [
 					{
-						"name": "numOfAttendees",
+						"name": "numOfAttendeesStep",
 						"type": "Microsoft.Common.Slider",
 						"label": "Number of attendees",
 						"subLabel": "attendees",
+						"toolTip": "Number of attendees to the training.",
+						"showStepMarkers": false,
 						"min": 1,
 						"max": 20,
-						"defaultValue": 10,
-						"showStepMarkers": true,
-						"toolTip": "Number of attendees.",
+						"defaultValue": 8,
 						"constraints": {
 							"required": true
 						},
@@ -29,74 +29,98 @@
 				]
 			},
 			{
-				"name": "EmulatedOnPremisesEnv",
+				"name": "emulatedOnPremisesEnvStep",
 				"label": "Emulated on-premises environment",
 				"elements": [
 					{
-						"name": "legalAccept",
-						"type": "Microsoft.Common.CheckBox",
-						"label": "Deploy emulated on-premises environment",
+						"name": "isDeployEmulatedOnPremisesEnv",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Deploy the emulated on-premises environment?",
+						"toolTip": "",
+						"defaultValue": "Yes",
 						"constraints": {
-							"required": false
-						}
-					},
-					{
-						"name": "vpnSharedKey",
-						"type": "Microsoft.Common.TextBox",
-						"label": "VPN connection shared key",
-						"defaultValue": "contoso123",
-						"toolTip": "Use only allowed characters",
-						"placeholder": "",
-						"constraints": {
-							"required": true,
-							"validations": [
-								{
-									"regex": "^[a-z0-9A-Z]{1,30}$",
-									"message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-								},
-								{
-									"isValid": "[startsWith(steps('resourceConfig').nameInstance, 'contoso')]",
-									"message": "Must start with 'contoso'."
-								}
-							]
+						  "allowedValues": [
+							{
+							  "label": "Yes",
+							  "value": true
+							},
+							{
+							  "label": "No",
+							  "value": false
+							}
+						  ],
+						  "required": true
 						},
 						"visible": true
+					},
+					{
+						"name": "vpnSettingsSection",
+						"type": "Microsoft.Common.Section",
+						"label": "VPN settings",
+						"elements": [
+							{
+								"name": "vpnSharedKey",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Shared key (PSK)",
+								"toolTip": "A mixture of letters and numbers, used to establish encryption for the connection. The same shared key must be used in both the virtual network and local network gateways. If your gateway device doesn't provide one, you can make one up here and provide it to your device.",
+								"placeholder": "Your shared key",
+								"defaultValue": "",
+								"constraints": {
+									"required": true
+								},
+								"visible": true
+							}
+						],
+						"visible": "[steps('emulatedOnPremisesEnvStep').isDeployEmulatedOnPremisesEnv]"
 					}
 				]
 			},
 			{
-				"name": "jumpboxVm",
-				"label": "Jumpbox VM",
+				"name": "jumpboxVmStep",
+				"label": "Jump-box VM",
 				"elements": [
 					{
-						"name": "deployJumpboxVm",
-						"type": "Microsoft.Common.CheckBox",
-						"label": "Deploy jumpbox VM",
+						"name": "isDeployJumpboxVm",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Deploy a jump-box VM for each attendee?",
+						"toolTip": "",
+						"defaultValue": "Yes",
 						"constraints": {
-							"required": false
-						}
+						  "allowedValues": [
+							{
+							  "label": "Yes",
+							  "value": true
+							},
+							{
+							  "label": "No",
+							  "value": false
+							}
+						  ],
+						  "required": true
+						},
+						"visible": true
 					},
 					{
-						"name": "section1",
+						"name": "adminAccountSection",
 						"type": "Microsoft.Common.Section",
-						"label": "Credential",
+						"label": "Administrator account",
 						"elements": [
 							{
-								"name": "jumpVmAdminUserName",
+								"name": "adminUserName",
 								"type": "Microsoft.Compute.UserNameTextBox",
-								"label": "User name",
-								"defaultValue": "",
+								"label": "Username",
 								"toolTip": "",
+								"defaultValue": "AzureAdmin",
 								"constraints": {
 									"required": true,
-									"regex": "^[a-z0-9A-Z]{1,30}$",
-									"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									"regex": "^[a-z0-9A-Z]{1,20}$",
+									"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-20 characters long."
 								},
 								"osPlatform": "Windows",
 								"visible": true
 							},					
 							{
-								"name": "jumpVmAdminCredential",
+								"name": "adminPassword",
 								"type": "Microsoft.Compute.CredentialsCombo",
 								"label": {
 									"password": "Password",
@@ -120,7 +144,7 @@
 						"visible": true
 					},
 					{
-						"name": "jumpVmSettings",
+						"name": "vmSettingsSectoin",
 						"type": "Microsoft.Common.Section",
 						"label": "Virtual machine settings",
 						"elements": [
@@ -128,9 +152,9 @@
 								"name": "jumpVmOsImage",
 								"type": "Microsoft.Common.DropDown",
 								"label": "OS image",
+								"toolTip": "",
 								"placeholder": "",
 								"defaultValue": "Windows 10 Pro (127 GiB)",
-								"toolTip": "",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -182,9 +206,9 @@
 								"name": "dropDown1",
 								"type": "Microsoft.Common.DropDown",
 								"label": "OS disk type",
+								"toolTip": "",
 								"placeholder": "",
 								"defaultValue": "Value two",
-								"toolTip": "",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -204,17 +228,17 @@
 						"visible": true
 					},
 					{
-						"name": "autoshutdown",
+						"name": "autoShutdownSection",
 						"type": "Microsoft.Common.Section",
-						"label": "Autoshutdown",
+						"label": "Auto-shutdown",
 						"elements": [
 							{
-								"name": "autoshutdownTime",
+								"name": "autoShutdownTime",
 								"type": "Microsoft.Common.DropDown",
-								"label": "Example drop down",
+								"label": "Daily auto-shutdown time",
+								"toolTip": "",
 								"placeholder": "",
 								"defaultValue": "Value two",
-								"toolTip": "",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -231,12 +255,12 @@
 								"visible": true
 							},
 							{
-								"name": "autoshutdownTimeZone",
+								"name": "autoShutdownTimeZone",
 								"type": "Microsoft.Common.DropDown",
-								"label": "Example drop down",
+								"label": "Auto-shutdown time zone",
+								"toolTip": "",
 								"placeholder": "",
 								"defaultValue": "Value two",
-								"toolTip": "",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -258,7 +282,7 @@
 				]
 			},
             {
-                "name": "tags",
+                "name": "tagsStep",
                 "label": "Tags",
                 "elements": [
                     {
