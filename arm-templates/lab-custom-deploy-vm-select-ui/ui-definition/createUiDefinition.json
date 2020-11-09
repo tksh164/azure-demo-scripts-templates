@@ -3,16 +3,55 @@
     "handler": "Microsoft.Azure.CreateUIDef",
     "version": "0.1.2-preview",
     "parameters": {
+		"config": {
+			"isWizard": false,
+			"basics": {
+				"description": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"subscription": {
+					"resourceProviders": [
+						"Microsoft.Compute",
+						"Microsoft.Network",
+						"Microsoft.DevTestLab"
+					]
+				}
+			}
+		},
+		"resourceTypes": [
+			"Microsoft.Compute/virtualMachines",
+			"Microsoft.Compute/disks",
+			"Microsoft.Compute/availabilitySets",
+			"Microsoft.Network/virtualNetworks",
+			"Microsoft.Network/networkInterfaces",
+			"Microsoft.Network/networkSecurityGroups",
+			"Microsoft.Network/publicIPAddresses",
+			"Microsoft.Network/virtualNetworkGateways",
+			"Microsoft.Network/localNetworkGateways",
+			"Microsoft.Network/connections",
+			"Microsoft.Network/loadBalancers",
+			"Microsoft.DevTestLab/schedules"
+		],
         "basics": [
-            {}
+			{}
         ],
         "steps": [
 			{
-				"name": "attendees",
+				"name": "attendeesStep",
 				"label": "Attendees",
 				"elements": [
 					{
-						"name": "numOfAttendeesStep",
+						"name": "text1",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+						  "text": "Please provide the configuration values for your application.",
+						  "link": {
+							"label": "Learn more",
+							"uri": "https://www.microsoft.com"
+						  }
+						}
+					},		
+					{
+						"name": "numOfAttendees",
 						"type": "Microsoft.Common.Slider",
 						"label": "Number of attendees",
 						"subLabel": "attendees",
@@ -32,6 +71,18 @@
 				"name": "emulatedOnPremisesEnvStep",
 				"label": "Emulated on-premises environment",
 				"elements": [
+					{
+						"name": "text1",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+						  "text": "Please provide the configuration values for your application.",
+						  "link": {
+							"label": "Learn more",
+							"uri": "https://www.microsoft.com"
+						  }
+						}
+					},		
 					{
 						"name": "isDeployEmulatedOnPremisesEnv",
 						"type": "Microsoft.Common.OptionsGroup",
@@ -69,6 +120,15 @@
 									"required": true
 								},
 								"visible": true
+							},
+							{
+								"name": "text1",
+								"type": "Microsoft.Common.InfoBox",
+								"options": {
+								  "icon": "Info",
+								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
+								},
+								"visible": true
 							}
 						],
 						"visible": "[steps('emulatedOnPremisesEnvStep').isDeployEmulatedOnPremisesEnv]"
@@ -79,6 +139,18 @@
 				"name": "jumpboxVmStep",
 				"label": "Jump-box VM",
 				"elements": [
+					{
+						"name": "text1",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+						  "text": "Please provide the configuration values for your application.",
+						  "link": {
+							"label": "Learn more",
+							"uri": "https://www.microsoft.com"
+						  }
+						}
+					},		
 					{
 						"name": "isDeployJumpboxVm",
 						"type": "Microsoft.Common.OptionsGroup",
@@ -106,11 +178,19 @@
 						"label": "Administrator account",
 						"elements": [
 							{
+								"name": "text2",
+								"type": "Microsoft.Common.TextBlock",
+								"visible": true,
+								"options": {
+								  "text": "Please provide the configuration values for your application."
+								}
+							},		
+							{
 								"name": "adminUserName",
 								"type": "Microsoft.Compute.UserNameTextBox",
 								"label": "Username",
-								"toolTip": "",
-								"defaultValue": "AzureAdmin",
+								"toolTip": "The administrator username for the jump-box VM.",
+								"defaultValue": "localadmin",
 								"constraints": {
 									"required": true,
 									"regex": "^[a-z0-9A-Z]{1,20}$",
@@ -127,7 +207,7 @@
 									"confirmPassword": "Confirm password"
 								},
 								"toolTip": {
-									"password": ""
+									"password": "The administrator password for the jump-box VM."
 								},
 								"constraints": {
 									"required": true,
@@ -139,9 +219,18 @@
 								},
 								"osPlatform": "Windows",
 								"visible": true
+							},
+							{
+								"name": "text1",
+								"type": "Microsoft.Common.InfoBox",
+								"options": {
+								  "icon": "Info",
+								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
+								},
+								"visible": true
 							}
 						],
-						"visible": true
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
 					},
 					{
 						"name": "vmSettingsSectoin",
@@ -149,25 +238,48 @@
 						"label": "Virtual machine settings",
 						"elements": [
 							{
-								"name": "jumpVmOsImage",
+								"name": "text2",
+								"type": "Microsoft.Common.TextBlock",
+								"visible": true,
+								"options": {
+								  "text": "Please provide the configuration values for your application."
+								}
+							},		
+							{
+								"name": "osImage",
 								"type": "Microsoft.Common.DropDown",
-								"label": "OS image",
-								"toolTip": "",
+								"label": "Image",
+								"toolTip": "The operating system image for the jump-box VM.",
 								"placeholder": "",
 								"defaultValue": "Windows 10 Pro (127 GiB)",
 								"constraints": {
 									"allowedValues": [
 										{
 											"label": "Windows 10 Pro (127 GiB)",
-											"value": "one"
+											"value": {
+												"publisher": "MicrosoftWindowsDesktop",
+												"offer": "Windows-10",
+												"sku": "19h2-pro",
+												"version": "latest"
+											}
 										},
 										{
 											"label": "Windows Server 2019 Datacenter (127 GiB)",
-											"value": "two"
+											"value": {
+												"publisher": "MicrosoftWindowsServer",
+												"offer": "WindowsServer",
+												"sku": "2019-Datacenter",
+												"version": "latest"
+											}
 										},
 										{
 											"label": "Windows Server 2019 Datacenter (30 GiB)",
-											"value": "three"
+											"value": {
+												"publisher": "MicrosoftWindowsServer",
+												"offer": "WindowsServer",
+												"sku": "2019-Datacenter-smalldisk",
+												"version": "latest"
+											}
 										}
 									],
 									"required": true
@@ -175,49 +287,55 @@
 								"visible": true
 							},
 							{
-								"name": "element1",
+								"name": "vmSize",
 								"type": "Microsoft.Compute.SizeSelector",
 								"label": "Size",
-								"toolTip": "",
+								"toolTip": "The virtual machine size of the jump-box VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2079859'>Learn more about Virtual Machine sizes</a>",
 								"recommendedSizes": [
-									"Standard_D1",
-									"Standard_D2",
-									"Standard_D3"
+									"Standard_B2ms",
+									"Standard_D2s_v3",
+									"Standard_DS1_v2"
 								],
 								"constraints": {
-									"allowedSizes": [],
-									"excludedSizes": [],
-									"numAvailabilityZonesRequired": 3,
-									"zone": "3"
+									"allowedSizes": [
+										"Standard_B2ms",
+										"Standard_D2s_v3",
+										"Standard_DS1_v2"
+									],
+									"excludedSizes": []
 								},
 								"options": {
-									"hideDiskTypeFilter": false
+									"hideDiskTypeFilter": true
 								},
 								"osPlatform": "Windows",
 								"imageReference": {
-									"publisher": "MicrosoftWindowsServer",
-									"offer": "WindowsServer",
-									"sku": "2012-R2-Datacenter"
+									"publisher": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.publisher]",
+									"offer": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.offer]",
+									"sku": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.sku]"
 								},
-								"count": 2,
+								"count": "[steps('attendeesStep').numOfAttendees]",
 								"visible": true
 							},
 							{
-								"name": "dropDown1",
+								"name": "diskType",
 								"type": "Microsoft.Common.DropDown",
 								"label": "OS disk type",
-								"toolTip": "",
+								"toolTip": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>",
 								"placeholder": "",
-								"defaultValue": "Value two",
+								"defaultValue": "Premium SSD",
 								"constraints": {
 									"allowedValues": [
 										{
-											"label": "Value one",
-											"value": "one"
+											"label": "Standard HDD",
+											"value": "Standard_LRS"
 										},
 										{
-											"label": "Value two",
-											"value": "two"
+											"label": "Standard SSD",
+											"value": "StandardSSD_LRS"
+										},
+										{
+											"label": "Premium SSD",
+											"value": "Premium_LRS"
 										}
 									],
 									"required": true
@@ -225,7 +343,7 @@
 								"visible": true
 							}
 						],
-						"visible": true
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
 					},
 					{
 						"name": "autoShutdownSection",
@@ -233,10 +351,18 @@
 						"label": "Auto-shutdown",
 						"elements": [
 							{
+								"name": "text2",
+								"type": "Microsoft.Common.TextBlock",
+								"visible": true,
+								"options": {
+								  "text": "Please provide the configuration values for your application."
+								}
+							},		
+							{
 								"name": "autoShutdownTime",
 								"type": "Microsoft.Common.DropDown",
 								"label": "Daily auto-shutdown time",
-								"toolTip": "",
+								"toolTip": "The time of day the auto-shutdown of the jump-box VM will occur.",
 								"placeholder": "",
 								"defaultValue": "23:30",
 								"constraints": {
@@ -442,18 +568,566 @@
 								"name": "autoShutdownTimeZone",
 								"type": "Microsoft.Common.DropDown",
 								"label": "Auto-shutdown time zone",
-								"toolTip": "",
+								"toolTip": "The time zone ID for auto-shutdown time.",
 								"placeholder": "",
-								"defaultValue": "Value two",
+								"defaultValue": "Pacific Standard Time",
 								"constraints": {
 									"allowedValues": [
 										{
-											"label": "Value one",
-											"value": "one"
+											"label": "Afghanistan Standard Time",
+											"value": "Afghanistan Standard Time"
 										},
 										{
-											"label": "Value two",
-											"value": "two"
+											"label": "Alaskan Standard Time",
+											"value": "Alaskan Standard Time"
+										},
+										{
+											"label": "Aleutian Standard Time",
+											"value": "Aleutian Standard Time"
+										},
+										{
+											"label": "Altai Standard Time",
+											"value": "Altai Standard Time"
+										},
+										{
+											"label": "Arab Standard Time",
+											"value": "Arab Standard Time"
+										},
+										{
+											"label": "Arabian Standard Time",
+											"value": "Arabian Standard Time"
+										},
+										{
+											"label": "Arabic Standard Time",
+											"value": "Arabic Standard Time"
+										},
+										{
+											"label": "Argentina Standard Time",
+											"value": "Argentina Standard Time"
+										},
+										{
+											"label": "Astrakhan Standard Time",
+											"value": "Astrakhan Standard Time"
+										},
+										{
+											"label": "Atlantic Standard Time",
+											"value": "Atlantic Standard Time"
+										},
+										{
+											"label": "AUS Central Standard Time",
+											"value": "AUS Central Standard Time"
+										},
+										{
+											"label": "Aus Central W. Standard Time",
+											"value": "Aus Central W. Standard Time"
+										},
+										{
+											"label": "AUS Eastern Standard Time",
+											"value": "AUS Eastern Standard Time"
+										},
+										{
+											"label": "Azerbaijan Standard Time",
+											"value": "Azerbaijan Standard Time"
+										},
+										{
+											"label": "Azores Standard Time",
+											"value": "Azores Standard Time"
+										},
+										{
+											"label": "Bahia Standard Time",
+											"value": "Bahia Standard Time"
+										},
+										{
+											"label": "Bangladesh Standard Time",
+											"value": "Bangladesh Standard Time"
+										},
+										{
+											"label": "Belarus Standard Time",
+											"value": "Belarus Standard Time"
+										},
+										{
+											"label": "Bougainville Standard Time",
+											"value": "Bougainville Standard Time"
+										},
+										{
+											"label": "Canada Central Standard Time",
+											"value": "Canada Central Standard Time"
+										},
+										{
+											"label": "Cape Verde Standard Time",
+											"value": "Cape Verde Standard Time"
+										},
+										{
+											"label": "Caucasus Standard Time",
+											"value": "Caucasus Standard Time"
+										},
+										{
+											"label": "Cen. Australia Standard Time",
+											"value": "Cen. Australia Standard Time"
+										},
+										{
+											"label": "Central America Standard Time",
+											"value": "Central America Standard Time"
+										},
+										{
+											"label": "Central Asia Standard Time",
+											"value": "Central Asia Standard Time"
+										},
+										{
+											"label": "Central Brazilian Standard Time",
+											"value": "Central Brazilian Standard Time"
+										},
+										{
+											"label": "Central Europe Standard Time",
+											"value": "Central Europe Standard Time"
+										},
+										{
+											"label": "Central European Standard Time",
+											"value": "Central European Standard Time"
+										},
+										{
+											"label": "Central Pacific Standard Time",
+											"value": "Central Pacific Standard Time"
+										},
+										{
+											"label": "Central Standard Time",
+											"value": "Central Standard Time"
+										},
+										{
+											"label": "Central Standard Time (Mexico)",
+											"value": "Central Standard Time (Mexico)"
+										},
+										{
+											"label": "Chatham Islands Standard Time",
+											"value": "Chatham Islands Standard Time"
+										},
+										{
+											"label": "China Standard Time",
+											"value": "China Standard Time"
+										},
+										{
+											"label": "Cuba Standard Time",
+											"value": "Cuba Standard Time"
+										},
+										{
+											"label": "Dateline Standard Time",
+											"value": "Dateline Standard Time"
+										},
+										{
+											"label": "E. Africa Standard Time",
+											"value": "E. Africa Standard Time"
+										},
+										{
+											"label": "E. Australia Standard Time",
+											"value": "E. Australia Standard Time"
+										},
+										{
+											"label": "E. Europe Standard Time",
+											"value": "E. Europe Standard Time"
+										},
+										{
+											"label": "E. South America Standard Time",
+											"value": "E. South America Standard Time"
+										},
+										{
+											"label": "Easter Island Standard Time",
+											"value": "Easter Island Standard Time"
+										},
+										{
+											"label": "Eastern Standard Time",
+											"value": "Eastern Standard Time"
+										},
+										{
+											"label": "Eastern Standard Time (Mexico)",
+											"value": "Eastern Standard Time (Mexico)"
+										},
+										{
+											"label": "Egypt Standard Time",
+											"value": "Egypt Standard Time"
+										},
+										{
+											"label": "Ekaterinburg Standard Time",
+											"value": "Ekaterinburg Standard Time"
+										},
+										{
+											"label": "Fiji Standard Time",
+											"value": "Fiji Standard Time"
+										},
+										{
+											"label": "FLE Standard Time",
+											"value": "FLE Standard Time"
+										},
+										{
+											"label": "Georgian Standard Time",
+											"value": "Georgian Standard Time"
+										},
+										{
+											"label": "GMT Standard Time",
+											"value": "GMT Standard Time"
+										},
+										{
+											"label": "Greenland Standard Time",
+											"value": "Greenland Standard Time"
+										},
+										{
+											"label": "Greenwich Standard Time",
+											"value": "Greenwich Standard Time"
+										},
+										{
+											"label": "GTB Standard Time",
+											"value": "GTB Standard Time"
+										},
+										{
+											"label": "Haiti Standard Time",
+											"value": "Haiti Standard Time"
+										},
+										{
+											"label": "Hawaiian Standard Time",
+											"value": "Hawaiian Standard Time"
+										},
+										{
+											"label": "India Standard Time",
+											"value": "India Standard Time"
+										},
+										{
+											"label": "Iran Standard Time",
+											"value": "Iran Standard Time"
+										},
+										{
+											"label": "Israel Standard Time",
+											"value": "Israel Standard Time"
+										},
+										{
+											"label": "Jordan Standard Time",
+											"value": "Jordan Standard Time"
+										},
+										{
+											"label": "Kaliningrad Standard Time",
+											"value": "Kaliningrad Standard Time"
+										},
+										{
+											"label": "Kamchatka Standard Time",
+											"value": "Kamchatka Standard Time"
+										},
+										{
+											"label": "Korea Standard Time",
+											"value": "Korea Standard Time"
+										},
+										{
+											"label": "Libya Standard Time",
+											"value": "Libya Standard Time"
+										},
+										{
+											"label": "Line Islands Standard Time",
+											"value": "Line Islands Standard Time"
+										},
+										{
+											"label": "Lord Howe Standard Time",
+											"value": "Lord Howe Standard Time"
+										},
+										{
+											"label": "Magadan Standard Time",
+											"value": "Magadan Standard Time"
+										},
+										{
+											"label": "Magallanes Standard Time",
+											"value": "Magallanes Standard Time"
+										},
+										{
+											"label": "Marquesas Standard Time",
+											"value": "Marquesas Standard Time"
+										},
+										{
+											"label": "Mauritius Standard Time",
+											"value": "Mauritius Standard Time"
+										},
+										{
+											"label": "Mid-Atlantic Standard Time",
+											"value": "Mid-Atlantic Standard Time"
+										},
+										{
+											"label": "Middle East Standard Time",
+											"value": "Middle East Standard Time"
+										},
+										{
+											"label": "Montevideo Standard Time",
+											"value": "Montevideo Standard Time"
+										},
+										{
+											"label": "Morocco Standard Time",
+											"value": "Morocco Standard Time"
+										},
+										{
+											"label": "Mountain Standard Time",
+											"value": "Mountain Standard Time"
+										},
+										{
+											"label": "Mountain Standard Time (Mexico)",
+											"value": "Mountain Standard Time (Mexico)"
+										},
+										{
+											"label": "Myanmar Standard Time",
+											"value": "Myanmar Standard Time"
+										},
+										{
+											"label": "N. Central Asia Standard Time",
+											"value": "N. Central Asia Standard Time"
+										},
+										{
+											"label": "Namibia Standard Time",
+											"value": "Namibia Standard Time"
+										},
+										{
+											"label": "Nepal Standard Time",
+											"value": "Nepal Standard Time"
+										},
+										{
+											"label": "New Zealand Standard Time",
+											"value": "New Zealand Standard Time"
+										},
+										{
+											"label": "Newfoundland Standard Time",
+											"value": "Newfoundland Standard Time"
+										},
+										{
+											"label": "Norfolk Standard Time",
+											"value": "Norfolk Standard Time"
+										},
+										{
+											"label": "North Asia East Standard Time",
+											"value": "North Asia East Standard Time"
+										},
+										{
+											"label": "North Asia Standard Time",
+											"value": "North Asia Standard Time"
+										},
+										{
+											"label": "North Korea Standard Time",
+											"value": "North Korea Standard Time"
+										},
+										{
+											"label": "Omsk Standard Time",
+											"value": "Omsk Standard Time"
+										},
+										{
+											"label": "Pacific SA Standard Time",
+											"value": "Pacific SA Standard Time"
+										},
+										{
+											"label": "Pacific Standard Time",
+											"value": "Pacific Standard Time"
+										},
+										{
+											"label": "Pacific Standard Time (Mexico)",
+											"value": "Pacific Standard Time (Mexico)"
+										},
+										{
+											"label": "Pakistan Standard Time",
+											"value": "Pakistan Standard Time"
+										},
+										{
+											"label": "Paraguay Standard Time",
+											"value": "Paraguay Standard Time"
+										},
+										{
+											"label": "Qyzylorda Standard Time",
+											"value": "Qyzylorda Standard Time"
+										},
+										{
+											"label": "Romance Standard Time",
+											"value": "Romance Standard Time"
+										},
+										{
+											"label": "Russia Time Zone 10",
+											"value": "Russia Time Zone 10"
+										},
+										{
+											"label": "Russia Time Zone 11",
+											"value": "Russia Time Zone 11"
+										},
+										{
+											"label": "Russia Time Zone 3",
+											"value": "Russia Time Zone 3"
+										},
+										{
+											"label": "Russian Standard Time",
+											"value": "Russian Standard Time"
+										},
+										{
+											"label": "SA Eastern Standard Time",
+											"value": "SA Eastern Standard Time"
+										},
+										{
+											"label": "SA Pacific Standard Time",
+											"value": "SA Pacific Standard Time"
+										},
+										{
+											"label": "SA Western Standard Time",
+											"value": "SA Western Standard Time"
+										},
+										{
+											"label": "Saint Pierre Standard Time",
+											"value": "Saint Pierre Standard Time"
+										},
+										{
+											"label": "Sakhalin Standard Time",
+											"value": "Sakhalin Standard Time"
+										},
+										{
+											"label": "Samoa Standard Time",
+											"value": "Samoa Standard Time"
+										},
+										{
+											"label": "Sao Tome Standard Time",
+											"value": "Sao Tome Standard Time"
+										},
+										{
+											"label": "Saratov Standard Time",
+											"value": "Saratov Standard Time"
+										},
+										{
+											"label": "SE Asia Standard Time",
+											"value": "SE Asia Standard Time"
+										},
+										{
+											"label": "Singapore Standard Time",
+											"value": "Singapore Standard Time"
+										},
+										{
+											"label": "South Africa Standard Time",
+											"value": "South Africa Standard Time"
+										},
+										{
+											"label": "Sri Lanka Standard Time",
+											"value": "Sri Lanka Standard Time"
+										},
+										{
+											"label": "Sudan Standard Time",
+											"value": "Sudan Standard Time"
+										},
+										{
+											"label": "Syria Standard Time",
+											"value": "Syria Standard Time"
+										},
+										{
+											"label": "Taipei Standard Time",
+											"value": "Taipei Standard Time"
+										},
+										{
+											"label": "Tasmania Standard Time",
+											"value": "Tasmania Standard Time"
+										},
+										{
+											"label": "Tocantins Standard Time",
+											"value": "Tocantins Standard Time"
+										},
+										{
+											"label": "Tokyo Standard Time",
+											"value": "Tokyo Standard Time"
+										},
+										{
+											"label": "Tomsk Standard Time",
+											"value": "Tomsk Standard Time"
+										},
+										{
+											"label": "Tonga Standard Time",
+											"value": "Tonga Standard Time"
+										},
+										{
+											"label": "Transbaikal Standard Time",
+											"value": "Transbaikal Standard Time"
+										},
+										{
+											"label": "Turkey Standard Time",
+											"value": "Turkey Standard Time"
+										},
+										{
+											"label": "Turks And Caicos Standard Time",
+											"value": "Turks And Caicos Standard Time"
+										},
+										{
+											"label": "Ulaanbaatar Standard Time",
+											"value": "Ulaanbaatar Standard Time"
+										},
+										{
+											"label": "US Eastern Standard Time",
+											"value": "US Eastern Standard Time"
+										},
+										{
+											"label": "US Mountain Standard Time",
+											"value": "US Mountain Standard Time"
+										},
+										{
+											"label": "UTC",
+											"value": "UTC"
+										},
+										{
+											"label": "UTC+12",
+											"value": "UTC+12"
+										},
+										{
+											"label": "UTC+13",
+											"value": "UTC+13"
+										},
+										{
+											"label": "UTC-02",
+											"value": "UTC-02"
+										},
+										{
+											"label": "UTC-08",
+											"value": "UTC-08"
+										},
+										{
+											"label": "UTC-09",
+											"value": "UTC-09"
+										},
+										{
+											"label": "UTC-11",
+											"value": "UTC-11"
+										},
+										{
+											"label": "Venezuela Standard Time",
+											"value": "Venezuela Standard Time"
+										},
+										{
+											"label": "Vladivostok Standard Time",
+											"value": "Vladivostok Standard Time"
+										},
+										{
+											"label": "Volgograd Standard Time",
+											"value": "Volgograd Standard Time"
+										},
+										{
+											"label": "W. Australia Standard Time",
+											"value": "W. Australia Standard Time"
+										},
+										{
+											"label": "W. Central Africa Standard Time",
+											"value": "W. Central Africa Standard Time"
+										},
+										{
+											"label": "W. Europe Standard Time",
+											"value": "W. Europe Standard Time"
+										},
+										{
+											"label": "W. Mongolia Standard Time",
+											"value": "W. Mongolia Standard Time"
+										},
+										{
+											"label": "West Asia Standard Time",
+											"value": "West Asia Standard Time"
+										},
+										{
+											"label": "West Bank Standard Time",
+											"value": "West Bank Standard Time"
+										},
+										{
+											"label": "West Pacific Standard Time",
+											"value": "West Pacific Standard Time"
+										},
+										{
+											"label": "Yakutsk Standard Time",
+											"value": "Yakutsk Standard Time"
 										}
 									],
 									"required": true
@@ -461,7 +1135,7 @@
 								"visible": true
 							}
 						],
-						"visible": true
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
             		}
 				]
 			},
