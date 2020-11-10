@@ -53,6 +53,7 @@
 					{
 						"name": "numOfAttendees",
 						"type": "Microsoft.Common.Slider",
+						"visible": true,
 						"label": "Number of attendees",
 						"subLabel": "attendees",
 						"toolTip": "Number of attendees to the training.",
@@ -62,8 +63,7 @@
 						"defaultValue": 8,
 						"constraints": {
 							"required": true
-						},
-						"visible": true
+						}
 					}
 				]
 			},
@@ -86,6 +86,7 @@
 					{
 						"name": "isDeployEmulatedOnPremisesEnv",
 						"type": "Microsoft.Common.OptionsGroup",
+						"visible": true,
 						"label": "Deploy the emulated on-premises environment?",
 						"toolTip": "",
 						"defaultValue": "Yes",
@@ -101,37 +102,36 @@
 							}
 						  ],
 						  "required": true
-						},
-						"visible": true
+						}
 					},
 					{
 						"name": "vpnSettingsSection",
 						"type": "Microsoft.Common.Section",
+						"visible": "[steps('emulatedOnPremisesEnvStep').isDeployEmulatedOnPremisesEnv]",
 						"label": "VPN settings",
 						"elements": [
 							{
 								"name": "vpnSharedKey",
 								"type": "Microsoft.Common.TextBox",
+								"visible": true,
 								"label": "Shared key (PSK)",
 								"toolTip": "A mixture of letters and numbers, used to establish encryption for the connection. The same shared key must be used in both the virtual network and local network gateways. If your gateway device doesn't provide one, you can make one up here and provide it to your device.",
 								"placeholder": "Your shared key",
 								"defaultValue": "",
 								"constraints": {
 									"required": true
-								},
-								"visible": true
+								}
 							},
 							{
 								"name": "text1",
 								"type": "Microsoft.Common.InfoBox",
+								"visible": true,
 								"options": {
 								  "icon": "Info",
 								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
-								},
-								"visible": true
+								}
 							}
-						],
-						"visible": "[steps('emulatedOnPremisesEnvStep').isDeployEmulatedOnPremisesEnv]"
+						]
 					}
 				]
 			},
@@ -154,6 +154,7 @@
 					{
 						"name": "isDeployJumpboxVm",
 						"type": "Microsoft.Common.OptionsGroup",
+						"visible": true,
 						"label": "Deploy a jump-box VM for each attendee?",
 						"toolTip": "",
 						"defaultValue": "Yes",
@@ -169,12 +170,12 @@
 							}
 						  ],
 						  "required": true
-						},
-						"visible": true
+						}
 					},
 					{
 						"name": "adminAccountSection",
 						"type": "Microsoft.Common.Section",
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Administrator account",
 						"elements": [
 							{
@@ -188,20 +189,21 @@
 							{
 								"name": "adminUserName",
 								"type": "Microsoft.Compute.UserNameTextBox",
+								"visible": true,
 								"label": "Username",
 								"toolTip": "The administrator username for the jump-box VM.",
+								"osPlatform": "Windows",
 								"defaultValue": "localadmin",
 								"constraints": {
 									"required": true,
 									"regex": "^[a-z0-9A-Z]{1,20}$",
 									"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-20 characters long."
-								},
-								"osPlatform": "Windows",
-								"visible": true
+								}
 							},					
 							{
 								"name": "adminPassword",
 								"type": "Microsoft.Compute.CredentialsCombo",
+								"visible": true,
 								"label": {
 									"password": "Password",
 									"confirmPassword": "Confirm password"
@@ -209,6 +211,7 @@
 								"toolTip": {
 									"password": "The administrator password for the jump-box VM."
 								},
+								"osPlatform": "Windows",
 								"constraints": {
 									"required": true,
 									"customPasswordRegex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
@@ -216,25 +219,23 @@
 								},
 								"options": {
 									"hideConfirmation": false
-								},
-								"osPlatform": "Windows",
-								"visible": true
+								}
 							},
 							{
 								"name": "text1",
 								"type": "Microsoft.Common.InfoBox",
+								"visible": true,
 								"options": {
 								  "icon": "Info",
 								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
-								},
-								"visible": true
+								}
 							}
-						],
-						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
+						]
 					},
 					{
 						"name": "vmSettingsSectoin",
 						"type": "Microsoft.Common.Section",
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Virtual machine settings",
 						"elements": [
 							{
@@ -248,14 +249,18 @@
 							{
 								"name": "osImage",
 								"type": "Microsoft.Common.DropDown",
+								"visible": true,
 								"label": "Image",
 								"toolTip": "The operating system image for the jump-box VM.",
 								"placeholder": "",
+								"multiLine": true,
 								"defaultValue": "Windows 10 Pro (127 GiB)",
 								"constraints": {
+									"required": true,
 									"allowedValues": [
 										{
 											"label": "Windows 10 Pro (127 GiB)",
+											"description": "SKU: 19h2-pro",
 											"value": {
 												"publisher": "MicrosoftWindowsDesktop",
 												"offer": "Windows-10",
@@ -265,6 +270,7 @@
 										},
 										{
 											"label": "Windows Server 2019 Datacenter (127 GiB)",
+											"description": "SKU: 2019-Datacenter",
 											"value": {
 												"publisher": "MicrosoftWindowsServer",
 												"offer": "WindowsServer",
@@ -274,6 +280,7 @@
 										},
 										{
 											"label": "Windows Server 2019 Datacenter (30 GiB)",
+											"description": "SKU: 2019-Datacenter-smalldisk",
 											"value": {
 												"publisher": "MicrosoftWindowsServer",
 												"offer": "WindowsServer",
@@ -281,16 +288,17 @@
 												"version": "latest"
 											}
 										}
-									],
-									"required": true
-								},
-								"visible": true
+									]
+								}
 							},
 							{
 								"name": "vmSize",
 								"type": "Microsoft.Compute.SizeSelector",
+								"visible": true,
 								"label": "Size",
 								"toolTip": "The virtual machine size of the jump-box VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2079859'>Learn more about Virtual Machine sizes</a>",
+								"count": "[steps('attendeesStep').numOfAttendees]",
+								"osPlatform": "Windows",
 								"recommendedSizes": [
 									"Standard_B2ms",
 									"Standard_D2s_v3",
@@ -307,23 +315,22 @@
 								"options": {
 									"hideDiskTypeFilter": true
 								},
-								"osPlatform": "Windows",
 								"imageReference": {
 									"publisher": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.publisher]",
 									"offer": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.offer]",
 									"sku": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.sku]"
-								},
-								"count": "[steps('attendeesStep').numOfAttendees]",
-								"visible": true
+								}
 							},
 							{
 								"name": "diskType",
 								"type": "Microsoft.Common.DropDown",
+								"visible": true,
 								"label": "OS disk type",
 								"toolTip": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>",
 								"placeholder": "",
 								"defaultValue": "Premium SSD",
 								"constraints": {
+									"required": true,
 									"allowedValues": [
 										{
 											"label": "Standard HDD",
@@ -337,17 +344,15 @@
 											"label": "Premium SSD",
 											"value": "Premium_LRS"
 										}
-									],
-									"required": true
-								},
-								"visible": true
+									]
+								}
 							}
-						],
-						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
+						]
 					},
 					{
 						"name": "autoShutdownSection",
 						"type": "Microsoft.Common.Section",
+						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Auto-shutdown",
 						"elements": [
 							{
@@ -361,13 +366,15 @@
 							{
 								"name": "autoShutdownTime",
 								"type": "Microsoft.Common.DropDown",
+								"visible": true,
 								"label": "Daily auto-shutdown time",
 								"toolTip": "The time of day the auto-shutdown of the jump-box VM will occur.",
-								"placeholder": "",
 								"filter": true,
 								"filterPlaceholder": "Filter items ...",
+								"placeholder": "",
 								"defaultValue": "23:30",
 								"constraints": {
+									"required": true,
 									"allowedValues": [
 										{
 											"label": "00:00",
@@ -561,19 +568,21 @@
 											"label": "23:30",
 											"value": "23:30"
 										}
-									],
-									"required": true
-								},
-								"visible": true
+									]
+								}
 							},
 							{
 								"name": "autoShutdownTimeZone",
 								"type": "Microsoft.Common.DropDown",
+								"visible": true,
 								"label": "Auto-shutdown time zone",
 								"toolTip": "The time zone ID for auto-shutdown time.",
+								"filter": true,
+								"filterPlaceholder": "Filter items ...",
 								"placeholder": "",
 								"defaultValue": "Pacific Standard Time",
 								"constraints": {
+									"required": true,
 									"allowedValues": [
 										{
 											"label": "Afghanistan Standard Time",
@@ -1131,13 +1140,10 @@
 											"label": "Yakutsk Standard Time",
 											"value": "Yakutsk Standard Time"
 										}
-									],
-									"required": true
-								},
-								"visible": true
+									]
+								}
 							}
-						],
-						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]"
+						]
             		}
 				]
 			},
