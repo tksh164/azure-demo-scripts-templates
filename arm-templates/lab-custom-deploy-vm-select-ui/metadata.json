@@ -1,13 +1,4 @@
 {
-    "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
-    "itemDisplayName": "itemDisplayName",
-    "description": "description value",
-    "summary": "summary value",
-    "githubUsername": "tksh164",
-    "docOwner": "tksh164",
-    "dateUpdated": "2020-11-04",
-    "type": "QuickStart",
-    "environments": [
-      "AzureCloud"
-    ]
-  }
+  "itemDisplayName": "itemDisplayName",
+  "description": "description"
+}
