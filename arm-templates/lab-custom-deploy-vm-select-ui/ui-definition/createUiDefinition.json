@@ -364,6 +364,8 @@
 								"label": "Daily auto-shutdown time",
 								"toolTip": "The time of day the auto-shutdown of the jump-box VM will occur.",
 								"placeholder": "",
+								 "filter": true,  
+								 "filterPlaceholder": "Filter items ...", 
 								"defaultValue": "23:30",
 								"constraints": {
 									"allowedValues": [
