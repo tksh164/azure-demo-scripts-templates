@@ -39,15 +39,11 @@
 				"label": "Attendees",
 				"elements": [
 					{
-						"name": "text1",
+						"name": "attendeesStepText",
 						"type": "Microsoft.Common.TextBlock",
 						"visible": true,
 						"options": {
-						  "text": "Please provide the configuration values for your application.",
-						  "link": {
-							"label": "Learn more",
-							"uri": "https://www.microsoft.com"
-						  }
+						  "text": "Please provide the attendee information for your training."
 						}
 					},		
 					{
@@ -72,15 +68,11 @@
 				"label": "Emulated on-premises environment",
 				"elements": [
 					{
-						"name": "text1",
+						"name": "emulatedOnPremisesEnvStepText",
 						"type": "Microsoft.Common.TextBlock",
 						"visible": true,
 						"options": {
-						  "text": "Please provide the configuration values for your application.",
-						  "link": {
-							"label": "Learn more",
-							"uri": "https://www.microsoft.com"
-						  }
+						  "text": "Please provide the emulated on-premises environment configurations."
 						}
 					},		
 					{
@@ -123,12 +115,12 @@
 								}
 							},
 							{
-								"name": "text1",
+								"name": "vpnSharedKeyInfo",
 								"type": "Microsoft.Common.InfoBox",
 								"visible": true,
 								"options": {
 								  "icon": "Info",
-								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
+								  "text": "Please tell the shared key to all attendees. The shared key is needed to do the PoC lab."
 								}
 							}
 						]
@@ -140,22 +132,18 @@
 				"label": "Jump-box VM",
 				"elements": [
 					{
-						"name": "text1",
+						"name": "jumpboxVmStepText",
 						"type": "Microsoft.Common.TextBlock",
 						"visible": true,
 						"options": {
-						  "text": "Please provide the configuration values for your application.",
-						  "link": {
-							"label": "Learn more",
-							"uri": "https://www.microsoft.com"
-						  }
+						  "text": "Please provide the jump-box VM configurations."
 						}
 					},		
 					{
 						"name": "isDeployJumpboxVm",
 						"type": "Microsoft.Common.OptionsGroup",
 						"visible": true,
-						"label": "Deploy a jump-box VM for each attendee?",
+						"label": "Deploy the jump-box VM for each attendee?",
 						"toolTip": "",
 						"defaultValue": "Yes",
 						"constraints": {
@@ -178,14 +166,6 @@
 						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Administrator account",
 						"elements": [
-							{
-								"name": "text2",
-								"type": "Microsoft.Common.TextBlock",
-								"visible": true,
-								"options": {
-								  "text": "Please provide the configuration values for your application."
-								}
-							},		
 							{
 								"name": "adminUserName",
 								"type": "Microsoft.Compute.UserNameTextBox",
@@ -222,12 +202,12 @@
 								}
 							},
 							{
-								"name": "text1",
+								"name": "adminAccountInfo",
 								"type": "Microsoft.Common.InfoBox",
 								"visible": true,
 								"options": {
 								  "icon": "Info",
-								  "text": "Nullam eros mi, mollis in sollicitudin non, tincidunt sed enim. Sed et felis metus, rhoncus ornare nibh. Ut at magna leo."
+								  "text": "Please tell the account information to all attendees. By default, all jump-box VM's administrator account is set to the above value."
 								}
 							}
 						]
@@ -238,14 +218,6 @@
 						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Virtual machine settings",
 						"elements": [
-							{
-								"name": "text2",
-								"type": "Microsoft.Common.TextBlock",
-								"visible": true,
-								"options": {
-								  "text": "Please provide the configuration values for your application."
-								}
-							},		
 							{
 								"name": "osImage",
 								"type": "Microsoft.Common.DropDown",
@@ -355,14 +327,6 @@
 						"visible": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
 						"label": "Auto-shutdown",
 						"elements": [
-							{
-								"name": "text2",
-								"type": "Microsoft.Common.TextBlock",
-								"visible": true,
-								"options": {
-								  "text": "Please provide the configuration values for your application."
-								}
-							},		
 							{
 								"name": "autoShutdownTime",
 								"type": "Microsoft.Common.DropDown",
