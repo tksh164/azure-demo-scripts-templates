@@ -1110,20 +1110,6 @@
                         ]
                     }
                 ]
-            },
-            {
-                "name": "tagsStep",
-                "label": "Tags",
-                "elements": [
-                    {
-                        "name": "tagsByResource",
-                        "type": "Microsoft.Common.TagsByResource",
-                        "resources": [
-                            "Microsoft.Storage/storageAccounts",
-                            "Microsoft.Compute/virtualMachines"
-                        ]
-                    }
-                ]
             }
         ],
         "outputs": {
