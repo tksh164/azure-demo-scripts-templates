@@ -6,7 +6,7 @@
         "config": {
             "isWizard": false,
             "basics": {
-                "description": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "description": "Emulated on-premises environment and jump-box VMs deployment.",
                 "subscription": {
                     "resourceProviders": [
                         "Microsoft.Compute",
@@ -72,14 +72,14 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                          "text": "Please provide the emulated on-premises environment configurations."
+                          "text": "If you are not interested in establishing a VPN with Azure at this time, the Microsoft engineer coordinating the session will help you to deploy a single \"emulated on-premises\" environment in one of your Azure subscriptions. Then, in the VPN exercises, we can establish VPN tunnels between attendees' VNets and the emulated on-premises VNet."
                         }
                     },
                     {
                         "name": "isDeployEmulatedOnPremisesEnv",
                         "type": "Microsoft.Common.OptionsGroup",
                         "visible": true,
-                        "label": "Deploy the emulated on-premises environment?",
+                        "label": "Do you want to deploy the emulated on-premises environment?",
                         "toolTip": "",
                         "defaultValue": "Yes",
                         "constraints": {
@@ -120,7 +120,7 @@
                                 "visible": true,
                                 "options": {
                                   "icon": "Info",
-                                  "text": "Please tell the shared key to all attendees. The shared key is needed to do the PoC lab."
+                                  "text": "Please tell the shared key to all attendees. The shared key is needed to do the VPN exercises."
                                 }
                             }
                         ]
@@ -136,14 +136,14 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                          "text": "Please provide the jump-box VM configurations."
+                          "text": "The Jump-box VMs are optional. The Microsoft engineer coordinating the session can deploy one VM for each attendee, facilitating the access to some internet resources, the installation of some required tools and services, etc."
                         }
                     },
                     {
                         "name": "isDeployJumpboxVm",
                         "type": "Microsoft.Common.OptionsGroup",
                         "visible": true,
-                        "label": "Deploy the jump-box VM for each attendee?",
+                        "label": "Do you want to deploy a jump-box VM for each attendee?",
                         "toolTip": "",
                         "defaultValue": "Yes",
                         "constraints": {
@@ -207,7 +207,7 @@
                                 "visible": true,
                                 "options": {
                                   "icon": "Info",
-                                  "text": "Please tell the account information to all attendees. By default, all jump-box VM's administrator account is set to the above value."
+                                  "text": "Please tell the account information to all attendees. By default, the administrator account of the all jump-box VMs are set to the above value."
                                 }
                             }
                         ]
