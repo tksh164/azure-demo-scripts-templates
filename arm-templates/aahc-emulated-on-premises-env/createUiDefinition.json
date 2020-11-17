@@ -1113,6 +1113,17 @@
             }
         ],
         "outputs": {
+            "numberOfAttendees": "[]",
+            "deployEmulatedOnPremisesEnvironment": "[]",
+            "vpnConnectionSharedKey": "[]",
+            "deployJumpboxVm": "[]",
+            "username": "[]",
+            "password": "[]",
+            "vmOsImage": "[]",
+            "vmSize": "[]",
+            "vmOsDiskType": "[]",
+            "dailyAutoshutdownTime": "[]",
+            "autoshutdownTimeZone": "[]"
         }
     }
 }
