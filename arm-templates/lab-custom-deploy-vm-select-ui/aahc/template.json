@@ -1,0 +1,341 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "numberOfAttendees": {
+            "type": "int",
+            "defaultValue": 8,
+            "minValue": 1,
+            "metadata": {
+                "description": "Number of attendees."
+            }
+        },
+        "deployEmulatedOnPremisesEnvironment": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "To deploy the emulated on-premises environment, select <strong>true</strong>. If you do not deploy the emulated on-premises environment, select <strong>false<strong>."
+            }
+        },
+        "vpnConnectionSharedKey": {
+            "type": "string",
+            "defaultValue": "define-your-shared-key-1234",
+            "metadata": {
+                "description": "The shared key for the site-to-site VPN connection."
+            }
+        },
+        "deployJumpboxVm": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "To deploy the jumpbox VMs for attendees, select <strong>true</strong>. If you do not deploy the jumpbox VMs, select <strong>false</strong> and input the dummy parameters to the following."
+            }
+        },
+        "username": {
+            "type": "string",
+            "defaultValue": "localadmin",
+            "minLength": 1,
+            "maxLength": 20,
+            "metadata": {
+                "description": "The administrator username for the jumpbox VMs."
+            }
+        },
+        "password": {
+            "type": "secureString",
+            "minLength": 12,
+            "maxLength": 123,
+            "metadata": {
+                "description": "The administrator password for the jumpbox VMs."
+            }
+        },
+        "vmOsImage": {
+            "type": "string",
+            "defaultValue": "Windows 10 Pro (127 GiB)",
+            "allowedValues": [
+                "Windows 10 Pro (127 GiB)",
+                "Windows Server 2019 Datacenter (127 GiB)",
+                "Windows Server 2019 Datacenter (30 GiB)"
+            ],
+            "metadata": {
+                "description": "The operating system image for the jumpbox VMs."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_D2s_v3",
+                "Standard_DS1_v2",
+                "Standard_B2ms"
+            ],
+            "metadata": {
+                "description": "The virtual machine size of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2079859'>Learn more about Virtual Machine sizes</a>"
+            }
+        },
+        "vmOsDiskType": {
+            "type": "string",
+            "defaultValue": "Premium SSD",
+            "allowedValues": [
+                "Standard HDD",
+                "Standard SSD",
+                "Premium SSD"
+            ],
+            "metadata": {
+                "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>"
+            }
+        },
+        "dailyAutoshutdownTime": {
+            "type": "string",
+            "defaultValue": "23:30",
+            "allowedValues": [
+                "00:00",
+                "00:30",
+                "01:00",
+                "01:30",
+                "02:00",
+                "02:30",
+                "03:00",
+                "03:30",
+                "04:00",
+                "04:30",
+                "05:00",
+                "05:30",
+                "06:00",
+                "06:30",
+                "07:00",
+                "07:30",
+                "08:00",
+                "08:30",
+                "09:00",
+                "09:30",
+                "10:00",
+                "10:30",
+                "11:00",
+                "11:30",
+                "12:00",
+                "12:30",
+                "13:00",
+                "13:30",
+                "14:00",
+                "14:30",
+                "15:00",
+                "15:30",
+                "16:00",
+                "16:30",
+                "17:00",
+                "17:30",
+                "18:00",
+                "18:30",
+                "19:00",
+                "19:30",
+                "20:00",
+                "20:30",
+                "21:00",
+                "21:30",
+                "22:00",
+                "22:30",
+                "23:00",
+                "23:30"
+            ],
+            "metadata": {
+                "description": "The time of day the auto-shutdown of the jumpbox VM will occur."
+            }
+        },
+        "autoshutdownTimeZone": {
+            "type": "string",
+            "defaultValue": "Pacific Standard Time",
+            "allowedValues": [
+                "Afghanistan Standard Time",
+                "Alaskan Standard Time",
+                "Aleutian Standard Time",
+                "Altai Standard Time",
+                "Arab Standard Time",
+                "Arabian Standard Time",
+                "Arabic Standard Time",
+                "Argentina Standard Time",
+                "Astrakhan Standard Time",
+                "Atlantic Standard Time",
+                "AUS Central Standard Time",
+                "Aus Central W. Standard Time",
+                "AUS Eastern Standard Time",
+                "Azerbaijan Standard Time",
+                "Azores Standard Time",
+                "Bahia Standard Time",
+                "Bangladesh Standard Time",
+                "Belarus Standard Time",
+                "Bougainville Standard Time",
+                "Canada Central Standard Time",
+                "Cape Verde Standard Time",
+                "Caucasus Standard Time",
+                "Cen. Australia Standard Time",
+                "Central America Standard Time",
+                "Central Asia Standard Time",
+                "Central Brazilian Standard Time",
+                "Central Europe Standard Time",
+                "Central European Standard Time",
+                "Central Pacific Standard Time",
+                "Central Standard Time",
+                "Central Standard Time (Mexico)",
+                "Chatham Islands Standard Time",
+                "China Standard Time",
+                "Cuba Standard Time",
+                "Dateline Standard Time",
+                "E. Africa Standard Time",
+                "E. Australia Standard Time",
+                "E. Europe Standard Time",
+                "E. South America Standard Time",
+                "Easter Island Standard Time",
+                "Eastern Standard Time",
+                "Eastern Standard Time (Mexico)",
+                "Egypt Standard Time",
+                "Ekaterinburg Standard Time",
+                "Fiji Standard Time",
+                "FLE Standard Time",
+                "Georgian Standard Time",
+                "GMT Standard Time",
+                "Greenland Standard Time",
+                "Greenwich Standard Time",
+                "GTB Standard Time",
+                "Haiti Standard Time",
+                "Hawaiian Standard Time",
+                "India Standard Time",
+                "Iran Standard Time",
+                "Israel Standard Time",
+                "Jordan Standard Time",
+                "Kaliningrad Standard Time",
+                "Kamchatka Standard Time",
+                "Korea Standard Time",
+                "Libya Standard Time",
+                "Line Islands Standard Time",
+                "Lord Howe Standard Time",
+                "Magadan Standard Time",
+                "Magallanes Standard Time",
+                "Marquesas Standard Time",
+                "Mauritius Standard Time",
+                "Mid-Atlantic Standard Time",
+                "Middle East Standard Time",
+                "Montevideo Standard Time",
+                "Morocco Standard Time",
+                "Mountain Standard Time",
+                "Mountain Standard Time (Mexico)",
+                "Myanmar Standard Time",
+                "N. Central Asia Standard Time",
+                "Namibia Standard Time",
+                "Nepal Standard Time",
+                "New Zealand Standard Time",
+                "Newfoundland Standard Time",
+                "Norfolk Standard Time",
+                "North Asia East Standard Time",
+                "North Asia Standard Time",
+                "North Korea Standard Time",
+                "Omsk Standard Time",
+                "Pacific SA Standard Time",
+                "Pacific Standard Time",
+                "Pacific Standard Time (Mexico)",
+                "Pakistan Standard Time",
+                "Paraguay Standard Time",
+                "Qyzylorda Standard Time",
+                "Romance Standard Time",
+                "Russia Time Zone 10",
+                "Russia Time Zone 11",
+                "Russia Time Zone 3",
+                "Russian Standard Time",
+                "SA Eastern Standard Time",
+                "SA Pacific Standard Time",
+                "SA Western Standard Time",
+                "Saint Pierre Standard Time",
+                "Sakhalin Standard Time",
+                "Samoa Standard Time",
+                "Sao Tome Standard Time",
+                "Saratov Standard Time",
+                "SE Asia Standard Time",
+                "Singapore Standard Time",
+                "South Africa Standard Time",
+                "Sri Lanka Standard Time",
+                "Sudan Standard Time",
+                "Syria Standard Time",
+                "Taipei Standard Time",
+                "Tasmania Standard Time",
+                "Tocantins Standard Time",
+                "Tokyo Standard Time",
+                "Tomsk Standard Time",
+                "Tonga Standard Time",
+                "Transbaikal Standard Time",
+                "Turkey Standard Time",
+                "Turks And Caicos Standard Time",
+                "Ulaanbaatar Standard Time",
+                "US Eastern Standard Time",
+                "US Mountain Standard Time",
+                "UTC",
+                "UTC+12",
+                "UTC+13",
+                "UTC-02",
+                "UTC-08",
+                "UTC-09",
+                "UTC-11",
+                "Venezuela Standard Time",
+                "Vladivostok Standard Time",
+                "Volgograd Standard Time",
+                "W. Australia Standard Time",
+                "W. Central Africa Standard Time",
+                "W. Europe Standard Time",
+                "W. Mongolia Standard Time",
+                "West Asia Standard Time",
+                "West Bank Standard Time",
+                "West Pacific Standard Time",
+                "Yakutsk Standard Time"
+            ],
+            "metadata": {
+                "description": "The time zone ID for auto-shutdown time."
+            }
+        }
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "numberOfAttendees": {
+            "type": "int",
+            "value": "[parameters('numberOfAttendees')]"
+        },
+        "deployEmulatedOnPremisesEnvironment": {
+            "type": "bool",
+            "value": "[parameters('deployEmulatedOnPremisesEnvironment')]"
+        },
+        "vpnConnectionSharedKey": {
+            "type": "string",
+            "value": "[parameters('vpnConnectionSharedKey')]"
+        },
+        "deployJumpboxVm": {
+            "type": "bool",
+            "value": "[parameters('deployJumpboxVm')]"
+        },
+        "username": {
+            "type": "string",
+            "value": "[parameters('username')]"
+        },
+        "password": {
+            "type": "securestring",
+            "value": "[parameters('password')]"
+        },
+        "vmOsImage": {
+            "type": "string",
+            "value": "[parameters('vmOsImage')]"
+        },
+        "vmSize": {
+            "type": "string",
+            "value": "[parameters('vmSize')]"
+        },
+        "vmOsDiskType": {
+            "type": "string",
+            "value": "[parameters('vmOsDiskType')]"
+        },
+        "dailyAutoshutdownTime": {
+            "type": "string",
+            "value": "[parameters('dailyAutoshutdownTime')]"
+        },
+        "autoshutdownTimeZone": {
+            "type": "string",
+            "value": "[parameters('autoshutdownTimeZone')]"
+        }
+    }
+}
