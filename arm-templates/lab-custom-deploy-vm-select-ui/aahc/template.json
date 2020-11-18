@@ -49,12 +49,32 @@
             }
         },
         "vmOsImage": {
-            "type": "string",
-            "defaultValue": "Windows 10 Pro (127 GiB)",
+            "type": "object",
+            "defaultValue": {
+                "publisher": "MicrosoftWindowsDesktop",
+                "offer": "Windows-10",
+                "sku": "19h2-pro",
+                "version": "latest"
+            },
             "allowedValues": [
-                "Windows 10 Pro (127 GiB)",
-                "Windows Server 2019 Datacenter (127 GiB)",
-                "Windows Server 2019 Datacenter (30 GiB)"
+                {
+                    "publisher": "MicrosoftWindowsDesktop",
+                    "offer": "Windows-10",
+                    "sku": "19h2-pro",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk",
+                    "version": "latest"
+                }
             ],
             "metadata": {
                 "description": "The operating system image for the jumpbox VMs."
@@ -318,7 +338,7 @@
             "value": "[parameters('password')]"
         },
         "vmOsImage": {
-            "type": "string",
+            "type": "object",
             "value": "[parameters('vmOsImage')]"
         },
         "vmSize": {
