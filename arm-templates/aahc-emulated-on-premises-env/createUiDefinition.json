@@ -1119,7 +1119,7 @@
             "deployJumpboxVm": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
             "username": "[steps('jumpboxVmStep').adminAccountSection.adminUserName]",
             "password": "[steps('jumpboxVmStep').adminAccountSection.adminPassword]",
-            "vmOsImage": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage]",
+            "vmOsImage": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.sku]",
             "vmSize": "[steps('jumpboxVmStep').vmSettingsSectoin.vmSize]",
             "vmOsDiskType": "[steps('jumpboxVmStep').vmSettingsSectoin.diskType]",
             "dailyAutoshutdownTime": "[steps('jumpboxVmStep').autoShutdownSection.autoShutdownTime]",
