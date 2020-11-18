@@ -1118,7 +1118,7 @@
             "vpnConnectionSharedKey": "[steps('emulatedOnPremisesEnvStep').vpnSettingsSection.vpnSharedKey]",
             "deployJumpboxVm": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
             "username": "[steps('jumpboxVmStep').adminAccountSection.adminUserName]",
-            "password": "[steps('jumpboxVmStep').adminAccountSection.adminPassword]",
+            "password": "[steps('jumpboxVmStep').adminAccountSection.adminPassword.password]",
             "vmOsImage": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage.sku]",
             "vmSize": "[steps('jumpboxVmStep').vmSettingsSectoin.vmSize]",
             "vmOsDiskType": "[steps('jumpboxVmStep').vmSettingsSectoin.diskType]",
