@@ -1113,17 +1113,17 @@
             }
         ],
         "outputs": {
-            "numberOfAttendees": "[]",
-            "deployEmulatedOnPremisesEnvironment": "[]",
-            "vpnConnectionSharedKey": "[]",
-            "deployJumpboxVm": "[]",
-            "username": "[]",
-            "password": "[]",
-            "vmOsImage": "[]",
-            "vmSize": "[]",
-            "vmOsDiskType": "[]",
-            "dailyAutoshutdownTime": "[]",
-            "autoshutdownTimeZone": "[]"
+            "numberOfAttendees": "[steps('attendeesStep').numOfAttendees]",
+            "deployEmulatedOnPremisesEnvironment": "[steps('emulatedOnPremisesEnvStep').isDeployEmulatedOnPremisesEnv]",
+            "vpnConnectionSharedKey": "[steps('emulatedOnPremisesEnvStep').vpnSettingsSection.vpnSharedKey]",
+            "deployJumpboxVm": "[steps('jumpboxVmStep').isDeployJumpboxVm]",
+            "username": "[steps('jumpboxVmStep').adminAccountSection.adminUserName]",
+            "password": "[steps('jumpboxVmStep').adminAccountSection.adminPassword]",
+            "vmOsImage": "[steps('jumpboxVmStep').vmSettingsSectoin.osImage]",
+            "vmSize": "[steps('jumpboxVmStep').vmSettingsSectoin.vmSize]",
+            "vmOsDiskType": "[steps('jumpboxVmStep').vmSettingsSectoin.diskType]",
+            "dailyAutoshutdownTime": "[steps('jumpboxVmStep').autoShutdownSection.autoShutdownTime]",
+            "autoshutdownTimeZone": "[steps('jumpboxVmStep').autoShutdownSection.autoShutdownTimeZone]"
         }
     }
 }
