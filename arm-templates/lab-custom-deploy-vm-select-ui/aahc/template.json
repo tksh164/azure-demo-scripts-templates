@@ -94,11 +94,11 @@
         },
         "vmOsDiskType": {
             "type": "string",
-            "defaultValue": "Premium SSD",
+            "defaultValue": "Premium_LRS",
             "allowedValues": [
-                "Standard HDD",
-                "Standard SSD",
-                "Premium SSD"
+                "Standard_LRS",
+                "StandardSSD_LRS",
+                "Premium_LRS"
             ],
             "metadata": {
                 "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>"
