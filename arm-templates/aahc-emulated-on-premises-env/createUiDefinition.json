@@ -175,9 +175,7 @@
                                 "osPlatform": "Windows",
                                 "defaultValue": "localadmin",
                                 "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,20}$",
-                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-20 characters long."
+                                    "required": true
                                 }
                             },
                             {
@@ -193,9 +191,7 @@
                                 },
                                 "osPlatform": "Windows",
                                 "constraints": {
-                                    "required": true,
-                                    "customPasswordRegex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
-                                    "customValidationMessage": "The password must be alphanumeric, contain at least 12 characters, and have at least 1 letter and 1 number."
+                                    "required": true
                                 },
                                 "options": {
                                     "hideConfirmation": false
