@@ -52,12 +52,32 @@
             }
         },
         "vmOsImage": {
-            "type": "string",
-            "defaultValue": "Windows 10 Pro (127 GiB)",
+            "type": "object",
+            "defaultValue": {
+                "publisher": "MicrosoftWindowsDesktop",
+                "offer": "Windows-10",
+                "sku": "19h2-pro",
+                "version": "latest"
+            },
             "allowedValues": [
-                "Windows 10 Pro (127 GiB)",
-                "Windows Server 2019 Datacenter (127 GiB)",
-                "Windows Server 2019 Datacenter (30 GiB)"
+                {
+                    "publisher": "MicrosoftWindowsDesktop",
+                    "offer": "Windows-10",
+                    "sku": "19h2-pro",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk",
+                    "version": "latest"
+                }
             ],
             "metadata": {
                 "description": "The operating system image for the jumpbox VMs."
@@ -77,11 +97,11 @@
         },
         "vmOsDiskType": {
             "type": "string",
-            "defaultValue": "Premium SSD",
+            "defaultValue": "Premium_LRS",
             "allowedValues": [
-                "Standard HDD",
-                "Standard SSD",
-                "Premium SSD"
+                "Standard_LRS",
+                "StandardSSD_LRS",
+                "Premium_LRS"
             ],
             "metadata": {
                 "description": "The OS disk storage type of the jumpbox VMs. <a href='http://go.microsoft.com/fwlink/?LinkId=2077396'>Learn more about disk types</a>"
@@ -293,66 +313,10 @@
             }
         }
     },
-    "functions": [
-        {
-            "namespace": "aahc",
-            "members": {
-                "osImageIndex": {
-                    "parameters": [
-                        {
-                            "type": "string",
-                            "name": "label"
-                        }
-                    ],
-                    "output": {
-                        "type": "int",
-                        "value": "[if(equals(parameters('label'), 'Windows 10 Pro (127 GiB)'), 0, if(equals(parameters('label'), 'Windows Server 2019 Datacenter (127 GiB)'), 1, if(equals(parameters('label'), 'Windows Server 2019 Datacenter (30 GiB)'), 2, 0)))]"
-                    }
-                },
-                "diskTypeIndex": {
-                    "parameters": [
-                        {
-                            "type": "string",
-                            "name": "label"
-                        }
-                    ],
-                    "output": {
-                        "type": "int",
-                        "value": "[if(equals(parameters('label'), 'Standard HDD'), 0, if(equals(parameters('label'), 'Standard SSD'), 1, if(equals(parameters('label'), 'Premium SSD'), 2, 1)))]"
-                    }
-                }
-            }
-        }
-    ],
     "variables": {
         "location": "[resourceGroup().location]",
         "deployEmulatedOnPremisesEnvRelatedResources": "[parameters('deployEmulatedOnPremisesEnvironment')]",
         "deployJumpboxVmRelatedResources": "[parameters('deployJumpboxVm')]",
-        "osImageDefinition": [
-            {
-                "publisher": "MicrosoftWindowsDesktop",
-                "offer": "Windows-10",
-                "sku": "19h2-pro",
-                "version": "latest"
-            },
-            {
-                "publisher": "MicrosoftWindowsServer",
-                "offer": "WindowsServer",
-                "sku": "2019-Datacenter",
-                "version": "latest"
-            },
-            {
-                "publisher": "MicrosoftWindowsServer",
-                "offer": "WindowsServer",
-                "sku": "2019-Datacenter-smalldisk",
-                "version": "latest"
-            }
-        ],
-        "diskTypeDefinition": [
-            "Standard_LRS",
-            "StandardSSD_LRS",
-            "Premium_LRS"
-        ],
 
         "numOfAttendees": "[parameters('numberOfAttendees')]",
         "attendeeOffset": 1,
@@ -370,8 +334,8 @@
 
         "jumpboxVmName": "jumpbox",
         "jumpboxVmSize": "[parameters('vmSize')]",
-        "jumpboxOsDiskStorageAccountType": "[variables('diskTypeDefinition')[aahc.diskTypeIndex(parameters('vmOsDiskType'))]]",
-        "jumpboxOsImageReference": "[variables('osImageDefinition')[aahc.osImageIndex(parameters('vmOsImage'))]]",
+        "jumpboxOsDiskStorageAccountType": "[parameters('vmOsDiskType')]",
+        "jumpboxOsImageReference": "[parameters('vmOsImage')]",
         "jumpboxVmAutoshutdownDailyRecurrenceTime": "[parameters('dailyAutoshutdownTime')]",
         "jumpboxVmAutoshutdownTimeZoneId": "[parameters('autoshutdownTimeZone')]",
 
