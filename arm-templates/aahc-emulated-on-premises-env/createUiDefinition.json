@@ -228,11 +228,11 @@
                                     "allowedValues": [
                                         {
                                             "label": "Windows 10 Pro (127 GiB)",
-                                            "description": "SKU: 19h2-pro",
+                                            "description": "SKU: 20h2-pro",
                                             "value": {
                                                 "publisher": "MicrosoftWindowsDesktop",
                                                 "offer": "Windows-10",
-                                                "sku": "19h2-pro",
+                                                "sku": "20h2-pro",
                                                 "version": "latest"
                                             }
                                         },

@@ -56,14 +56,14 @@
             "defaultValue": {
                 "publisher": "MicrosoftWindowsDesktop",
                 "offer": "Windows-10",
-                "sku": "19h2-pro",
+                "sku": "20h2-pro",
                 "version": "latest"
             },
             "allowedValues": [
                 {
                     "publisher": "MicrosoftWindowsDesktop",
                     "offer": "Windows-10",
-                    "sku": "19h2-pro",
+                    "sku": "20h2-pro",
                     "version": "latest"
                 },
                 {
