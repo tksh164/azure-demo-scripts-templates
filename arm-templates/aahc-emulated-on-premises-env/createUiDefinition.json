@@ -540,7 +540,7 @@
                                 "filter": true,
                                 "filterPlaceholder": "Filter timezones ...",
                                 "placeholder": "",
-                                "defaultValue": "Pacific Standard Time",
+                                "defaultValue": "(UTC-08:00) Pacific Time (US &amp; Canada)",
                                 "constraints": {
                                     "required": true,
                                     "allowedValues": [
