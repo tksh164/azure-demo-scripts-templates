@@ -538,7 +538,7 @@
                                 "label": "Auto-shutdown time zone",
                                 "toolTip": "The time zone ID for auto-shutdown time.",
                                 "filter": true,
-                                "filterPlaceholder": "Filter items ...",
+                                "filterPlaceholder": "Filter timezones ...",
                                 "placeholder": "",
                                 "defaultValue": "Pacific Standard Time",
                                 "constraints": {
