@@ -545,560 +545,428 @@
                                     "required": true,
                                     "allowedValues": [
                                         {
-                                            "label": "Afghanistan Standard Time",
-                                            "value": "Afghanistan Standard Time"
-                                        },
-                                        {
-                                            "label": "Alaskan Standard Time",
-                                            "value": "Alaskan Standard Time"
-                                        },
-                                        {
-                                            "label": "Aleutian Standard Time",
-                                            "value": "Aleutian Standard Time"
-                                        },
-                                        {
-                                            "label": "Altai Standard Time",
-                                            "value": "Altai Standard Time"
-                                        },
-                                        {
-                                            "label": "Arab Standard Time",
-                                            "value": "Arab Standard Time"
-                                        },
-                                        {
-                                            "label": "Arabian Standard Time",
-                                            "value": "Arabian Standard Time"
-                                        },
-                                        {
-                                            "label": "Arabic Standard Time",
-                                            "value": "Arabic Standard Time"
-                                        },
-                                        {
-                                            "label": "Argentina Standard Time",
-                                            "value": "Argentina Standard Time"
-                                        },
-                                        {
-                                            "label": "Astrakhan Standard Time",
-                                            "value": "Astrakhan Standard Time"
-                                        },
-                                        {
-                                            "label": "Atlantic Standard Time",
-                                            "value": "Atlantic Standard Time"
-                                        },
-                                        {
-                                            "label": "AUS Central Standard Time",
-                                            "value": "AUS Central Standard Time"
-                                        },
-                                        {
-                                            "label": "Aus Central W. Standard Time",
-                                            "value": "Aus Central W. Standard Time"
-                                        },
-                                        {
-                                            "label": "AUS Eastern Standard Time",
-                                            "value": "AUS Eastern Standard Time"
-                                        },
-                                        {
-                                            "label": "Azerbaijan Standard Time",
-                                            "value": "Azerbaijan Standard Time"
-                                        },
-                                        {
-                                            "label": "Azores Standard Time",
-                                            "value": "Azores Standard Time"
-                                        },
-                                        {
-                                            "label": "Bahia Standard Time",
-                                            "value": "Bahia Standard Time"
-                                        },
-                                        {
-                                            "label": "Bangladesh Standard Time",
-                                            "value": "Bangladesh Standard Time"
-                                        },
-                                        {
-                                            "label": "Belarus Standard Time",
-                                            "value": "Belarus Standard Time"
-                                        },
-                                        {
-                                            "label": "Bougainville Standard Time",
-                                            "value": "Bougainville Standard Time"
-                                        },
-                                        {
-                                            "label": "Canada Central Standard Time",
-                                            "value": "Canada Central Standard Time"
-                                        },
-                                        {
-                                            "label": "Cape Verde Standard Time",
-                                            "value": "Cape Verde Standard Time"
-                                        },
-                                        {
-                                            "label": "Caucasus Standard Time",
-                                            "value": "Caucasus Standard Time"
-                                        },
-                                        {
-                                            "label": "Cen. Australia Standard Time",
-                                            "value": "Cen. Australia Standard Time"
-                                        },
-                                        {
-                                            "label": "Central America Standard Time",
-                                            "value": "Central America Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Asia Standard Time",
-                                            "value": "Central Asia Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Brazilian Standard Time",
-                                            "value": "Central Brazilian Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Europe Standard Time",
-                                            "value": "Central Europe Standard Time"
-                                        },
-                                        {
-                                            "label": "Central European Standard Time",
-                                            "value": "Central European Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Pacific Standard Time",
-                                            "value": "Central Pacific Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Standard Time",
-                                            "value": "Central Standard Time"
-                                        },
-                                        {
-                                            "label": "Central Standard Time (Mexico)",
-                                            "value": "Central Standard Time (Mexico)"
-                                        },
-                                        {
-                                            "label": "Chatham Islands Standard Time",
-                                            "value": "Chatham Islands Standard Time"
-                                        },
-                                        {
-                                            "label": "China Standard Time",
-                                            "value": "China Standard Time"
-                                        },
-                                        {
-                                            "label": "Cuba Standard Time",
-                                            "value": "Cuba Standard Time"
-                                        },
-                                        {
-                                            "label": "Dateline Standard Time",
+                                            "label": "(UTC-12:00) International Date Line West",
                                             "value": "Dateline Standard Time"
                                         },
                                         {
-                                            "label": "E. Africa Standard Time",
-                                            "value": "E. Africa Standard Time"
-                                        },
-                                        {
-                                            "label": "E. Australia Standard Time",
-                                            "value": "E. Australia Standard Time"
-                                        },
-                                        {
-                                            "label": "E. Europe Standard Time",
-                                            "value": "E. Europe Standard Time"
-                                        },
-                                        {
-                                            "label": "E. South America Standard Time",
-                                            "value": "E. South America Standard Time"
-                                        },
-                                        {
-                                            "label": "Easter Island Standard Time",
-                                            "value": "Easter Island Standard Time"
-                                        },
-                                        {
-                                            "label": "Eastern Standard Time",
-                                            "value": "Eastern Standard Time"
-                                        },
-                                        {
-                                            "label": "Eastern Standard Time (Mexico)",
-                                            "value": "Eastern Standard Time (Mexico)"
-                                        },
-                                        {
-                                            "label": "Egypt Standard Time",
-                                            "value": "Egypt Standard Time"
-                                        },
-                                        {
-                                            "label": "Ekaterinburg Standard Time",
-                                            "value": "Ekaterinburg Standard Time"
-                                        },
-                                        {
-                                            "label": "Fiji Standard Time",
-                                            "value": "Fiji Standard Time"
-                                        },
-                                        {
-                                            "label": "FLE Standard Time",
-                                            "value": "FLE Standard Time"
-                                        },
-                                        {
-                                            "label": "Georgian Standard Time",
-                                            "value": "Georgian Standard Time"
-                                        },
-                                        {
-                                            "label": "GMT Standard Time",
-                                            "value": "GMT Standard Time"
-                                        },
-                                        {
-                                            "label": "Greenland Standard Time",
-                                            "value": "Greenland Standard Time"
-                                        },
-                                        {
-                                            "label": "Greenwich Standard Time",
-                                            "value": "Greenwich Standard Time"
-                                        },
-                                        {
-                                            "label": "GTB Standard Time",
-                                            "value": "GTB Standard Time"
-                                        },
-                                        {
-                                            "label": "Haiti Standard Time",
-                                            "value": "Haiti Standard Time"
-                                        },
-                                        {
-                                            "label": "Hawaiian Standard Time",
-                                            "value": "Hawaiian Standard Time"
-                                        },
-                                        {
-                                            "label": "India Standard Time",
-                                            "value": "India Standard Time"
-                                        },
-                                        {
-                                            "label": "Iran Standard Time",
-                                            "value": "Iran Standard Time"
-                                        },
-                                        {
-                                            "label": "Israel Standard Time",
-                                            "value": "Israel Standard Time"
-                                        },
-                                        {
-                                            "label": "Jordan Standard Time",
-                                            "value": "Jordan Standard Time"
-                                        },
-                                        {
-                                            "label": "Kaliningrad Standard Time",
-                                            "value": "Kaliningrad Standard Time"
-                                        },
-                                        {
-                                            "label": "Kamchatka Standard Time",
-                                            "value": "Kamchatka Standard Time"
-                                        },
-                                        {
-                                            "label": "Korea Standard Time",
-                                            "value": "Korea Standard Time"
-                                        },
-                                        {
-                                            "label": "Libya Standard Time",
-                                            "value": "Libya Standard Time"
-                                        },
-                                        {
-                                            "label": "Line Islands Standard Time",
-                                            "value": "Line Islands Standard Time"
-                                        },
-                                        {
-                                            "label": "Lord Howe Standard Time",
-                                            "value": "Lord Howe Standard Time"
-                                        },
-                                        {
-                                            "label": "Magadan Standard Time",
-                                            "value": "Magadan Standard Time"
-                                        },
-                                        {
-                                            "label": "Magallanes Standard Time",
-                                            "value": "Magallanes Standard Time"
-                                        },
-                                        {
-                                            "label": "Marquesas Standard Time",
-                                            "value": "Marquesas Standard Time"
-                                        },
-                                        {
-                                            "label": "Mauritius Standard Time",
-                                            "value": "Mauritius Standard Time"
-                                        },
-                                        {
-                                            "label": "Mid-Atlantic Standard Time",
-                                            "value": "Mid-Atlantic Standard Time"
-                                        },
-                                        {
-                                            "label": "Middle East Standard Time",
-                                            "value": "Middle East Standard Time"
-                                        },
-                                        {
-                                            "label": "Montevideo Standard Time",
-                                            "value": "Montevideo Standard Time"
-                                        },
-                                        {
-                                            "label": "Morocco Standard Time",
-                                            "value": "Morocco Standard Time"
-                                        },
-                                        {
-                                            "label": "Mountain Standard Time",
-                                            "value": "Mountain Standard Time"
-                                        },
-                                        {
-                                            "label": "Mountain Standard Time (Mexico)",
-                                            "value": "Mountain Standard Time (Mexico)"
-                                        },
-                                        {
-                                            "label": "Myanmar Standard Time",
-                                            "value": "Myanmar Standard Time"
-                                        },
-                                        {
-                                            "label": "N. Central Asia Standard Time",
-                                            "value": "N. Central Asia Standard Time"
-                                        },
-                                        {
-                                            "label": "Namibia Standard Time",
-                                            "value": "Namibia Standard Time"
-                                        },
-                                        {
-                                            "label": "Nepal Standard Time",
-                                            "value": "Nepal Standard Time"
-                                        },
-                                        {
-                                            "label": "New Zealand Standard Time",
-                                            "value": "New Zealand Standard Time"
-                                        },
-                                        {
-                                            "label": "Newfoundland Standard Time",
-                                            "value": "Newfoundland Standard Time"
-                                        },
-                                        {
-                                            "label": "Norfolk Standard Time",
-                                            "value": "Norfolk Standard Time"
-                                        },
-                                        {
-                                            "label": "North Asia East Standard Time",
-                                            "value": "North Asia East Standard Time"
-                                        },
-                                        {
-                                            "label": "North Asia Standard Time",
-                                            "value": "North Asia Standard Time"
-                                        },
-                                        {
-                                            "label": "North Korea Standard Time",
-                                            "value": "North Korea Standard Time"
-                                        },
-                                        {
-                                            "label": "Omsk Standard Time",
-                                            "value": "Omsk Standard Time"
-                                        },
-                                        {
-                                            "label": "Pacific SA Standard Time",
-                                            "value": "Pacific SA Standard Time"
-                                        },
-                                        {
-                                            "label": "Pacific Standard Time",
-                                            "value": "Pacific Standard Time"
-                                        },
-                                        {
-                                            "label": "Pacific Standard Time (Mexico)",
-                                            "value": "Pacific Standard Time (Mexico)"
-                                        },
-                                        {
-                                            "label": "Pakistan Standard Time",
-                                            "value": "Pakistan Standard Time"
-                                        },
-                                        {
-                                            "label": "Paraguay Standard Time",
-                                            "value": "Paraguay Standard Time"
-                                        },
-                                        {
-                                            "label": "Qyzylorda Standard Time",
-                                            "value": "Qyzylorda Standard Time"
-                                        },
-                                        {
-                                            "label": "Romance Standard Time",
-                                            "value": "Romance Standard Time"
-                                        },
-                                        {
-                                            "label": "Russia Time Zone 10",
-                                            "value": "Russia Time Zone 10"
-                                        },
-                                        {
-                                            "label": "Russia Time Zone 11",
-                                            "value": "Russia Time Zone 11"
-                                        },
-                                        {
-                                            "label": "Russia Time Zone 3",
-                                            "value": "Russia Time Zone 3"
-                                        },
-                                        {
-                                            "label": "Russian Standard Time",
-                                            "value": "Russian Standard Time"
-                                        },
-                                        {
-                                            "label": "SA Eastern Standard Time",
-                                            "value": "SA Eastern Standard Time"
-                                        },
-                                        {
-                                            "label": "SA Pacific Standard Time",
-                                            "value": "SA Pacific Standard Time"
-                                        },
-                                        {
-                                            "label": "SA Western Standard Time",
-                                            "value": "SA Western Standard Time"
-                                        },
-                                        {
-                                            "label": "Saint Pierre Standard Time",
-                                            "value": "Saint Pierre Standard Time"
-                                        },
-                                        {
-                                            "label": "Sakhalin Standard Time",
-                                            "value": "Sakhalin Standard Time"
-                                        },
-                                        {
-                                            "label": "Samoa Standard Time",
-                                            "value": "Samoa Standard Time"
-                                        },
-                                        {
-                                            "label": "Sao Tome Standard Time",
-                                            "value": "Sao Tome Standard Time"
-                                        },
-                                        {
-                                            "label": "Saratov Standard Time",
-                                            "value": "Saratov Standard Time"
-                                        },
-                                        {
-                                            "label": "SE Asia Standard Time",
-                                            "value": "SE Asia Standard Time"
-                                        },
-                                        {
-                                            "label": "Singapore Standard Time",
-                                            "value": "Singapore Standard Time"
-                                        },
-                                        {
-                                            "label": "South Africa Standard Time",
-                                            "value": "South Africa Standard Time"
-                                        },
-                                        {
-                                            "label": "Sri Lanka Standard Time",
-                                            "value": "Sri Lanka Standard Time"
-                                        },
-                                        {
-                                            "label": "Sudan Standard Time",
-                                            "value": "Sudan Standard Time"
-                                        },
-                                        {
-                                            "label": "Syria Standard Time",
-                                            "value": "Syria Standard Time"
-                                        },
-                                        {
-                                            "label": "Taipei Standard Time",
-                                            "value": "Taipei Standard Time"
-                                        },
-                                        {
-                                            "label": "Tasmania Standard Time",
-                                            "value": "Tasmania Standard Time"
-                                        },
-                                        {
-                                            "label": "Tocantins Standard Time",
-                                            "value": "Tocantins Standard Time"
-                                        },
-                                        {
-                                            "label": "Tokyo Standard Time",
-                                            "value": "Tokyo Standard Time"
-                                        },
-                                        {
-                                            "label": "Tomsk Standard Time",
-                                            "value": "Tomsk Standard Time"
-                                        },
-                                        {
-                                            "label": "Tonga Standard Time",
-                                            "value": "Tonga Standard Time"
-                                        },
-                                        {
-                                            "label": "Transbaikal Standard Time",
-                                            "value": "Transbaikal Standard Time"
-                                        },
-                                        {
-                                            "label": "Turkey Standard Time",
-                                            "value": "Turkey Standard Time"
-                                        },
-                                        {
-                                            "label": "Turks And Caicos Standard Time",
-                                            "value": "Turks And Caicos Standard Time"
-                                        },
-                                        {
-                                            "label": "Ulaanbaatar Standard Time",
-                                            "value": "Ulaanbaatar Standard Time"
-                                        },
-                                        {
-                                            "label": "US Eastern Standard Time",
-                                            "value": "US Eastern Standard Time"
-                                        },
-                                        {
-                                            "label": "US Mountain Standard Time",
-                                            "value": "US Mountain Standard Time"
-                                        },
-                                        {
-                                            "label": "UTC",
-                                            "value": "UTC"
-                                        },
-                                        {
-                                            "label": "UTC+12",
-                                            "value": "UTC+12"
-                                        },
-                                        {
-                                            "label": "UTC+13",
-                                            "value": "UTC+13"
-                                        },
-                                        {
-                                            "label": "UTC-02",
-                                            "value": "UTC-02"
-                                        },
-                                        {
-                                            "label": "UTC-08",
-                                            "value": "UTC-08"
-                                        },
-                                        {
-                                            "label": "UTC-09",
-                                            "value": "UTC-09"
-                                        },
-                                        {
-                                            "label": "UTC-11",
+                                            "label": "(UTC-11:00) Coordinated Universal Time-11",
                                             "value": "UTC-11"
                                         },
                                         {
-                                            "label": "Venezuela Standard Time",
+                                            "label": "(UTC-10:00) Hawaii",
+                                            "value": "Hawaiian Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-09:00) Alaska",
+                                            "value": "Alaskan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-08:00) Baja California",
+                                            "value": "Pacific Standard Time (Mexico)"
+                                        },
+                                        {
+                                            "label": "(UTC-08:00) Pacific Time (US &amp; Canada)",
+                                            "value": "Pacific Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-07:00) Arizona",
+                                            "value": "US Mountain Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-07:00) Chihuahua, La Paz, Mazatlan",
+                                            "value": "Mountain Standard Time (Mexico)"
+                                        },
+                                        {
+                                            "label": "(UTC-07:00) Mountain Time (US &amp; Canada)",
+                                            "value": "Mountain Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-06:00) Central America",
+                                            "value": "Central America Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-06:00) Central Time (US &amp; Canada)",
+                                            "value": "Central Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-06:00) Guadalajara, Mexico City, Monterrey",
+                                            "value": "Central Standard Time (Mexico)"
+                                        },
+                                        {
+                                            "label": "(UTC-06:00) Saskatchewan",
+                                            "value": "Canada Central Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-05:00) Bogota, Lima, Quito, Rio Branco",
+                                            "value": "SA Pacific Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-05:00) Chetumal",
+                                            "value": "Eastern Standard Time (Mexico)"
+                                        },
+                                        {
+                                            "label": "(UTC-05:00) Eastern Time (US &amp; Canada)",
+                                            "value": "Eastern Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-05:00) Indiana (East)",
+                                            "value": "US Eastern Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-04:30) Caracas",
                                             "value": "Venezuela Standard Time"
                                         },
                                         {
-                                            "label": "Vladivostok Standard Time",
-                                            "value": "Vladivostok Standard Time"
+                                            "label": "(UTC-04:00) Asuncion",
+                                            "value": "Paraguay Standard Time"
                                         },
                                         {
-                                            "label": "Volgograd Standard Time",
-                                            "value": "Volgograd Standard Time"
+                                            "label": "(UTC-04:00) Atlantic Time (Canada)",
+                                            "value": "Atlantic Standard Time"
                                         },
                                         {
-                                            "label": "W. Australia Standard Time",
-                                            "value": "W. Australia Standard Time"
+                                            "label": "(UTC-04:00) Cuiaba",
+                                            "value": "Central Brazilian Standard Time"
                                         },
                                         {
-                                            "label": "W. Central Africa Standard Time",
-                                            "value": "W. Central Africa Standard Time"
+                                            "label": "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan",
+                                            "value": "SA Western Standard Time"
                                         },
                                         {
-                                            "label": "W. Europe Standard Time",
+                                            "label": "(UTC-03:30) Newfoundland",
+                                            "value": "Newfoundland Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Brasilia",
+                                            "value": "E. South America Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Cayenne, Fortaleza",
+                                            "value": "SA Eastern Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) City of Buenos Aires",
+                                            "value": "Argentina Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Greenland",
+                                            "value": "Greenland Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Montevideo",
+                                            "value": "Montevideo Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Salvador",
+                                            "value": "Bahia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-03:00) Santiago",
+                                            "value": "Pacific SA Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-02:00) Coordinated Universal Time-02",
+                                            "value": "UTC-02"
+                                        },
+                                        {
+                                            "label": "(UTC-01:00) Azores",
+                                            "value": "Azores Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC-01:00) Cabo Verde Is.",
+                                            "value": "Cape Verde Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC) Casablanca",
+                                            "value": "Morocco Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC) Coordinated Universal Time",
+                                            "value": "UTC"
+                                        },
+                                        {
+                                            "label": "(UTC) Dublin, Edinburgh, Lisbon, London",
+                                            "value": "GMT Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC) Monrovia, Reykjavik",
+                                            "value": "Greenwich Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
                                             "value": "W. Europe Standard Time"
                                         },
                                         {
-                                            "label": "W. Mongolia Standard Time",
-                                            "value": "W. Mongolia Standard Time"
+                                            "label": "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague",
+                                            "value": "Central Europe Standard Time"
                                         },
                                         {
-                                            "label": "West Asia Standard Time",
+                                            "label": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris",
+                                            "value": "Romance Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb",
+                                            "value": "Central European Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+01:00) West Central Africa",
+                                            "value": "W. Central Africa Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+01:00) Windhoek",
+                                            "value": "Namibia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Amman",
+                                            "value": "Jordan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Athens, Bucharest",
+                                            "value": "GTB Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Beirut",
+                                            "value": "Middle East Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Cairo",
+                                            "value": "Egypt Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Damascus",
+                                            "value": "Syria Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) E. Europe",
+                                            "value": "E. Europe Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Harare, Pretoria",
+                                            "value": "South Africa Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius",
+                                            "value": "FLE Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Istanbul",
+                                            "value": "Turkey Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Jerusalem",
+                                            "value": "Israel Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Kaliningrad (RTZ 1)",
+                                            "value": "Kaliningrad Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+02:00) Tripoli",
+                                            "value": "Libya Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:00) Baghdad",
+                                            "value": "Arabic Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:00) Kuwait, Riyadh",
+                                            "value": "Arab Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:00) Minsk",
+                                            "value": "Belarus Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:00) Moscow, St. Petersburg, Volgograd (RTZ 2)",
+                                            "value": "Russian Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:00) Nairobi",
+                                            "value": "E. Africa Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+03:30) Tehran",
+                                            "value": "Iran Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Abu Dhabi, Muscat",
+                                            "value": "Arabian Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Baku",
+                                            "value": "Azerbaijan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Izhevsk, Samara (RTZ 3)",
+                                            "value": "Russia Time Zone 3"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Port Louis",
+                                            "value": "Mauritius Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Tbilisi",
+                                            "value": "Georgian Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:00) Yerevan",
+                                            "value": "Caucasus Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+04:30) Kabul",
+                                            "value": "Afghanistan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+05:00) Ashgabat, Toshkent",
                                             "value": "West Asia Standard Time"
                                         },
                                         {
-                                            "label": "West Bank Standard Time",
-                                            "value": "West Bank Standard Time"
+                                            "label": "(UTC+05:00) Ekaterinburg (RTZ 4)",
+                                            "value": "Ekaterinburg Standard Time"
                                         },
                                         {
-                                            "label": "West Pacific Standard Time",
+                                            "label": "(UTC+05:00) Islamabad, Karachi",
+                                            "value": "Pakistan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi",
+                                            "value": "India Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+05:30) Sri Jayawardenepura",
+                                            "value": "Sri Lanka Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+05:45) Kathmandu",
+                                            "value": "Nepal Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+06:00) Astana",
+                                            "value": "Central Asia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+06:00) Dhaka",
+                                            "value": "Bangladesh Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+06:00) Novosibirsk (RTZ 5)",
+                                            "value": "N. Central Asia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+06:30) Yangon (Rangoon)",
+                                            "value": "Myanmar Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+07:00) Bangkok, Hanoi, Jakarta",
+                                            "value": "SE Asia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+07:00) Krasnoyarsk (RTZ 6)",
+                                            "value": "North Asia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi",
+                                            "value": "China Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Irkutsk (RTZ 7)",
+                                            "value": "North Asia East Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Kuala Lumpur, Singapore",
+                                            "value": "Singapore Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Perth",
+                                            "value": "W. Australia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Taipei",
+                                            "value": "Taipei Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+08:00) Ulaanbaatar",
+                                            "value": "Ulaanbaatar Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+09:00) Osaka, Sapporo, Tokyo",
+                                            "value": "Tokyo Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+09:00) Seoul",
+                                            "value": "Korea Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+09:00) Yakutsk (RTZ 8)",
+                                            "value": "Yakutsk Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+09:30) Adelaide",
+                                            "value": "Cen. Australia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+09:30) Darwin",
+                                            "value": "AUS Central Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+10:00) Brisbane",
+                                            "value": "E. Australia Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+10:00) Canberra, Melbourne, Sydney",
+                                            "value": "AUS Eastern Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+10:00) Guam, Port Moresby",
                                             "value": "West Pacific Standard Time"
                                         },
                                         {
-                                            "label": "Yakutsk Standard Time",
-                                            "value": "Yakutsk Standard Time"
+                                            "label": "(UTC+10:00) Hobart",
+                                            "value": "Tasmania Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+10:00) Magadan",
+                                            "value": "Magadan Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+10:00) Vladivostok, Magadan (RTZ 9)",
+                                            "value": "Vladivostok Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+11:00) Chokurdakh (RTZ 10)",
+                                            "value": "Russia Time Zone 10"
+                                        },
+                                        {
+                                            "label": "(UTC+11:00) Solomon Is., New Caledonia",
+                                            "value": "Central Pacific Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+12:00) Anadyr, Petropavlovsk-Kamchatsky (RTZ 11)",
+                                            "value": "Russia Time Zone 11"
+                                        },
+                                        {
+                                            "label": "(UTC+12:00) Auckland, Wellington",
+                                            "value": "New Zealand Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+12:00) Coordinated Universal Time+12",
+                                            "value": "UTC+12"
+                                        },
+                                        {
+                                            "label": "(UTC+12:00) Fiji",
+                                            "value": "Fiji Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+13:00) Nuku'alofa",
+                                            "value": "Tonga Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+13:00) Samoa",
+                                            "value": "Samoa Standard Time"
+                                        },
+                                        {
+                                            "label": "(UTC+14:00) Kiritimati Island",
+                                            "value": "Line Islands Standard Time"
                                         }
                                     ]
                                 }
