@@ -1,0 +1,6 @@
+[ClassVersion("1.0.0.0"), FriendlyName("DiskVolume")]
+class DSC_DiskVolume : OMI_BaseResource
+{
+    [Key, Description("Specifies the drive letter for which volume to need.")] String DriveLetter;
+    [Required, Description("Specifies the volume label as criteria for which volume to need.")] String VolumeLabel;
+};
