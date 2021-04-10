@@ -78,7 +78,7 @@
 
         "adds": {
             "domainName": "[parameters('domainName')]",
-            "dataVolumeDriveLetter": "S",
+            "dataVolumeDriveLetter": "N",
             "dataVolumeLabel": "ADDS Data"
         },
 
