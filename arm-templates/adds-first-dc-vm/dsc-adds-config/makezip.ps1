@@ -1,5 +1,6 @@
 $targetFiles = @(
     'dsc-adds-config.ps1',
+    'DiskVolumeDsc',
     'ActiveDirectoryDsc'
 )
 $destinationFile = 'dsc-adds-config.zip'
