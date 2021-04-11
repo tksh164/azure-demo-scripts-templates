@@ -40,6 +40,34 @@
                 "description": "The domain name for the new AD DS forest."
             }
         },
+        "vmImagePublisher": {
+            "type": "string",
+            "defaultValue": "MicrosoftWindowsServer",
+            "allowedValues": [
+                "MicrosoftWindowsServer"
+            ]
+        },
+        "vmImageOffer": {
+            "type": "string",
+            "defaultValue": "WindowsServer",
+            "allowedValues": [
+                "WindowsServer"
+            ]
+        },
+        "vmImageSku": {
+            "type": "string",
+            "defaultValue": "2019-Datacenter-smalldisk",
+            "allowedValues": [
+                "2019-Datacenter",
+                "2019-Datacenter-smalldisk",
+                "2016-Datacenter",
+                "2016-Datacenter-smalldisk"//,
+                //"2012-R2-Datacenter",
+                //"2012-R2-Datacenter-smalldisk",
+                // "2012-Datacenter",
+                // "2012-Datacenter-smalldisk"
+            ]
+        },
         "uniqueSuffixSeed": {
             "type": "string",
             "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
@@ -119,9 +147,9 @@
                         }
                     },
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2019-Datacenter-smalldisk",
+                        "publisher": "[parameters('vmImagePublisher')]",
+                        "offer": "[parameters('vmImageOffer')]",
+                        "sku": "[parameters('vmImageSku')]",
                         "version": "latest"
                     },
                     "dataDisks": [
