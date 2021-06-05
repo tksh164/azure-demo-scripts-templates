@@ -17,7 +17,10 @@
         Line |
         33 |                      New-AzStorageSyncCloudEndpoint @params
             |                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            | Long running operation failed with status 'Failed'. Additional Info:'Unable to read specified storage account. Please check the permissions and try again after some time.' Code: MgmtStorageAccountAuthorizationFailed Message: Unable to read specified storage account. Please check the permissions and try again after some time. Target:
+            | Long running operation failed with status 'Failed'. Additional Info:'Unable to read specified storage
+            | account. Please check the permissions and try again after some time.' Code:
+            | MgmtStorageAccountAuthorizationFailed Message: Unable to read specified storage account. Please check the
+            | permissions and try again after some time. Target:
         ```
     - The PowerShell script execution takes around 35 minutes with 30 Sync Groups if no error.
     - You can simply re-run the PowerShell script if the error happened.
