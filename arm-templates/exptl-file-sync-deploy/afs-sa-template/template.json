@@ -1,0 +1,181 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourcePrefix": {
+            "type": "string",
+            "defaultValue": "afs"
+        },
+        "syncGroupCount": {
+            "type": "int",
+            "defaultValue": 30,
+            "minValue": 1,
+            "maxValue": 200
+        },
+        "storageAccountNamePrefix": {
+            "type": "string",
+            "defaultValue": "fsync"
+        }//,
+        // "storageAccountTenantId": {
+        //     "type": "string",
+        //     "minLength": 36,
+        //     "maxLength": 36,
+        //     "metadata": {
+        //         "description": "The tenant ID (GUID) of the storage account where the storage share exists."
+        //     }
+        // }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id), 0, 3)]",
+        "storageAccountNameSuffix": "[concat('x', variables('uniqueString'))]",
+        "storageSyncServicesName": "[concat(parameters('resourcePrefix'), variables('uniqueString'), '-fsync')]",
+        "syncGroupNamePrefix": "syncgroup-",
+        "fileShareName": "fsync-share"
+    },
+    "resources": [
+
+        // Storage Account
+
+        {
+            "copy": {
+                "name": "storageAccountCopy",
+                "count": "[parameters('syncGroupCount')]"
+            },
+            "name": "[concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix'))]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-01-01",
+            "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Allow",
+                    "ipRules": []
+                }
+            },
+            "resources": [
+                {
+                    "name": "default",
+                    "type": "fileServices",
+                    "apiVersion": "2021-01-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]"
+                    ],
+                    "properties": {
+                        // "cors": {
+                        //     "corsRules": [
+                        //         {
+                        //         "allowedOrigins": [
+                        //             "string"
+                        //         ],
+                        //         "allowedMethods": [
+                        //             "string"
+                        //         ],
+                        //         "maxAgeInSeconds": "integer",
+                        //         "exposedHeaders": [
+                        //             "string"
+                        //         ],
+                        //         "allowedHeaders": [
+                        //             "string"
+                        //         ]
+                        //         }
+                        //     ]
+                        // },
+                        // "shareDeleteRetentionPolicy": {
+                        //     "enabled": "boolean",
+                        //     "days": "integer"
+                        // },
+                        // "protocolSettings": {
+                        //     "smb": {
+                        //         "multichannel": {
+                        //             "enabled": "boolean"
+                        //         },
+                        //         "versions": "string",
+                        //         "authenticationMethods": "string",
+                        //         "kerberosTicketEncryption": "string",
+                        //         "channelEncryption": "string"
+                        //     }
+                        // }
+                    },
+                    "resources": [
+                        {
+                            "name": "[variables('fileShareName')]",
+                            "type": "shares",
+                            "apiVersion": "2021-01-01",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default')]"
+                            ],
+                            "properties": {
+                                //"metadata": {},
+                                //"shareQuota": "integer",
+                                //"enabledProtocols": "SMB",
+                                //"rootSquash": "string",
+                                //"accessTier": "string"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        // Storage Sync Service
+
+        {
+            "name": "[variables('storageSyncServicesName')]",
+            "type": "Microsoft.StorageSync/storageSyncServices",
+            "apiVersion": "2020-03-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "incomingTrafficPolicy": "AllowAllTraffic"
+            }
+        },
+
+        // Sync Group
+
+        {
+            "copy": {
+                "name": "syncGroupCopy",
+                "count": "[parameters('syncGroupCount')]"
+            },
+            "name": "[concat(variables('storageSyncServicesName'), '/', concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')))]",
+            "type": "Microsoft.StorageSync/storageSyncServices/syncGroups",
+            "apiVersion": "2020-03-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.StorageSync/storageSyncServices', variables('storageSyncServicesName'))]"
+            ],
+            "properties": {}
+        }//,
+
+        // NOTE: Sometimes failed with "Code: MgmtStorageAccountAuthorizationFailed Message: Unable to read specified storage account. Please check the permissions and try again after some time."
+        // {
+        //     "copy": {
+        //         "name": "cloudEndpointCopy",
+        //         "count": "[parameters('syncGroupCount')]"
+        //     },
+        //     "name": "[concat(variables('storageSyncServicesName'), '/', concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')), '/', guid(resourceGroup().id, string(copyIndex())))]",
+        //     "type": "Microsoft.StorageSync/storageSyncServices/syncGroups/cloudEndpoints",
+        //     "apiVersion": "2020-03-01",
+        //     "dependsOn": [
+        //         // "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]",
+        //         // "[resourceId('Microsoft.Storage/storageAccounts/fileServices', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default')]",
+        //         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default', variables('fileShareName'))]",
+        //         //"[resourceId('Microsoft.StorageSync/storageSyncServices', variables('storageSyncServicesName'))]",
+        //         "[resourceId('Microsoft.StorageSync/storageSyncServices/syncGroups', variables('storageSyncServicesName'), concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')))]"
+        //     ],
+        //     "properties": {
+        //         "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]",
+        //         "azureFileShareName": "[variables('fileShareName')]",
+        //         "storageAccountTenantId": "[parameters('storageAccountTenantId')]"
+        //         //"friendlyName": "[variables('fileShareName')]"
+        //     }
+        // }
+    ]
+}
