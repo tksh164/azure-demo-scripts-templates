@@ -6,7 +6,7 @@ This template demonstrates that change the Windows language and region settings 
 
 You can use non-English language and region settings since first login even if use the Azure Marketplace image because the DSC extension changes the Windows language and region settings for default account and system account. It's meaning the new user's language and welcome screen language are changed.
 
-Simple PowerShell script version is [here](https://github.com/tksh164/windows-language-culture-change-script).
+Simple PowerShell script version is [here](https://github.com/tksh164/change-windows-language-regional-settings).
 
 ### Deployments
 
