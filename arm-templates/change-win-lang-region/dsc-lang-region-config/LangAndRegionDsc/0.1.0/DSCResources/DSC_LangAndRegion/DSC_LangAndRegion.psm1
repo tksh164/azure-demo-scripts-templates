@@ -17,15 +17,13 @@ function Get-TargetResource
 
     $locationGeoId = (Get-WinHomeLocation).GeoId
 
-    $returnValue = @{
+    return @{
         IsSingleInstance     = 'Yes'
         PreferredLanguage    = $preferredLanguage
         LocationGeoId        = $locationGeoId
         CopyToDefaultAccount = $false
         CopyToSystemAccount  = $false
     }
-
-    return $returnValue
 }
 
 function Set-TargetResource

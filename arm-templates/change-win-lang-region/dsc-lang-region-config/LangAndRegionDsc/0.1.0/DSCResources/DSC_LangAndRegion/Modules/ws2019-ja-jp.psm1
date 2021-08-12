@@ -1,6 +1,5 @@
-$LANGUAGE = 'ja'
-
-$REQUIRED_WINDOWS_CAPABILITY_NAMES = @(
+$language = 'ja'
+$languageCapabilityNames = @(
     'Language.Basic~~~ja-JP~0.0.1.0',
     'Language.Fonts.Jpan~~~und-JPAN~0.0.1.0',
     'Language.Handwriting~~~ja-JP~0.0.1.0',
@@ -9,19 +8,18 @@ $REQUIRED_WINDOWS_CAPABILITY_NAMES = @(
     'Language.TextToSpeech~~~ja-JP~0.0.1.0'
 )
 
-
 function Install-LanguagePack
 {
     [CmdletBinding()]
     param ()
 
     # Download the lang pack CAB file.
-    Write-Verbose -Message ('Downloading the language pack for "{0}".' -f $LANGUAGE)
+    Write-Verbose -Message ('Downloading the language pack for "{0}".' -f $language)
     $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
     Get-JapaneseLangPackCabFile -DestinationFilePath $langPackFilePath
 
     # Install the language pack.
-    Write-Verbose -Message ('Installing the language pack for "{0}".' -f $LANGUAGE)
+    Write-Verbose -Message ('Installing the language pack for "{0}".' -f $language)
     Add-WindowsPackage -Online -NoRestart -PackagePath $langPackFilePath -Verbose:$false
 
     # Delete the lang pack CAB file.
@@ -39,11 +37,11 @@ function Test-LanguagePack
 
     if (Test-LanguagePackInstallationState)
     {
-        Write-Verbose -Message ('The language pack for "{0}" is already installed.' -f $LANGUAGE)
+        Write-Verbose -Message ('The language pack for "{0}" is already installed.' -f $language)
     }
     else
     {
-        Write-Verbose -Message ('The language pack for "{0}" is not installed.' -f $LANGUAGE)
+        Write-Verbose -Message ('The language pack for "{0}" is not installed.' -f $language)
         $result = $false
     }
 
@@ -60,14 +58,14 @@ function Get-JapaneseLangPackCabFile
 
     # Ref: Cannot configure a language pack for Windows Server 2019 Desktop Experience
     #      https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
-    $LANG_PACK_ISO_URI = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
-    $request = [System.Net.HttpWebRequest]::Create($LANG_PACK_ISO_URI)
+    $langPackIsoUri = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
+    $request = [System.Net.HttpWebRequest]::Create($langPackIsoUri)
     $request.Method = 'GET'
 
     # Set the Japanese language pack CAB file data range.
-    $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE = 1003644928
-    $JP_LANG_CAB_FILE_SIZE = 62015873
-    $request.AddRange('bytes', $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE, $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE + $JP_LANG_CAB_FILE_SIZE - 1)
+    $offsetToJpLangCabFileInIsoFile = 1003644928
+    $jpLangCabFileSize = 62015873
+    $request.AddRange('bytes', $offsetToJpLangCabFileInIsoFile, $offsetToJpLangCabFileInIsoFile + $jpLangCabFileSize - 1)
 
     # Donwload the lang pack CAB file.
     $response = $request.GetResponse()
@@ -81,10 +79,10 @@ function Get-JapaneseLangPackCabFile
     $fileStream.Dispose()
 
     # Verify integrity to the downloaded lang pack CAB file.
-    $JP_LANG_CAB_FILE_HASH = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
+    $jpLangCabFileHash = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
     $fileHash = Get-FileHash -Algorithm SHA1 -LiteralPath $DestinationFilePath
-    if ($fileHash.Hash -ne $JP_LANG_CAB_FILE_HASH) {
-        throw ('"{0}" is corrupted. The download was may failed.') -f $DestinationFilePath
+    if ($fileHash.Hash -ne $jpLangCabFileHash) {
+        throw ('The "{0}" is corrupted. The download was may failed.') -f $DestinationFilePath
     }
 }
 
@@ -104,10 +102,10 @@ function Install-LanguageCapability
     [CmdletBinding()]
     param ()
 
-    $REQUIRED_WINDOWS_CAPABILITY_NAMES | ForEach-Object -Process {
+    $languageCapabilityNames | ForEach-Object -Process {
         if (-not (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_))
         {
-            Write-Verbose -Message ('Installing the "{0}" capability.' -f $_)
+            Write-Verbose -Message ('Installing capability "{0}".' -f $_)
             Add-WindowsCapability -Online -Name $_ -Verbose:$false
         }
     }
@@ -121,14 +119,14 @@ function Test-LanguageCapability
 
     $result = $true
 
-    $REQUIRED_WINDOWS_CAPABILITY_NAMES | ForEach-Object -Process {
+    $languageCapabilityNames | ForEach-Object -Process {
         if (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_)
         {
-            Write-Verbose -Message ('The "{0}" capability is already installed.' -f $_)
+            Write-Verbose -Message ('Capability "{0}" is already installed.' -f $_)
         }
         else
         {
-            Write-Verbose -Message ('The "{0}" capability is not installed.' -f $_)
+            Write-Verbose -Message ('Capability "{0}" is not installed.' -f $_)
             $result = $false
         }
     }
@@ -154,19 +152,13 @@ function Set-PreferredLanguage
     [CmdletBinding()]
     param ()
 
+    Write-Verbose -Message ('Setting the preferred language to "{0}"' -f $language)
+
     $langList = Get-WinUserLanguageList
-    if ($langList[0].LanguageTag -eq 'ja')
-    {
-        Write-Verbose -Message ('The preferred language is already set to "{0}".' -f $LANGUAGE)
-    }
-    else
-    {
-        Write-Verbose -Message ('Setting the preferred language to "{0}"' -f $LANGUAGE)
-        $jaItems = $langList | Where-Object -Property 'LanguageTag' -EQ -Value $LANGUAGE
-        $jaItems | ForEach-Object -Process { $langList.Remove($_) }
-        $langList.Insert(0, $LANGUAGE)
-        Set-WinUserLanguageList -LanguageList $langList -Force
-    }
+    $jaItems = $langList | Where-Object -Property 'LanguageTag' -EQ -Value $language
+    $jaItems | ForEach-Object -Process { $langList.Remove($_) }
+    $langList.Insert(0, $language)
+    Set-WinUserLanguageList -LanguageList $langList -Force
 }
 
 function Test-PreferredLanguage
@@ -178,13 +170,13 @@ function Test-PreferredLanguage
     $result = $true
 
     $langList = Get-WinUserLanguageList
-    if ($langList[0].LanguageTag -eq $LANGUAGE)
+    if ($langList[0].LanguageTag -eq $language)
     {
-        Write-Verbose -Message ('The preferred language is already set to "{0}"' -f $LANGUAGE)
+        Write-Verbose -Message ('The preferred language is already set to "{0}"' -f $language)
     }
     else
     {
-        Write-Verbose -Message ('The preferred language is not set to "{0}"' -f $LANGUAGE)
+        Write-Verbose -Message ('The preferred language is not set to "{0}"' -f $language)
         $result = $false
     }
 
@@ -196,7 +188,7 @@ function Set-UILanguage
     [CmdletBinding()]
     param ()
 
-    Write-Verbose -Message ('Setting the UI language to "{0}"' -f $LANGUAGE)
+    Write-Verbose -Message ('Setting the Windows UI language to "{0}"' -f $language)
     Set-WinUILanguageOverride -Language ja-JP
 }
 
