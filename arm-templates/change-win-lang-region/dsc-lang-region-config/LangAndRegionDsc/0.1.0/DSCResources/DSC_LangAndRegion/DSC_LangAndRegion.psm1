@@ -55,32 +55,12 @@ function Set-TargetResource
     # TODO: Require OS version detection.
     if ($PreferredLanguage -eq 'ja')
     {
-        #
-        # Install the Japanese language pack.
-        #
+        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ws2019-ja-jp.psm1') -Verbose:$false
 
-        #Write-Verbose -Message ('Getting the language pack installation state for "{0}".' -f $PreferredLanguage)
-
-        if (Test-LanguagePackInstallationState)
+        if (-not (Test-LanguagePack))
         {
-            Write-Verbose -Message ('The language pack for "{0}" is already installed.' -f $PreferredLanguage)
-        }
-        else
-        {
-            Write-Verbose -Message ('The language pack for "{0}" is not installed.' -f $PreferredLanguage)
-
-            # Download the lang pack CAB file.
-            Write-Verbose -Message 'Downloading the language pack.'
-            $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
-            Get-JapaneseLangPackCabFile -DestinationFilePath $langPackFilePath
-
-            # Install the language pack.
-            Write-Verbose -Message 'Installing the language pack.'
-            Add-WindowsPackage -Online -NoRestart -PackagePath $langPackFilePath -Verbose:$false
-
-            # Delete the lang pack CAB file.
-            Write-Verbose -Message 'Deleting the language pack temporary file.'
-            Remove-Item -LiteralPath $langPackFilePath -Force
+            # Install the Japanese language pack.
+            Install-LanguagePack -Verbose
 
             # The prerequisite is met for the UI language update and the copy settings to the default/system account.
             $isPrerequisiteMet = $true
@@ -89,56 +69,24 @@ function Set-TargetResource
             $global:DSCMachineStatus = 1
         }
 
-        #
-        # Install the Japanese language related capabilities.
-        #
-
-        #Write-Verbose -Message ('Getting the language related capabilities installation state for "{0}".' -f $PreferredLanguage)
-
-        Get-RequiredWindowsCapabilityNames | ForEach-Object -Process {
-            if (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_)
-            {
-                Write-Verbose -Message ('The "{0}" capability is already installed.' -f $_)
-            }
-            else
-            {
-                Write-Verbose -Message ('Installing the "{0}" capability.' -f $_)
-                Add-WindowsCapability -Online -Name $_ -Verbose:$false
-                $global:DSCMachineStatus = 1
-            }
+        if (-not (Test-LanguageCapability))
+        {
+            # Install the Japanese language related capabilities.
+            Install-LanguageCapability -Verbose
+            $global:DSCMachineStatus = 1
         }
 
-        #
-        # Set the preferred language for the current user account.
-        #
-
-        #Write-Verbose -Message 'Getting the preferred language setting for the current user account.'
-
-        $langList = Get-WinUserLanguageList
-        if ($langList[0].LanguageTag -eq $PreferredLanguage)
+        if (-not (Test-PreferredLanguage))
         {
-            Write-Verbose -Message ('The preferred language is already set to "{0}".' -f $PreferredLanguage)
-        }
-        else
-        {
-            Write-Verbose -Message ('Setting the preferred language to "{0}"' -f $PreferredLanguage)
-            $jaItems = $langList | Where-Object -Property 'LanguageTag' -EQ -Value $PreferredLanguage
-            $jaItems | ForEach-Object -Process { $langList.Remove($_) }
-            $langList.Insert(0, $PreferredLanguage)
-            Set-WinUserLanguageList -LanguageList $langList -Force
+            # Set the preferred language for the current user account.
+            Set-PreferredLanguage -Verbose
         }
 
         $prerequisiteMetFlagFilePath = Get-PrerequisiteMetFlagFilePath
         if ([System.IO.File]::Exists($prerequisiteMetFlagFilePath))
         {
-            #
             # Override the Windows UI language for the current user account.
-            #
-
-            #Write-Verbose -Message 'Getting the UI language setting for the current user account.'
-
-            Write-Verbose -Message ('Setting the UI language to "{0}"' -f $PreferredLanguage)
-            Set-WinUILanguageOverride -Language ja-JP
+            Set-UILanguage -Verbose
 
             # Delete the flag file.
             Write-Verbose -Message 'Deleting the prerequisite met flag file.'
@@ -175,7 +123,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey('LocationGeoId'))
     {
         #Write-Verbose -Message 'Getting the location ID for the current user account.'
-
+        
         if ((Get-WinHomeLocation).GeoId -eq $LocationGeoId)
         {
             Write-Verbose -Message ('The location ID is already set to "{0}".' -f $LocationGeoId)
@@ -224,60 +172,16 @@ function Test-TargetResource
     # TODO: Require OS version detection.
     if ($PreferredLanguage -eq 'ja')
     {
-        #
+        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ws2019-ja-jp.psm1') -Verbose:$false
+
         # Test the Japanese language pack installation.
-        #
+        if (-not (Test-LanguagePack -Verbose)) { $result = $false }
 
-        #Write-Verbose -Message ('Getting the language pack installation state for "{0}".' -f $PreferredLanguage)
-        if (Test-LanguagePackInstallationState)
-        {
-            Write-Verbose -Message ('The language pack for "{0}" is already installed.' -f $PreferredLanguage)
-        }
-        else
-        {
-            Write-Verbose -Message ('The language pack for "{0}" is not installed.' -f $PreferredLanguage)
-            $result = $false
-        }
-
-        #
         # Test the Japanese language related capabilities installation.
-        #
+        if (-not (Test-LanguageCapability -Verbose)) { $result = $false }
 
-        #Write-Verbose -Message ('Getting the language related capabilities installation state for "{0}".' -f $PreferredLanguage)
-        Get-RequiredWindowsCapabilityNames | ForEach-Object -Process {
-            if (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_)
-            {
-                Write-Verbose -Message ('The "{0}" capability is already installed.' -f $_)
-            }
-            else
-            {
-                Write-Verbose -Message ('The "{0}" capability is not installed.' -f $_)
-                $result = $false
-            }
-        }
-       
-        #
         # Set the preferred language for the current user account.
-        #
-
-        #Write-Verbose -Message 'Getting the preferred language setting for the current user account.'
-
-        $langList = Get-WinUserLanguageList
-        if ($langList[0].LanguageTag -eq $PreferredLanguage)
-        {
-            Write-Verbose -Message ('The preferred language is already set to "{0}"' -f $PreferredLanguage)
-        }
-        else
-        {
-            Write-Verbose -Message ('The preferred language is not set to "{0}"' -f $PreferredLanguage)
-            $result = $false
-        }
-
-        #
-        # Override the Windows UI language for the current user account.
-        #
-
-        #Write-Verbose -Message 'Getting the UI language setting for the current user account.'
+        if (-not (Test-PreferredLanguage -Verbose)) { $result = $false }
 
         $prerequisiteMetFlagFilePath = Get-PrerequisiteMetFlagFilePath
         if ([System.IO.File]::Exists($prerequisiteMetFlagFilePath))
@@ -301,8 +205,6 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('LocationGeoId'))
     {
-        #Write-Verbose -Message 'Getting the location ID for the current user account.'
-
         if ((Get-WinHomeLocation).GeoId -eq $LocationGeoId)
         {
             Write-Verbose -Message ('The location ID is already set to "{0}".' -f $LocationGeoId)
@@ -317,89 +219,12 @@ function Test-TargetResource
     $result
 }
 
-function Test-LanguagePackInstallationState
-{
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param ()
-
-    $langPackPackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.1'
-    $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -EQ -Value $langPackPackageName
-    $package -ne $null
-}
-
-function Get-RequiredWindowsCapabilityNames
-{
-    [CmdletBinding()]
-    param ()
-
-    return @(
-        'Language.Basic~~~ja-JP~0.0.1.0',
-        'Language.Fonts.Jpan~~~und-JPAN~0.0.1.0',
-        'Language.Handwriting~~~ja-JP~0.0.1.0',
-        'Language.OCR~~~ja-JP~0.0.1.0',
-        'Language.Speech~~~ja-JP~0.0.1.0',
-        'Language.TextToSpeech~~~ja-JP~0.0.1.0'
-    )
-}
-
-function Test-WindowsCapabilityInstallationState
-{
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string] $WindowsCapabilityName
-    )
-
-    $capability = Get-WindowsCapability -Online -Name $WindowsCapabilityName -Verbose:$false
-    $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
-}
-
 function Get-PrerequisiteMetFlagFilePath
 {
     [CmdletBinding()]
     param ()
 
     return Join-Path -Path $env:TEMP -ChildPath 'dsc-international-settings-prerequisites-are-met'
-}
-
-function Get-JapaneseLangPackCabFile
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string] $DestinationFilePath
-    )
-
-    # Ref: Cannot configure a language pack for Windows Server 2019 Desktop Experience
-    #      https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
-    $LANG_PACK_ISO_URI = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
-    $request = [System.Net.HttpWebRequest]::Create($LANG_PACK_ISO_URI)
-    $request.Method = 'GET'
-
-    # Set the Japanese language pack CAB file data range.
-    $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE = 1003644928
-    $JP_LANG_CAB_FILE_SIZE = 62015873
-    $request.AddRange('bytes', $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE, $OFFSET_TO_JP_LANG_CAB_FILE_IN_ISO_FILE + $JP_LANG_CAB_FILE_SIZE - 1)
-
-    # Donwload the lang pack CAB file.
-    $response = $request.GetResponse()
-    $reader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList $response.GetResponseStream()
-    $contents = $reader.ReadBytes($response.ContentLength)
-    $reader.Dispose()
-
-    # Save the lang pack CAB file.
-    $fileStream = [System.IO.File]::Create($DestinationFilePath)
-    $fileStream.Write($contents, 0, $contents.Length)
-    $fileStream.Dispose()
-
-    # Verify integrity to the downloaded lang pack CAB file.
-    $JP_LANG_CAB_FILE_HASH = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
-    $fileHash = Get-FileHash -Algorithm SHA1 -LiteralPath $DestinationFilePath
-    if ($fileHash.Hash -ne $JP_LANG_CAB_FILE_HASH) {
-        throw ('"{0}" is corrupted. The download was may failed.') -f $DestinationFilePath
-    }
 }
 
 function Copy-LanguageSttingsToDefaultAndSystemAccount

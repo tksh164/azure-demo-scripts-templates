@@ -11,6 +11,20 @@ configuration lang-region-config
             RebootNodeIfNeeded = $true
         }
 
+        TimeZone time-zone
+        {
+            IsSingleInstance = 'Yes'
+            TimeZone         = 'Tokyo Standard Time'
+        }
+
+        # TODO: Region
+
+        # Region region
+        # {
+        #     IsSingleInstance = 'Yes'
+        #     GeoLocationId    = 122
+        # }
+
         LangAndRegion current-user
         {
             IsSingleInstance     = 'Yes'
@@ -18,12 +32,6 @@ configuration lang-region-config
             LocationGeoId        = 122
             CopyToDefaultAccount = $true
             CopyToSystemAccount  = $true
-        }
-
-        TimeZone time-zone
-        {
-            IsSingleInstance = 'Yes'
-            TimeZone         = 'Tokyo Standard Time'
         }
 
         SystemLocale system-locale
