@@ -17,19 +17,16 @@ configuration lang-region-config
             TimeZone         = 'Tokyo Standard Time'
         }
 
-        # TODO: Region
-
-        # Region region
-        # {
-        #     IsSingleInstance = 'Yes'
-        #     GeoLocationId    = 122
-        # }
+        Region region
+        {
+            IsSingleInstance = 'Yes'
+            GeoLocationId    = 122  # Japan
+        }
 
         LangAndRegion current-user
         {
             IsSingleInstance     = 'Yes'
             PreferredLanguage    = 'ja'
-            LocationGeoId        = 122
             CopyToDefaultAccount = $true
             CopyToSystemAccount  = $true
         }
