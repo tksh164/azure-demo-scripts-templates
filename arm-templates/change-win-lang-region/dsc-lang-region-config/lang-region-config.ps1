@@ -23,7 +23,7 @@ configuration lang-region-config
             GeoLocationId    = 122  # Japan
         }
 
-        LangAndRegion current-user
+        Language current-user
         {
             IsSingleInstance     = 'Yes'
             PreferredLanguage    = 'ja'
