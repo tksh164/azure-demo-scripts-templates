@@ -15,12 +15,9 @@ function Get-TargetResource
     $langList = Get-WinUserLanguageList
     $preferredLanguage = $langList[0].LanguageTag
 
-    $locationGeoId = (Get-WinHomeLocation).GeoId
-
     return @{
         IsSingleInstance     = 'Yes'
         PreferredLanguage    = $preferredLanguage
-        LocationGeoId        = $locationGeoId
         CopyToDefaultAccount = $false
         CopyToSystemAccount  = $false
     }
@@ -37,9 +34,6 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $PreferredLanguage,
-
-        [Parameter(Mandatory = $false)]
-        [int] $LocationGeoId,
 
         [Parameter(Mandatory = $false)]
         [bool] $CopyToDefaultAccount = $false,
@@ -114,25 +108,6 @@ function Set-TargetResource
         Write-Verbose -Message ('"{0}" is not supported language.' -f $PreferredLanguage)
     }
 
-    #
-    # Set the home location for the current user account.
-    #
-
-    if ($PSBoundParameters.ContainsKey('LocationGeoId'))
-    {
-        #Write-Verbose -Message 'Getting the location ID for the current user account.'
-        
-        if ((Get-WinHomeLocation).GeoId -eq $LocationGeoId)
-        {
-            Write-Verbose -Message ('The location ID is already set to "{0}".' -f $LocationGeoId)
-        }
-        else
-        {
-            Write-Verbose -Message ('Setting the location ID to "{0}"' -f $LocationGeoId)
-            Set-WinHomeLocation -GeoId $LocationGeoId
-        }
-    }
-
     # Create the flag file.
     if ($isPrerequisiteMet)
     {
@@ -154,9 +129,6 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $PreferredLanguage,
-
-        [Parameter(Mandatory = $false)]
-        [int] $LocationGeoId,
 
         [Parameter(Mandatory = $false)]
         [bool] $CopyToDefaultAccount = $false,
@@ -195,23 +167,6 @@ function Test-TargetResource
     else
     {
         Write-Verbose -Message ('"{0}" is not supported language.' -f $PreferredLanguage)
-    }
-
-    #
-    # Set the home location for the current user account.
-    #
-
-    if ($PSBoundParameters.ContainsKey('LocationGeoId'))
-    {
-        if ((Get-WinHomeLocation).GeoId -eq $LocationGeoId)
-        {
-            Write-Verbose -Message ('The location ID is already set to "{0}".' -f $LocationGeoId)
-        }
-        else
-        {
-            Write-Verbose -Message ('The location ID is not set to "{0}".' -f $LocationGeoId)
-            $result = $false
-        }
     }
 
     $result

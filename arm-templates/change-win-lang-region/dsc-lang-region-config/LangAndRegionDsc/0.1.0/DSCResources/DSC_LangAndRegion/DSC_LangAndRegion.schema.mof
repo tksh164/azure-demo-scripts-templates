@@ -3,7 +3,6 @@ class DSC_LangAndRegion : OMI_BaseResource
 {
     [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'."), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
     [Required, Description("Specifies the preferred language.")] String PreferredLanguage;
-    [Write, Description("Specifies the location geo ID.")] Sint32 LocationGeoId;
     [Write, Description("Specifies whether to copy the current user settings to the default account. The default account settings will use for new users.")] Boolean CopyToDefaultAccount;
     [Write, Description("Specifies whether to copy the current user settings to the system account. The system account settings will use for the welcome screen.")] Boolean CopyToSystemAccount;
 };
