@@ -25,7 +25,7 @@
     },
     "variables": {
 
-        // Common
+        // General
 
         "location": "[resourceGroup().location]",
         "uniqueSuffix": "[toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 4))]",
@@ -383,7 +383,7 @@
             "name": "[variables('vmConfig').dc.nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"//,
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
