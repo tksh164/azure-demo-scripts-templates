@@ -105,7 +105,7 @@ function Install-LanguageCapability
     $languageCapabilityNames | ForEach-Object -Process {
         if (-not (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_))
         {
-            Write-Verbose -Message ('Installing capability "{0}".' -f $_)
+            Write-Verbose -Message ('Installing the capability "{0}".' -f $_)
             Add-WindowsCapability -Online -Name $_ -Verbose:$false
         }
     }
@@ -122,11 +122,11 @@ function Test-LanguageCapability
     $languageCapabilityNames | ForEach-Object -Process {
         if (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_)
         {
-            Write-Verbose -Message ('Capability "{0}" is already installed.' -f $_)
+            Write-Verbose -Message ('The capability "{0}" is already installed.' -f $_)
         }
         else
         {
-            Write-Verbose -Message ('Capability "{0}" is not installed.' -f $_)
+            Write-Verbose -Message ('The capability "{0}" is not installed.' -f $_)
             $result = $false
         }
     }
