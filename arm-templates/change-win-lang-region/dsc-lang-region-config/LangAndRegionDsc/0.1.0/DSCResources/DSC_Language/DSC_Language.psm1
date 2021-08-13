@@ -47,7 +47,7 @@ function Set-TargetResource
     # TODO: Require OS version detection.
     if ($PreferredLanguage -eq 'ja')
     {
-        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ws2019-ja-jp.psm1') -Verbose:$false
+        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ja-JP.ws2019.psm1') -Verbose:$false
 
         if (-not (Test-LanguagePack))
         {
@@ -142,7 +142,7 @@ function Test-TargetResource
     # TODO: Require OS version detection.
     if ($PreferredLanguage -eq 'ja')
     {
-        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ws2019-ja-jp.psm1') -Verbose:$false
+        Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ja-JP.ws2019.psm1') -Verbose:$false
 
         # Test the Japanese language pack installation.
         if (-not (Test-LanguagePack -Verbose)) { $result = $false }
