@@ -1,3 +1,5 @@
+Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'Common.psm1') -Verbose:$false
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -11,6 +13,8 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [string] $PreferredLanguage
     )
+
+    Write-Verbose -Message 'Getting the language.'
 
     $langList = Get-WinUserLanguageList
     $preferredLanguage = $langList[0].LanguageTag
@@ -42,79 +46,46 @@ function Set-TargetResource
         [bool] $CopyToSystemAccount = $false
     )
 
-    $isPrerequisiteMet = $false
+    Write-Verbose -Message 'Setting the language.'
 
-    # TODO: Require OS version detection.
-    if ($PreferredLanguage -eq 'ja')
+    $isPhaseOneComplete = $false
+
+    if (($PreferredLanguage -eq 'ja') -and (Test-WindowsVersion -Version '10.0.17763' -Verbose))
     {
         Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ja-JP.ws2019.psm1') -Verbose:$false
 
         if (-not (Test-LanguagePack))
         {
-            # Install the Japanese language pack.
             Install-LanguagePack -Verbose
-
-            # The prerequisite is met for the UI language update and the copy settings to the default/system account.
-            $isPrerequisiteMet = $true
-
-            # Need to reboot for effect to the language pack installation.
+            $isPhaseOneComplete = $true
             $global:DSCMachineStatus = 1
         }
 
         if (-not (Test-LanguageCapability))
         {
-            # Install the Japanese language related capabilities.
             Install-LanguageCapability -Verbose
             $global:DSCMachineStatus = 1
         }
 
         if (-not (Test-PreferredLanguage))
         {
-            # Set the preferred language for the current user account.
             Set-PreferredLanguage -Verbose
         }
 
-        $prerequisiteMetFlagFilePath = Get-PrerequisiteMetFlagFilePath
-        if ([System.IO.File]::Exists($prerequisiteMetFlagFilePath))
+        if (Test-PhaseOneCompletionFlag -Verbose)
         {
-            # Override the Windows UI language for the current user account.
             Set-UILanguage -Verbose
-
-            # Delete the flag file.
-            Write-Verbose -Message 'Deleting the prerequisite met flag file.'
-            Remove-Item -LiteralPath $prerequisiteMetFlagFilePath -Force
-
-            #
-            # Copy the current user language settings to default user account and system user account.
-            #
-
-            if ($CopyToDefaultAccount -or $CopyToSystemAccount)
-            {
-                if ($CopyToDefaultAccount) { Write-Verbose -Message 'Copying the current user language settings to the default account.' }
-                if ($CopyToSystemAccount) { Write-Verbose -Message 'Copying the current user language settings to the system account.' }
-                Copy-LanguageSttingsToDefaultAndSystemAccount -CopyToDefaultAccount $CopyToDefaultAccount -CopyToSystemAccount $CopyToSystemAccount
-            }
-
-            # Need to reboot for effect to the UI language change and the copy settings to the default/system account.
+            Clear-PhaseOneCompletionFlag -Verbose
+            Copy-LanguageSttingsToSpecialAccount -CopyToDefaultAccount:$CopyToDefaultAccount -CopyToSystemAccount:$CopyToSystemAccount -Verbose
             $global:DSCMachineStatus = 1
-        }
-        else
-        {
-            Write-Verbose -Message ('The prerequisite met flag file is not located at "{0}".' -f $prerequisiteMetFlagFilePath)
         }
     }
     else
     {
-        Write-Verbose -Message ('"{0}" is not supported language.' -f $PreferredLanguage)
+        Write-Verbose -Message ('This DSC resource does not support "{0}" language on this Windows version.' -f $PreferredLanguage)
     }
 
-    # Create the flag file.
-    if ($isPrerequisiteMet)
-    {
-        $prerequisiteMetFlagFilePath = Get-PrerequisiteMetFlagFilePath
-        Write-Verbose -Message ('Creating the prerequisite met flag file to "{0}".' -f $prerequisiteMetFlagFilePath)
-        Set-Content -LiteralPath $prerequisiteMetFlagFilePath -Value '' -Force
-    }
+    if ($isPhaseOneComplete) { Set-PhaseOneCompletionFlag -Verbose }
 }
 
 function Test-TargetResource
@@ -137,84 +108,24 @@ function Test-TargetResource
         [bool] $CopyToSystemAccount = $false
     )
 
+    Write-Verbose -Message 'Testing the language.'
+
     $result = $true
 
-    # TODO: Require OS version detection.
-    if ($PreferredLanguage -eq 'ja')
+    if (($PreferredLanguage -eq 'ja') -and (Test-WindowsVersion -Version '10.0.17763' -Verbose))
     {
         Import-Module -Name (Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') -ChildPath 'ja-JP.ws2019.psm1') -Verbose:$false
-
-        # Test the Japanese language pack installation.
         if (-not (Test-LanguagePack -Verbose)) { $result = $false }
-
-        # Test the Japanese language related capabilities installation.
         if (-not (Test-LanguageCapability -Verbose)) { $result = $false }
-
-        # Set the preferred language for the current user account.
         if (-not (Test-PreferredLanguage -Verbose)) { $result = $false }
-
-        $prerequisiteMetFlagFilePath = Get-PrerequisiteMetFlagFilePath
-        if ([System.IO.File]::Exists($prerequisiteMetFlagFilePath))
-        {
-            Write-Verbose -Message ('The prerequisite met flag file is located at "{0}".' -f $prerequisiteMetFlagFilePath)
-            $result = $false
-        }
-        else
-        {
-            Write-Verbose -Message ('The prerequisite met flag file is not located at "{0}".' -f $prerequisiteMetFlagFilePath)
-        }
+        if (Test-PhaseOneCompletionFlag -Verbose) { $result = $false }
     }
     else
     {
-        Write-Verbose -Message ('"{0}" is not supported language.' -f $PreferredLanguage)
+        Write-Verbose -Message ('This DSC resource does not support "{0}" language on this Windows version.' -f $PreferredLanguage)
     }
 
     $result
-}
-
-function Get-PrerequisiteMetFlagFilePath
-{
-    [CmdletBinding()]
-    param ()
-
-    return Join-Path -Path $env:TEMP -ChildPath 'dsc-international-settings-prerequisites-are-met'
-}
-
-function Copy-LanguageSttingsToDefaultAndSystemAccount
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [bool] $CopyToDefaultAccount = $false,
-
-        [Parameter(Mandatory = $true)]
-        [bool] $CopyToSystemAccount = $false
-    )
-
-    # Ref: How to Automate Regional and Language settings in Windows Vista, Windows Server 2008, Windows 7 and in Windows Server 2008 R2
-    #      https://docs.microsoft.com/en-us/troubleshoot/windows-client/deployment/automate-regional-language-settings
-    $XML_FILE_CONTENT_TEMPLATE = @'
-<gs:GlobalizationServices xmlns:gs="urn:longhornGlobalizationUnattend">
-    <gs:UserList>
-        <gs:User UserID="Current" CopySettingsToDefaultUserAcct="{0}" CopySettingsToSystemAcct="{1}"/> 
-    </gs:UserList>
-</gs:GlobalizationServices>
-'@
-
-    # Create a XML file.
-    $xmlFileFilePath = Join-Path -Path $env:TEMP -ChildPath ((New-Guid).Guid + '.xml')
-    $xmlFileContent = ($XML_FILE_CONTENT_TEMPLATE -f $CopyToDefaultAccount.ToString().ToLowerInvariant(), $CopyToSystemAccount.ToString().ToLowerInvariant())
-    Set-Content -LiteralPath $xmlFileFilePath -Encoding UTF8 -Value $xmlFileContent
-
-    # Copy the current user language settings to default user account and system user account.
-    $procStartInfo = New-Object -TypeName 'System.Diagnostics.ProcessStartInfo' -ArgumentList 'C:\Windows\System32\control.exe', ('intl.cpl,,/f:"{0}"' -f $xmlFileFilePath)
-    $procStartInfo.UseShellExecute = $false
-    $procStartInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Minimized
-    $proc = [System.Diagnostics.Process]::Start($procStartInfo)
-    $proc.WaitForExit()
-
-    # Delete the XML file.
-    Remove-Item -LiteralPath $xmlFileFilePath -Force
 }
 
 Export-ModuleMember -Function *-TargetResource

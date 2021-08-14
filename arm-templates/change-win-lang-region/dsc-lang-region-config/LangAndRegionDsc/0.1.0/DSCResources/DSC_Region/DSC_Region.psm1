@@ -11,6 +11,8 @@ function Get-TargetResource
         [int] $GeoLocationId
     )
 
+    Write-Verbose -Message 'Getting the region.'
+
     $geoLocationId = (Get-WinHomeLocation).GeoId
 
     return @{
@@ -31,11 +33,12 @@ function Set-TargetResource
         [int] $GeoLocationId
     )
 
-    # Set the home location for the current user account.
+    Write-Verbose -Message 'Setting the region.'
+
     if ((Get-WinHomeLocation).GeoId -ne $GeoLocationId)
     {
-        Write-Verbose -Message ('Setting the geo location ID to "{0}"' -f $GeoLocationId)
         Set-WinHomeLocation -GeoId $GeoLocationId
+        Write-Verbose -Message ('The geo location ID for the current user updated to "{0}"' -f $GeoLocationId)
     }
 }
 
@@ -52,9 +55,9 @@ function Test-TargetResource
         [int] $GeoLocationId
     )
 
-    $result = $true
+    Write-Verbose -Message 'Testing the region.'
 
-    # Test the home location for the current user account.
+    $result = $true
 
     $currentGeoLocationId = (Get-WinHomeLocation).GeoId
 
@@ -64,7 +67,7 @@ function Test-TargetResource
     }
     else
     {
-        Write-Verbose -Message ('The geo location ID is not set to "{0}". The current geo location ID is "{1}"' -f $GeoLocationId, $currentGeoLocationId)
+        Write-Verbose -Message ('The geo location ID is "{0}" but should be "{1}". Change required.' -f $currentGeoLocationId, $GeoLocationId)
         $result = $false
     }
 

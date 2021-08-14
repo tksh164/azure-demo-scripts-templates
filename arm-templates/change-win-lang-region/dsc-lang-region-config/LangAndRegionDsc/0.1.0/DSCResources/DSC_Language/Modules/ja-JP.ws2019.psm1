@@ -1,12 +1,4 @@
 $language = 'ja'
-$languageCapabilityNames = @(
-    'Language.Basic~~~ja-JP~0.0.1.0',
-    'Language.Fonts.Jpan~~~und-JPAN~0.0.1.0',
-    'Language.Handwriting~~~ja-JP~0.0.1.0',
-    'Language.OCR~~~ja-JP~0.0.1.0',
-    'Language.Speech~~~ja-JP~0.0.1.0',
-    'Language.TextToSpeech~~~ja-JP~0.0.1.0'
-)
 
 function Install-LanguagePack
 {
@@ -17,35 +9,16 @@ function Install-LanguagePack
     Write-Verbose -Message ('Downloading the language pack for "{0}".' -f $language)
     $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
     Get-JapaneseLangPackCabFile -DestinationFilePath $langPackFilePath
+    Write-Verbose -Message ('The download of the language pack for "{0}" is completed.' -f $language)
 
     # Install the language pack.
     Write-Verbose -Message ('Installing the language pack for "{0}".' -f $language)
     Add-WindowsPackage -Online -NoRestart -PackagePath $langPackFilePath -Verbose:$false
+    Write-Verbose -Message ('The installation of the language pack for "{0}" is completed.' -f $language)
 
     # Delete the lang pack CAB file.
-    Write-Verbose -Message 'Deleting a temporary file for the language pack.'
     Remove-Item -LiteralPath $langPackFilePath -Force
-}
-
-function Test-LanguagePack
-{
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param ()
-
-    $result = $true
-
-    if (Test-LanguagePackInstallationState)
-    {
-        Write-Verbose -Message ('The language pack for "{0}" is already installed.' -f $language)
-    }
-    else
-    {
-        Write-Verbose -Message ('The language pack for "{0}" is not installed.' -f $language)
-        $result = $false
-    }
-
-    $result
+    Write-Verbose -Message 'The temporary files for the language pack are deleted.'
 }
 
 function Get-JapaneseLangPackCabFile
@@ -82,11 +55,11 @@ function Get-JapaneseLangPackCabFile
     $jpLangCabFileHash = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
     $fileHash = Get-FileHash -Algorithm SHA1 -LiteralPath $DestinationFilePath
     if ($fileHash.Hash -ne $jpLangCabFileHash) {
-        throw ('The "{0}" is corrupted. The download was may failed.') -f $DestinationFilePath
+        throw ('The file hash of the language pack CAB file "{0}" is not match to expected value. The download was may failed.') -f $DestinationFilePath
     }
 }
 
-function Test-LanguagePackInstallationState
+function Test-LanguagePack
 {
     [CmdletBinding()]
     [OutputType([bool])]
@@ -94,8 +67,20 @@ function Test-LanguagePackInstallationState
 
     $langPackPackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.1'
     $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -EQ -Value $langPackPackageName
-    $package -ne $null
+    $result = $package -ne $null
+    $stateText = if ($result) { 'installed' } else { 'not installed' }
+    Write-Verbose -Message ('The language pack for "{0}" is {1}.' -f $language, $stateText)
+    $result
 }
+
+$languageCapabilityNames = @(
+    'Language.Basic~~~ja-JP~0.0.1.0',
+    'Language.Fonts.Jpan~~~und-JPAN~0.0.1.0',
+    'Language.Handwriting~~~ja-JP~0.0.1.0',
+    'Language.OCR~~~ja-JP~0.0.1.0',
+    'Language.Speech~~~ja-JP~0.0.1.0',
+    'Language.TextToSpeech~~~ja-JP~0.0.1.0'
+)
 
 function Install-LanguageCapability
 {
@@ -107,6 +92,7 @@ function Install-LanguageCapability
         {
             Write-Verbose -Message ('Installing the capability "{0}".' -f $_)
             Add-WindowsCapability -Online -Name $_ -Verbose:$false
+            Write-Verbose -Message ('The installation of the capability "{0}" is completed.' -f $_)
         }
     }
 }
@@ -120,15 +106,10 @@ function Test-LanguageCapability
     $result = $true
 
     $languageCapabilityNames | ForEach-Object -Process {
-        if (Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_)
-        {
-            Write-Verbose -Message ('The capability "{0}" is already installed.' -f $_)
-        }
-        else
-        {
-            Write-Verbose -Message ('The capability "{0}" is not installed.' -f $_)
-            $result = $false
-        }
+        $subResult = Test-WindowsCapabilityInstallationState -WindowsCapabilityName $_
+        if (-not $subResult) { $result = $false }
+        $stateText = if ($subResult) { 'installed' } else { 'not installed' }
+        Write-Verbose -Message ('The capability "{0}" is {1}.' -f $_, $stateText)
     }
 
     $result
@@ -152,13 +133,12 @@ function Set-PreferredLanguage
     [CmdletBinding()]
     param ()
 
-    Write-Verbose -Message ('Setting the preferred language to "{0}"' -f $language)
-
     $langList = Get-WinUserLanguageList
     $jaItems = $langList | Where-Object -Property 'LanguageTag' -EQ -Value $language
     $jaItems | ForEach-Object -Process { $langList.Remove($_) }
     $langList.Insert(0, $language)
     Set-WinUserLanguageList -LanguageList $langList -Force
+    Write-Verbose -Message ('The preferred language for the current user updated to "{0}"' -f $language)
 }
 
 function Test-PreferredLanguage
@@ -167,19 +147,10 @@ function Test-PreferredLanguage
     [OutputType([bool])]
     param ()
 
-    $result = $true
-
     $langList = Get-WinUserLanguageList
-    if ($langList[0].LanguageTag -eq $language)
-    {
-        Write-Verbose -Message ('The preferred language is already set to "{0}"' -f $language)
-    }
-    else
-    {
-        Write-Verbose -Message ('The preferred language is not set to "{0}"' -f $language)
-        $result = $false
-    }
-
+    $currentLanguage = $langList[0].LanguageTag
+    $result = $currentLanguage -eq $language
+    Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentLanguage, $language)
     $result
 }
 
@@ -188,10 +159,9 @@ function Set-UILanguage
     [CmdletBinding()]
     param ()
 
-    Write-Verbose -Message ('Setting the Windows UI language to "{0}"' -f $language)
     Set-WinUILanguageOverride -Language ja-JP
+    Write-Verbose -Message ('The Windows UI language for the current user updated to "{0}"' -f $language)
 }
-
 
 Export-ModuleMember -Function @(
     'Install-LanguagePack',
