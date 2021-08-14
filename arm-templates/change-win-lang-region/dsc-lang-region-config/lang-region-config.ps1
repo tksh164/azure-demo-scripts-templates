@@ -1,6 +1,24 @@
 configuration lang-region-config
 {
-    param ()
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $TimeZone,
+
+        [Parameter(Mandatory = $true)]
+        [int] $GeoLocationId,
+
+        [Parameter(Mandatory = $true)]
+        [string] $PreferredLanguage,
+
+        [Parameter(Mandatory = $true)]
+        [bool] $CopyToDefaultAccount,
+
+        [Parameter(Mandatory = $true)]
+        [bool] $CopyToSystemAccount,
+
+        [Parameter(Mandatory = $true)]
+        [string] $SystemLocale
+    )
 
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration', 'ComputerManagementDsc', 'LangAndRegionDsc'
 
@@ -14,27 +32,27 @@ configuration lang-region-config
         TimeZone time-zone
         {
             IsSingleInstance = 'Yes'
-            TimeZone         = 'Tokyo Standard Time'
+            TimeZone         = $TimeZone
         }
 
         Region region
         {
             IsSingleInstance = 'Yes'
-            GeoLocationId    = 122  # Japan
+            GeoLocationId    = $GeoLocationId
         }
 
         Language current-user
         {
             IsSingleInstance     = 'Yes'
-            PreferredLanguage    = 'ja'
-            CopyToDefaultAccount = $true
-            CopyToSystemAccount  = $true
+            PreferredLanguage    = $PreferredLanguage
+            CopyToDefaultAccount = $CopyToDefaultAccount
+            CopyToSystemAccount  = $CopyToSystemAccount
         }
 
         SystemLocale system-locale
         {
             IsSingleInstance = 'Yes'
-            SystemLocale     = 'ja-JP'
+            SystemLocale     = $SystemLocale
         }
     }
 }
