@@ -218,6 +218,12 @@
                         "dataCollection": "enable"
                     },
                     "configurationArguments": {
+                        "PreferredLanguage": "ja",
+                        "CopyToDefaultAccount": true,
+                        "CopyToSystemAccount": true,
+                        "TimeZone": "Tokyo Standard Time",
+                        "GeoLocationId": 122,  // Japan
+                        "SystemLocale": "ja-JP"
                     }
                 },
                 "protectedSettings": {}
