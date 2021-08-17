@@ -29,10 +29,16 @@ configuration lang-region-config
             RebootNodeIfNeeded = $true
         }
 
-        TimeZone time-zone
+        TimeZone timezone
         {
             IsSingleInstance = 'Yes'
             TimeZone         = $TimeZone
+        }
+
+        SystemLocale system-locale
+        {
+            IsSingleInstance = 'Yes'
+            SystemLocale     = $SystemLocale
         }
 
         Region region
@@ -41,18 +47,12 @@ configuration lang-region-config
             GeoLocationId    = $GeoLocationId
         }
 
-        Language current-user
+        Language language
         {
             IsSingleInstance     = 'Yes'
             PreferredLanguage    = $PreferredLanguage
             CopyToDefaultAccount = $CopyToDefaultAccount
-            CopyToSystemAccount  = $CopyToSystemAccount
-        }
-
-        SystemLocale system-locale
-        {
-            IsSingleInstance = 'Yes'
-            SystemLocale     = $SystemLocale
+            DependsOn            = '[SystemLocale]system-locale','[Region]region'
         }
     }
 }

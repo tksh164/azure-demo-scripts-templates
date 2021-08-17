@@ -12,44 +12,47 @@ function Test-WindowsVersion
     $currentSystemVersion -eq $Version
 }
 
-$phaseOneCompletionFlagFilePath = Join-Path -Path $env:TEMP -ChildPath 'DSC_Language-PhaseOneCompleted'
+# $phaseOneCompletionFlagFilePath = Join-Path -Path $env:TEMP -ChildPath 'DSC_Language-PhaseOneCompleted'
 
-function Set-PhaseOneCompletionFlag
-{
-    [CmdletBinding()]
-    param ()
+# function Set-PhaseOneCompletionFlag
+# {
+#     [CmdletBinding()]
+#     param ()
 
-    Write-Verbose -Message 'Setting the phase one completion flag.'
-    Set-Content -LiteralPath $PhaseOneCompletionFlagFilePath -Value '' -Force
-}
+#     Write-Verbose -Message 'Setting the phase one completion flag.'
+#     Set-Content -LiteralPath $PhaseOneCompletionFlagFilePath -Value '' -Force
+# }
 
-function Clear-PhaseOneCompletionFlag
-{
-    [CmdletBinding()]
-    param ()
+# function Clear-PhaseOneCompletionFlag
+# {
+#     [CmdletBinding()]
+#     param ()
 
-    Write-Verbose -Message 'Clearing the phase one completion flag.'
-    Remove-Item -LiteralPath $PhaseOneCompletionFlagFilePath -Force
-}
+#     Write-Verbose -Message 'Clearing the phase one completion flag.'
+#     Remove-Item -LiteralPath $PhaseOneCompletionFlagFilePath -Force
+# }
 
-function Test-PhaseOneCompletionFlag
-{
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param ()
+# function Test-PhaseOneCompletionFlag
+# {
+#     [CmdletBinding()]
+#     [OutputType([bool])]
+#     param ()
 
-    $result = [System.IO.File]::Exists($PhaseOneCompletionFlagFilePath)
-    $flagState = if ($result) { 'set' } else { 'not set' }
-    Write-Verbose -Message ('The phase one completion flag is {0} in currently.' -f $flagState)
-    $result
-}
+#     $result = [System.IO.File]::Exists($PhaseOneCompletionFlagFilePath)
+#     $flagState = if ($result) { 'set' } else { 'not set' }
+#     Write-Verbose -Message ('The phase one completion flag is {0} in currently.' -f $flagState)
+#     $result
+# }
 
 function Copy-LanguageSttingsToSpecialAccount
 {
     [CmdletBinding()]
     param (
-        [switch] $CopyToDefaultAccount,
-        [switch] $CopyToSystemAccount
+        [Parameter(Mandatory = $false)]
+        [bool] $CopyToSystemAccount = $false,
+
+        [Parameter(Mandatory = $false)]
+        [bool] $CopyToDefaultAccount = $false
     )
 
     if (-not ($CopyToDefaultAccount -or $CopyToSystemAccount))
@@ -67,14 +70,14 @@ function Copy-LanguageSttingsToSpecialAccount
     $xmlFileContentTemplate = @'
 <gs:GlobalizationServices xmlns:gs="urn:longhornGlobalizationUnattend">
     <gs:UserList>
-        <gs:User UserID="Current" CopySettingsToDefaultUserAcct="{0}" CopySettingsToSystemAcct="{1}"/> 
+        <gs:User UserID="Current" CopySettingsToSystemAcct="{0}" CopySettingsToDefaultUserAcct="{1}"/> 
     </gs:UserList>
 </gs:GlobalizationServices>
 '@
 
     # Create a new XML file and set the content.
     $xmlFileFilePath = Join-Path -Path $env:TEMP -ChildPath ((New-Guid).Guid + '.xml')
-    $xmlFileContent = ($xmlFileContentTemplate -f $CopyToDefaultAccount.ToString().ToLowerInvariant(), $CopyToSystemAccount.ToString().ToLowerInvariant())
+    $xmlFileContent = ($xmlFileContentTemplate -f $CopyToSystemAccount.ToString().ToLowerInvariant(), $CopyToDefaultAccount.ToString().ToLowerInvariant())
     Set-Content -LiteralPath $xmlFileFilePath -Encoding UTF8 -Value $xmlFileContent
 
     # Copy the current user language settings to the default user account and system user account.
@@ -90,8 +93,8 @@ function Copy-LanguageSttingsToSpecialAccount
 
 Export-ModuleMember -Function @(
     'Test-WindowsVersion',
-    'Set-PhaseOneCompletionFlag',
-    'Clear-PhaseOneCompletionFlag',
-    'Test-PhaseOneCompletionFlag',
+    # 'Set-PhaseOneCompletionFlag',
+    # 'Clear-PhaseOneCompletionFlag',
+    # 'Test-PhaseOneCompletionFlag',
     'Copy-LanguageSttingsToSpecialAccount'
 )
