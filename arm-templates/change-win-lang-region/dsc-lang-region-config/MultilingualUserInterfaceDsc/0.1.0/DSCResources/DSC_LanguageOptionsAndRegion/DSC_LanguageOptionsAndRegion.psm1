@@ -172,6 +172,12 @@ function Test-TargetResource
 
     $result = $true
 
+    if (-not (Test-SupportedWindowsVersion -Version '10.0.17763'))
+    {
+        Write-Verbose -Message 'Current system''s Windows version is not supported.'
+        return $result
+    }
+
     if (-not (Test-SupportedLanguage -Language $PreferredLanguage))
     {
         New-InvalidArgumentException -Message ('The preferred language "{0}" is not supported.' -f $PreferredLanguage) -ArgumentName 'PreferredLanguage'
@@ -275,6 +281,20 @@ function Test-TargetResource
     }
 
     $result
+}
+
+function Test-SupportedWindowsVersion
+{
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string[]] $Version
+    )
+
+    $currentOSVersion = (Get-CimInstance -ClassName 'Win32_OperatingSystem' -Verbose:$false).Version
+    Write-Verbose -Message ('Current system''s Windows version is "{0}".' -f $currentOSVersion)
+    $currentOSVersion -in $Version
 }
 
 function Test-LanguagePackInstallation
