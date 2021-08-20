@@ -311,11 +311,26 @@ function Test-LanguageCapabilityInstallation
     $result = $true
 
     $LanguageCapabilityNames | ForEach-Object -Process {
-        $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
-        $subResult = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
-        $result = $subResult -and $result
-        $stateText = if ($subResult) { 'installed' } else { 'not installed' }
-        Write-Verbose -Message ('The "{0}" capability is {1}.' -f $_, $stateText)
+        try
+        {
+            $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
+            $subResult = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
+            $result = $subResult -and $result
+            $stateText = if ($subResult) { 'installed' } else { 'not installed' }
+            Write-Verbose -Message ('The "{0}" capability is {1}.' -f $_, $stateText)
+        }
+        catch
+        {
+            $result = $false
+            Write-Verbose (@'
+Exception:
+{0}
+ScriptStackTrace:
+{1}
+CategoryInfo: {2}
+FullyQualifiedErrorId: {3}
+'@ -f $errorMessage, $scriptStackTrace, $categoryInfo, $fullyQualifiedErrorId)
+        }
     }
     $result
 }
