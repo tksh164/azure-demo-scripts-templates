@@ -616,7 +616,7 @@ function Set-LanguageOptions
     )
     $xmlFileContent = $xmlFileContentTemplate -f $fillValues
 
-    Write-Verbose -Message ('XML: {0}' -f $xmlFileContent)
+    Write-Verbose -Message ('MUI XML: {0}' -f $xmlFileContent)
 
     # Create a new XML file and set the content.
     $xmlFileFilePath = Join-Path -Path $env:TEMP -ChildPath ((New-Guid).Guid + '.xml')
