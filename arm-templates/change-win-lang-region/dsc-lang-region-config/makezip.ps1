@@ -3,7 +3,7 @@ $targetFiles = @(
     'MultilingualUserInterfaceDsc',
     'ComputerManagementDsc'
 )
-$destinationFile = 'lang-region-config.zip'
+$destinationFile = 'dsc-lang-region-config.zip'
 
 $targetFiles |
     ForEach-Object -Process { Join-Path -Path $PSScriptRoot -ChildPath $_ } |
