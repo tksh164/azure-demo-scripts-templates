@@ -1,6 +1,6 @@
 $targetFiles = @(
-    'lang-region-config.ps1',
-    'LangAndRegionDsc',
+    'lang-options-and-region.ps1',
+    'MultilingualUserInterfaceDsc',
     'ComputerManagementDsc'
 )
 $destinationFile = 'lang-region-config.zip'
