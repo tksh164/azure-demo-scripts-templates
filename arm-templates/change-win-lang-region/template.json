@@ -230,5 +230,14 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "fqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)).dnsSettings.fqdn]"
+        }
+    }
 }
