@@ -1,7 +1,0 @@
-[ClassVersion("1.0.0"), FriendlyName("Language")]
-class DSC_Language : OMI_BaseResource
-{
-    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'."), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
-    [Required, Description("Specifies the preferred language.")] String PreferredLanguage;
-    [Write, Description("Specifies whether to copy the current user settings to the default account. The default account settings will use for new users.")] Boolean CopyToDefaultAccount;
-};
