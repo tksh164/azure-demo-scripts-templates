@@ -210,19 +210,19 @@
                 "settings": {
                     "wmfVersion": "latest",
                     "configuration": {
-                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/change-win-lang-region/dsc-lang-region-config/lang-region-config.zip",
-                        "script": "lang-region-config.ps1",
-                        "function": "lang-region-config"
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/change-win-lang-region/dsc-lang-region-config/dsc-lang-region-config.zip",
+                        "script": "lang-options-and-region.ps1",
+                        "function": "language-options-and-region"
                     },
                     "privacy": {
                         "dataCollection": "enable"
                     },
                     "configurationArguments": {
-                        "PreferredLanguage": "ja",
-                        "CopyToDefaultAccount": true,
-                        "CopyToSystemAccount": true,
-                        "TimeZone": "Tokyo Standard Time",
+                        "PreferredLanguage": "ja-JP",
+                        "LanguageCapabilities": "Minimum",
                         "GeoLocationId": 122,  // Japan
+                        "CopySettingsToDefaultUserAccount": true,
+                        "TimeZone": "Tokyo Standard Time",
                         "SystemLocale": "ja-JP"
                     }
                 },
