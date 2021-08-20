@@ -11,8 +11,15 @@ $languageConstants = @{
             CabFileHash              = 'B10C36225B9AFB503383FEA94A0D16FE4191CA37'
         }
         CapabilityNames = @{
-            Minimum = @()
-            Additional = @()
+            Minimum = @(
+                'Language.Basic~~~en-US~0.0.1.0',
+                'Language.OCR~~~en-US~0.0.1.0'
+            )
+            Additional = @(
+                'Language.Handwriting~~~en-US~0.0.1.0',
+                'Language.Speech~~~en-US~0.0.1.0',
+                'Language.TextToSpeech~~~en-US~0.0.1.0'
+            )
         }
         InputLanguageID = '0409:00000409'
     }
@@ -39,41 +46,48 @@ $languageConstants = @{
         }
         InputLanguageID = '0411:{03B5835F-F03C-411B-9CE2-AA23E1171E36}{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}'
     }
-    # 'fr-FR' = @{
-    #     LanguagePack = @{
-    #         PackageName = ''
-    #         CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_fr-fr.cab'
-    #         OffsetToCabFileInIsoFile = 0x2ADB2000
-    #         CabFileSize              = 60331188
-    #         CabFileHash              = '02CBE6DC0302F15AFBBC9159E5A1AE81AAC86804'
-    #     }
-    #     CapabilityNames = @{
-    #         Minimum = @()
-    #         Additional = @()
-    #     }
-    #     InputLanguageID = ''
-    # }
-    # 'ko-KR' = @{
-    #     LanguagePack = @{
-    #         PackageName = ''
-    #         CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_ko-kr.cab'
-    #         OffsetToCabFileInIsoFile = 0x3F84B800
-    #         CabFileSize              = 62974463 
-    #         CabFileHash              = '1370BBE78210CDF6D8156D9125C0D17C05607D82'
-    #     }
-    #     CapabilityNames = @{
-    #         Minimum = @(
-    #             'Language.Basic~~~ko-KR~0.0.1.0',
-    #             'Language.Fonts.Kore~~~und-KORE~0.0.1.0',
-    #             'Language.OCR~~~ko-KR~0.0.1.0'
-    #         )
-    #         Additional = @(
-    #             'Language.Handwriting~~~ko-KR~0.0.1.0',
-    #             'Language.TextToSpeech~~~ko-KR~0.0.1.0'
-    #         )
-    #     }
-    #     InputLanguageID = ''
-    # }
+    'fr-FR' = @{
+        LanguagePack = @{
+            PackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~fr-FR~10.0.17763.1'
+            CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_fr-fr.cab'
+            OffsetToCabFileInIsoFile = 0x2ADB2000
+            CabFileSize              = 60331188
+            CabFileHash              = '02CBE6DC0302F15AFBBC9159E5A1AE81AAC86804'
+        }
+        CapabilityNames = @{
+            Minimum = @(
+                'Language.Basic~~~fr-FR~0.0.1.0'
+                'Language.OCR~~~fr-FR~0.0.1.0'
+            )
+            Additional = @(
+                'Language.Handwriting~~~fr-FR~0.0.1.0',
+                'Language.Speech~~~fr-FR~0.0.1.0',
+                'Language.TextToSpeech~~~fr-FR~0.0.1.0'
+            )
+        }
+        InputLanguageID = '040c:0000040c'
+    }
+    'ko-KR' = @{
+        LanguagePack = @{
+            PackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ko-KR~10.0.17763.1'
+            CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_ko-kr.cab'
+            OffsetToCabFileInIsoFile = 0x3F84B800
+            CabFileSize              = 62974463 
+            CabFileHash              = '1370BBE78210CDF6D8156D9125C0D17C05607D82'
+        }
+        CapabilityNames = @{
+            Minimum = @(
+                'Language.Basic~~~ko-KR~0.0.1.0',
+                'Language.Fonts.Kore~~~und-KORE~0.0.1.0',
+                'Language.OCR~~~ko-KR~0.0.1.0'
+            )
+            Additional = @(
+                'Language.Handwriting~~~ko-KR~0.0.1.0',
+                'Language.TextToSpeech~~~ko-KR~0.0.1.0'
+            )
+        }
+        InputLanguageID = '0412:{A028AE76-01B1-46C2-99C4-ACD9858AE02F}{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}'
+    }
 }
 
 function Get-TargetResource
