@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0"), FriendlyName("LanguageOptionsAndRegion")]
+class DSC_LanguageOptionsAndRegion : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'."), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Required, Description("Specifies the system account's preferred language.")] String PreferredLanguage;
+    [Required, Description("Choose the install language capabilities."), ValueMap{"Minimum", "All"}, Values{"Minimum", "All"}] String LanguageCapabilities;    
+    [Required, Description("Specifies whether to copy the system account settings to the default user account. The default user account settings will use for new users.")] Boolean CopySettingsToDefaultUserAccount;
+    [Write, Description("Specifies the location geo ID.")] Sint32 LocationGeoId;
+    [Write, Description("Specifies the system locale.")] String SystemLocale;
+};
