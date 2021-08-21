@@ -65,14 +65,15 @@
             "jumpBox": {
                 "name": "[variables('vmNames').jumpBox]",
                 "computerName": "jb1",
-                "vmSize": "Standard_B2ms",
+                //"vmSize": "Standard_D2s_v4",
+                "vmSize": "Standard_B2ms",  // for test
                 "osDiskType": "StandardSSD_LRS",
                 //"osDiskType": "Premium_LRS",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
-                    "sku": "2019-datacenter-smalldisk-g2",
-                    //"sku": "2019-datacenter-gensecond",
+                    // "sku": "2019-datacenter-smalldisk-g2",
+                    "sku": "2019-datacenter-gensecond",
                     //"sku": "2019-Datacenter-smalldisk",
                     //"sku": "2019-Datacenter",
                     "version": "latest"
@@ -82,7 +83,7 @@
                 "enableAcceleratedNetworking": false,
                 "osDiskName": "[concat(variables('vmNames').jumpBox, '-osdisk')]",
                 "nicName": "[concat(variables('vmNames').jumpBox, '-nic')]",
-                "isDeployPublicIpAddress": false,
+                "isDeployPublicIpAddress": true,
                 "publicIpAddressName": "[concat(variables('vmNames').jumpBox, '-ip')]",
                 "domainNameLabel": "[concat(variables('vmNames').jumpBox, '-', variables('uniqueSuffix'))]",
                 "isDeployLanguageOptionsDsc": "[parameters('isDeployLanguageOptionsDsc')]"
@@ -130,7 +131,8 @@
                 {
                     "name": "[variables('vmNames').wsfcNodes[0]]",
                     "computerName": "n1",
-                    "vmSize": "Standard_D2s_v4",
+                    "vmSize": "Standard_D4s_v4",
+                    //"vmSize": "Standard_D2s_v4",  // for test
                     "osDiskType": "StandardSSD_LRS",
                     //"osDiskType": "Premium_LRS",
                     "iamge": {
@@ -155,7 +157,8 @@
                 {
                     "name": "[variables('vmNames').wsfcNodes[1]]",
                     "computerName": "n2",
-                    "vmSize": "Standard_D2s_v4",
+                    "vmSize": "Standard_D4s_v4",
+                    //"vmSize": "Standard_D2s_v4",  // for test
                     "osDiskType": "StandardSSD_LRS",
                     //"osDiskType": "Premium_LRS",
                     "iamge": {
