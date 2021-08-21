@@ -78,7 +78,7 @@
                     //"sku": "2019-Datacenter",
                     "version": "latest"
                 },
-                "privateIpAddress": "10.0.0.50",
+                "privateIpAddress": "10.0.0.200",
                 "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
                 "enableAcceleratedNetworking": false,
                 "osDiskName": "[concat(variables('vmNames').jumpBox, '-osdisk')]",
@@ -144,7 +144,7 @@
                         //"sku": "2019-Datacenter",
                         "version": "latest"
                     },
-                    "privateIpAddress": "10.0.0.101",
+                    "privateIpAddress": "10.0.0.51",
                     "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
                     "enableAcceleratedNetworking": true,
                     "osDiskName": "[concat(variables('vmNames').wsfcNodes[0], '-osdisk')]",
@@ -170,7 +170,7 @@
                         //"sku": "2019-Datacenter",
                         "version": "latest"
                     },
-                    "privateIpAddress": "10.0.0.102",
+                    "privateIpAddress": "10.0.0.52",
                     "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
                     "enableAcceleratedNetworking": true,
                     "osDiskName": "[concat(variables('vmNames').wsfcNodes[1], '-osdisk')]",
