@@ -667,7 +667,7 @@
         },
         "jumpBoxFqdn": {
             "type": "string",
-            "value": "[if (variables('vmParams').jumpBox.isDeployPublicIpAddress, resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').jumpBox.publicIpAddressName).dnsSettings.fqdn, 'The public IP address was not deployed due to the specified parameter value.')]"
+            "value": "[if (variables('vmParams').jumpBox.isDeployPublicIpAddress, reference(resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').jumpBox.publicIpAddressName)).dnsSettings.fqdn, 'The public IP address was not deployed due to the specified parameter value.')]"
         }
     }
 }
