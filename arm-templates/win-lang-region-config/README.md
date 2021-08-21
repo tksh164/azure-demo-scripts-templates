@@ -37,4 +37,5 @@ All the above names are the default value.
 
 ## Notes
 
+- Currently supported only Windows Server 2019.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
