@@ -15,6 +15,13 @@
                 "description": "The admin user password for VMs."
             }
         },
+        "isDeployLanguageOptionsDsc": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Specify whether deploy the language options DSC configuration."
+            }
+        },
         "uniqueSuffixSeed": {
             "type": "string",
             "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
@@ -54,14 +61,19 @@
                 "computerName": "jb1",
                 "vmSize": "Standard_B2ms",
                 "osDiskType": "StandardSSD_LRS",
+                //"osDiskType": "Premium_LRS",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
-                    "sku": "2019-Datacenter-smalldisk",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    //"sku": "2019-datacenter-gensecond",
+                    //"sku": "2019-Datacenter-smalldisk",
+                    //"sku": "2019-Datacenter",
                     "version": "latest"
                 },
                 "privateIPAddress": "10.0.0.50",
                 "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                "enableAcceleratedNetworking": false,
                 "osDiskName": "[concat(variables('vmName').jumpBox, '-osdisk')]",
                 "nicName": "[concat(variables('vmName').jumpBox, '-nic')]",
                 "ipName": "[concat(variables('vmName').jumpBox, '-ip')]",
@@ -72,24 +84,31 @@
                 "computerName": "dc1",
                 "vmSize": "Standard_B2ms",
                 "osDiskType": "StandardSSD_LRS",
+                //"osDiskType": "Premium_LRS",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
-                    "sku": "2019-Datacenter-smalldisk",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    //"sku": "2019-datacenter-gensecond",
+                    //"sku": "2019-Datacenter-smalldisk",
+                    //"sku": "2019-Datacenter",
                     "version": "latest"
                 },
                 "privateIPAddress": "10.0.0.11",
                 "dnsServers": null,  // Use AzureProvidedDNS
+                "enableAcceleratedNetworking": false,
                 "osDiskName": "[concat(variables('vmName').dc, '-osdisk')]",
                 "dataDisks": [
                     {
                         "name": "[concat(variables('vmName').dc, '-datadisk1')]",
                         "sku": "StandardSSD_LRS",
+                        // "sku": "Premium_LRS",
                         "size": 4
                     },
                     {
                         "name": "[concat(variables('vmName').dc, '-datadisk2')]",
                         "sku": "StandardSSD_LRS",
+                        // "sku": "Premium_LRS",
                         "size": 128
                     }
                 ],
@@ -101,14 +120,19 @@
                     "computerName": "n1",
                     "vmSize": "Standard_D2s_v4",
                     "osDiskType": "StandardSSD_LRS",
+                    //"osDiskType": "Premium_LRS",
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2019-Datacenter-smalldisk",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        //"sku": "2019-datacenter-gensecond",
+                        //"sku": "2019-Datacenter-smalldisk",
+                        //"sku": "2019-Datacenter",
                         "version": "latest"
                     },
                     "privateIPAddress": "10.0.0.101",
                     "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "enableAcceleratedNetworking": true,
                     "osDiskName": "[concat(variables('vmName').wsfcNodes[0], '-osdisk')]",
                     "nicName": "[concat(variables('vmName').wsfcNodes[0], '-nic')]"
                 },
@@ -117,14 +141,19 @@
                     "computerName": "n2",
                     "vmSize": "Standard_D2s_v4",
                     "osDiskType": "StandardSSD_LRS",
+                    //"osDiskType": "Premium_LRS",
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2019-Datacenter-smalldisk",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        //"sku": "2019-datacenter-gensecond",
+                        //"sku": "2019-Datacenter-smalldisk",
+                        //"sku": "2019-Datacenter",
                         "version": "latest"
                     },
                     "privateIPAddress": "10.0.0.102",
                     "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "enableAcceleratedNetworking": true,
                     "osDiskName": "[concat(variables('vmName').wsfcNodes[1], '-osdisk')]",
                     "nicName": "[concat(variables('vmName').wsfcNodes[1], '-nic')]"
                 }
@@ -136,14 +165,20 @@
         "dscSettings": {
             "wmfVersion": "latest",
             "configuration": {
-                "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/change-win-lang-region/dsc-lang-region-config/lang-region-config.zip",
-                "script": "lang-region-config.ps1",
-                "function": "lang-region-config"
+                "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/change-win-lang-region/dsc-lang-region-config/dsc-lang-region-config.zip",
+                "script": "lang-options-and-region.ps1",
+                "function": "language-options-and-region"
             },
             "privacy": {
                 "dataCollection": "enable"
             },
             "configurationArguments": {
+                "PreferredLanguage": "ja-JP",
+                "LanguageCapabilities": "Minimum",
+                "GeoLocationId": 122,  // Japan
+                "CopySettingsToDefaultUserAccount": true,
+                "TimeZone": "Tokyo Standard Time",
+                "SystemLocale": "ja-JP"
             }
         }
     },
@@ -236,8 +271,12 @@
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
-                        "enableAutomaticUpdates": true,
-                        "provisionVmAgent": true
+                        "provisionVmAgent": true,
+                        "enableAutomaticUpdates": false,
+                        "patchSettings": {
+                            "patchMode": "Manual",
+                            "enableHotpatching": false
+                        }
                     }
                 },
                 "diagnosticsProfile": {
@@ -274,7 +313,8 @@
                 ],
                 "dnsSettings": {
                     "dnsServers": "[variables('vmConfig').jumpBox.dnsServers]"
-                }
+                },
+                "enableAcceleratedNetworking": "[variables('vmConfig').jumpBox.enableAcceleratedNetworking]"
             }
         },
         {
@@ -293,6 +333,7 @@
             }
         },
         {
+            "condition": "[parameters('isDeployLanguageOptionsDsc')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2021-03-01",
             "name": "[concat(variables('vmConfig').jumpBox.name, '/Microsoft.Powershell.DSC')]",
@@ -366,8 +407,12 @@
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
-                        "enableAutomaticUpdates": true,
-                        "provisionVmAgent": true
+                        "provisionVmAgent": true,
+                        "enableAutomaticUpdates": false,
+                        "patchSettings": {
+                            "patchMode": "Manual",
+                            "enableHotpatching": false
+                        }
                     }
                 },
                 "diagnosticsProfile": {
@@ -400,7 +445,8 @@
                 ],
                 "dnsSettings": {
                     "dnsServers": "[variables('vmConfig').dc.dnsServers]"
-                }
+                },
+                "enableAcceleratedNetworking": "[variables('vmConfig').dc.enableAcceleratedNetworking]"
             }
         },
         {
@@ -423,6 +469,7 @@
             }
         },
         {
+            "condition": "[parameters('isDeployLanguageOptionsDsc')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2021-03-01",
             "name": "[concat(variables('vmConfig').dc.name, '/Microsoft.Powershell.DSC')]",
@@ -480,8 +527,12 @@
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
-                        "enableAutomaticUpdates": true,
-                        "provisionVmAgent": true
+                        "provisionVmAgent": true,
+                        "enableAutomaticUpdates": false,
+                        "patchSettings": {
+                            "patchMode": "Manual",
+                            "enableHotpatching": false
+                        }
                     }
                 },
                 "diagnosticsProfile": {
@@ -518,10 +569,12 @@
                 ],
                 "dnsSettings": {
                     "dnsServers": "[variables('vmConfig').wsfcNodes[copyIndex()].dnsServers]"
-                }
+                },
+                "enableAcceleratedNetworking": "[variables('vmConfig').wsfcNodes[copyIndex()].enableAcceleratedNetworking]"
             }
         },
         {
+            "condition": "[parameters('isDeployLanguageOptionsDsc')]",
             "copy": {
                 "name": "copyWsfcNodeDscExt",
                 "count": "[length(variables('vmConfig').wsfcNodes)]"
@@ -543,5 +596,14 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "jumpBoxFqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vmConfig').jumpBox.ipName)).dnsSettings.fqdn]"
+        }
+    }
 }
