@@ -1,0 +1,93 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": true,
+            "basics": {
+                "description": "Welcome to the Hyper-V cluster hands-on lab training. This deployment will deploy your hands-on lab environment on Azure.",
+                "subscription": {
+                    "resourceProviders": [
+                        "Microsoft.Compute",
+                        "Microsoft.Network"
+                    ]
+                },
+                "location": {
+                    "resourceTypes": [
+                        "Microsoft.Compute/virtualMachines",
+                        "Microsoft.Compute/disks",
+                        "Microsoft.Network/virtualNetworks",
+                        "Microsoft.Network/networkInterfaces",
+                        "Microsoft.Network/networkSecurityGroups",
+                        "Microsoft.Network/publicIPAddresses",
+                        "Microsoft.Network/loadBalancers"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "adminAccountSection",
+                "type": "Microsoft.Common.Section",
+                "visible": true,
+                "label": "Administrator account",
+                "elements": [
+                    {
+                        "name": "adminAccountSectionText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "The hands-on lab environment has multiple virtual machines. All virtual machines in the hands-on lab environment will use this administrator account credentials as local administrator account."
+                        }
+                    },
+                    {
+                        "name": "adminUserName",
+                        "type": "Microsoft.Compute.UserNameTextBox",
+                        "visible": true,
+                        "label": "Username",
+                        "toolTip": "The administrator username for all virtual machines in the hands-on lab environment.",
+                        "osPlatform": "Windows",
+                        "defaultValue": "vmadmin",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "adminPassword",
+                        "type": "Microsoft.Compute.CredentialsCombo",
+                        "visible": true,
+                        "label": {
+                            "password": "Password",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": {
+                            "password": "The administrator password for all virtual machines in the hands-on lab environment."
+                        },
+                        "osPlatform": "Windows",
+                        "constraints": {
+                            "required": true
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        }
+                    },
+                    {
+                        "name": "adminAccountInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                          "icon": "Info",
+                          "text": "Please take note the administrator account information. The administrator account information will use in your hands-on lab."
+                        }
+                    }
+                ]
+            }
+        ],
+        "steps": [],
+        "outputs": {
+            "adminUserName": "[basics.adminAccountSection.adminUserName]",
+            "adminPassword": "[basics.adminAccountSection.adminPassword.password]"
+        }
+    }
+}
