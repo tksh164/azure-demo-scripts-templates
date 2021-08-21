@@ -1,5 +1,7 @@
 # Change the Windows language options and regional settings using the DSC extension
 
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwin-lang-region-config%2Ftemplate.json)
+
 ## Template overview
 
 This template demonstrates that change the Windows language options and region settings using the DSC extension.
