@@ -86,8 +86,8 @@
         ],
         "steps": [],
         "outputs": {
-            "adminUserName": "[basics.adminAccountSection.adminUserName]",
-            "adminPassword": "[basics.adminAccountSection.adminPassword.password]"
+            "adminUserName": "[basics('adminAccountSection').adminUserName]",
+            "adminPassword": "[basics('adminAccountSection').adminPassword.password]"
         }
     }
 }
