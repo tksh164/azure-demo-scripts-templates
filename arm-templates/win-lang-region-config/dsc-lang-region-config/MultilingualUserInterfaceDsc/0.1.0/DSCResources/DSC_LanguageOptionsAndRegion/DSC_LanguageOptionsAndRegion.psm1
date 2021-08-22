@@ -1,6 +1,6 @@
-# Reference:
-# Default Input Profiles (Input Locales) in Windows
-# https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+# References:
+# - Default Input Profiles (Input Locales) in Windows
+#   https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
 $languageConstants = @{
     'en-US' = @{
         LanguagePack = @{
@@ -529,8 +529,9 @@ function Invoke-LanguagePackCabFileDownload
         [string] $DestinationFilePath
     )
 
-    # Ref: Cannot configure a language pack for Windows Server 2019 Desktop Experience
-    #      https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
+    # Reference:
+    # - Cannot configure a language pack for Windows Server 2019 Desktop Experience
+    #   https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
     $langPackIsoUri = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
     $request = [System.Net.HttpWebRequest]::Create($langPackIsoUri)
     $request.Method = 'GET'
@@ -600,8 +601,8 @@ function Set-LanguageOptions
     )
 
     # Reference:
-    # How to Automate Regional and Language settings in Windows Vista, Windows Server 2008, Windows 7 and in Windows Server 2008 R2
-    # https://docs.microsoft.com/en-us/troubleshoot/windows-client/deployment/automate-regional-language-settings
+    # - Guide to Windows Vista Multilingual User Interface
+    #   https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-vista/cc721887(v=ws.10)
     $xmlFragmentTemplateLocationPreferences = '<gs:LocationPreferences><gs:GeoID Value="{0}"/></gs:LocationPreferences>'
     $xmlFragmentTemplateSystemLocale = '<gs:SystemLocale Name="{0}"/>'
     $xmlFileContentTemplate = @'
