@@ -1,4 +1,4 @@
-# References:
+# Reference:
 # - Default Input Profiles (Input Locales) in Windows
 #   https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
 $languageConstants = @{
