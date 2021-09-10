@@ -50,6 +50,17 @@
 
         "subntNsgName": "[concat(variables('vnetName'), '-', variables('subnetName'), '-nsg')]",
 
+        // Internal load balancer
+
+        // "lbName": "wsfc-lb",
+
+        // Availability set
+
+        "availabilitySetName": {
+            "dc": "dc-as",
+            "wsfcNode": "wsfcnode-as"
+        },
+
         // Virtual machine
 
         "vmNames": {
@@ -61,14 +72,16 @@
             ]
         },
 
+        "diskType": "StandardSSD_LRS",
+        //"diskType": "Premium_LRS",
+
         "vmParams": {
             "jumpBox": {
                 "name": "[variables('vmNames').jumpBox]",
                 "computerName": "jb1",
                 //"vmSize": "Standard_D2s_v4",
                 "vmSize": "Standard_B2ms",  // for test
-                "osDiskType": "StandardSSD_LRS",
-                //"osDiskType": "Premium_LRS",
+                "osDiskType": "[variables('diskType')]",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
@@ -92,8 +105,7 @@
                 "name": "[variables('vmNames').dc]",
                 "computerName": "dc1",
                 "vmSize": "Standard_B2ms",
-                "osDiskType": "StandardSSD_LRS",
-                //"osDiskType": "Premium_LRS",
+                "osDiskType": "[variables('diskType')]",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
@@ -110,14 +122,12 @@
                 "dataDisks": [
                     {
                         "name": "[concat(variables('vmNames').dc, '-datadisk1')]",
-                        "sku": "StandardSSD_LRS",
-                        // "sku": "Premium_LRS",
+                        "sku": "[variables('diskType')]",
                         "size": 4
                     },
                     {
                         "name": "[concat(variables('vmNames').dc, '-datadisk2')]",
-                        "sku": "StandardSSD_LRS",
-                        // "sku": "Premium_LRS",
+                        "sku": "[variables('diskType')]",
                         "size": 128
                     }
                 ],
@@ -133,8 +143,7 @@
                     "computerName": "n1",
                     "vmSize": "Standard_D4s_v4",
                     //"vmSize": "Standard_D2s_v4",  // for test
-                    "osDiskType": "StandardSSD_LRS",
-                    //"osDiskType": "Premium_LRS",
+                    "osDiskType": "[variables('diskType')]",
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
@@ -159,8 +168,7 @@
                     "computerName": "n2",
                     "vmSize": "Standard_D4s_v4",
                     //"vmSize": "Standard_D2s_v4",  // for test
-                    "osDiskType": "StandardSSD_LRS",
-                    //"osDiskType": "Premium_LRS",
+                    "osDiskType": "[variables('diskType')]",
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
@@ -210,29 +218,6 @@
         // Virtual network
 
         {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('subntNsgName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "RDP",
-                        "properties": {
-                            "direction": "Inbound",
-                            "priority": 500,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "3389"
-                        }
-                    }
-                ]   
-            }
-        },
-        {
             "type": "Microsoft.Network/VirtualNetworks",
             "apiVersion": "2020-11-01",
             "name": "[variables('vnetName')]",
@@ -255,6 +240,29 @@
                         }
                     }
                 ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('subntNsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
             }
         },
 
@@ -376,14 +384,28 @@
         // Domain Controller VM
 
         {
+            "name": "[variables('availabilitySetName').dc]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            }
+        },
+        {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2021-03-01",
             "name": "[variables('vmParams').dc.name]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]",
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]",
                 "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]",
-                "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[1].name)]"
+                "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[1].name)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -436,6 +458,9 @@
                             "enableHotpatching": false
                         }
                     }
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]"
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
@@ -532,6 +557,19 @@
         // WSFC node VMs
 
         {
+            "name": "[variables('availabilitySetName').wsfcNode]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            }
+        },
+        {
             "copy": {
                 "name": "copyWsfcNodeVM",
                 "count": "[length(variables('vmParams').wsfcNodes)]"
@@ -541,6 +579,7 @@
             "name": "[variables('vmParams').wsfcNodes[copyIndex()].name]",
             "location": "[parameters('location')]",
             "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').wsfcNode)]",
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').wsfcNodes[copyIndex()].nicName)]"
             ],
             "properties": {
@@ -576,6 +615,9 @@
                             "enableHotpatching": false
                         }
                     }
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').wsfcNode)]"
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
@@ -658,7 +700,59 @@
                 "settings": "[variables('dscSettings')]",
                 "protectedSettings": {}
             }
-        }
+        }//,
+
+        // Intenral load balancer for WSFC
+
+        // {
+        //     "type": "Microsoft.Network/loadBalancers",
+        //     "apiVersion": "2020-11-01",
+        //     "name": "[variables('lbName')]",
+        //     "location": "[parameters('location')]",
+        //     "dependsOn": [],
+        //     "tags": {},
+        //     "properties": {
+        //         "frontendIPConfigurations": [
+        //             // TODO: Use copyied variables.
+        //             {
+        //                 "name": "cno",
+        //                 "properties": {
+        //                     "privateIPAddressVersion": "IPv4",
+        //                     "privateIPAllocationMethod": "Static",
+        //                     "privateIPAddress": "10.0.0.100",
+        //                     "subnet": {
+        //                         "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+        //                     }
+        //                 }
+        //             },
+        //             {
+        //                 "name": "vco1",
+        //                 "properties": {
+        //                     "privateIPAddressVersion": "IPv4",
+        //                     "privateIPAllocationMethod": "Static",
+        //                     "privateIPAddress": "10.0.0.101",
+        //                     "subnet": {
+        //                         "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+        //                     }
+        //                 }
+        //             }
+        //         ],
+        //         "backendAddressPools": [
+        //             {
+        //                 // Add VM's NIC to backend pool.
+        //                 "name": "backendpool1"
+        //             }
+        //         ],
+        //         "probes": [],
+        //         "loadBalancingRules": [],
+        //         "inboundNatRules": [],
+        //         "outboundRules": []
+        //     },
+        //     "sku": {
+        //         "name": "Standard",
+        //         "tier": "Regional"
+        //     }
+        // }
     ],
     "outputs": {
         "adminUserName": {
