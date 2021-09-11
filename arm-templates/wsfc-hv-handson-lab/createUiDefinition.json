@@ -77,8 +77,51 @@
                         "type": "Microsoft.Common.InfoBox",
                         "visible": true,
                         "options": {
-                          "icon": "Info",
-                          "text": "Please take note the administrator account information. The administrator account information will use in your hands-on lab."
+                            "icon": "Info",
+                            "text": "Please take note the administrator account information. The administrator account information will use in your hands-on lab training."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "labAccessSection",
+                "type": "Microsoft.Common.Section",
+                "visible": true,
+                "label": "Lab access",
+                "elements": [
+                    {
+                        "name": "labAccessSectionText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "You can increase network security by specify the source IP address that is allowed to access your lab environment. The default value '*' meaning allow to any source IP addresses can access to your lab environment. Highly recommended to specify your source IP address."
+                        }
+                    },
+                    {
+                        "name": "rdpSourceAddressPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "visible": true,
+                        "label": "Allowed source IPv4 address for RDP",
+                        "toolTip": "Specify the allowed source IPv4 address for RDP connections to your lab environment.",
+                        "defaultValue": "*",
+                        "placeholder": "a.b.c.d or *",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^(\\*)|(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9])){0,1}$",
+                                    "message": "Valid formats are a.b.c.d, a.b.c.d/e, *"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "rdpSourceAddressPrefixInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "Info",
+                            "text": "You can check your current source IP address from <a href='https://whatismyipaddress.com/'>whatismyipaddress.com</a>."
                         }
                     }
                 ]
@@ -87,7 +130,8 @@
         "steps": [],
         "outputs": {
             "adminUserName": "[basics('adminAccountSection').adminUserName]",
-            "adminPassword": "[basics('adminAccountSection').adminPassword.password]"
+            "adminPassword": "[basics('adminAccountSection').adminPassword.password]",
+            "rdpSourceAddressPrefix": "[basics('labAccessSection').rdpSourceAddressPrefix]"
         }
     }
 }

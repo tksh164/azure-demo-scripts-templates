@@ -22,6 +22,13 @@
                 "description": "The admin user password for VMs."
             }
         },
+        "rdpSourceAddressPrefix": {
+            "type": "string",
+            "defaultValue": "*",
+            "metadata": {
+                "description": "Specify the allowed source IPv4 address prefix for RDP connections."
+            }
+        },
         "isDeployLanguageOptionsDsc": {
             "type": "bool",
             "defaultValue": false,
@@ -256,7 +263,7 @@
                             "priority": 500,
                             "protocol": "TCP",
                             "access": "Allow",
-                            "sourceAddressPrefix": "*",
+                            "sourceAddressPrefix": "[parameters('rdpSourceAddressPrefix')]",
                             "sourcePortRange": "*",
                             "destinationAddressPrefix": "*",
                             "destinationPortRange": "3389"
