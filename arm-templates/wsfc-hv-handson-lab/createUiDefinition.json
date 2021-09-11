@@ -94,7 +94,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "You can increase network security by specify the source IP address that is allowed to access your lab environment. The default value '*' meaning allow to any source IP addresses can access to your lab environment. Highly recommended to specify your source IP address."
+                            "text": "You can increase network security by specify the source IP address that is allowed to access your lab environment. The default value '*' meaning allow access from any source IP addresses to your lab environment. Highly recommended to specify your source IP address."
                         }
                     },
                     {
