@@ -49,7 +49,7 @@
 
         "storageSyncServicesName": "[concat(parameters('resourcePrefix'), variables('uniqueString'), '-fsync')]",
         "syncGroupNamePrefix": "syncgroup-",
-        "storageSyncRoleAssignmentsDeploymentNamePrefix": "storageSyncRoleAssignments-",
+        "storageSyncRoleAssignmentDeploymentNamePrefix": "storageSyncRoleAssignment-",
 
         // Arrays
 
@@ -62,14 +62,19 @@
                 "count": "[parameters('syncGroupCount')]",
                 "input": "[concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex('StorageAccountNames', 1), 3, '0'), variables('storageAccountNameSuffix'))]"
             },
-            {
-                "name": "storageAccountRoleAssignmentNames",
-                "count": "[parameters('syncGroupCount')]",
-                "input": "[guid(resourceGroup().id, string(copyIndex('storageAccountRoleAssignmentNames')))]"
-            },
 
             // Storage Sync Service
 
+            {
+                "name": "storageSyncRoleAssignmentDeploymentName",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[concat(variables('storageSyncRoleAssignmentDeploymentNamePrefix'), padLeft(copyIndex('storageSyncRoleAssignmentDeploymentName', 1), 3, '0'))]"
+            },
+            {
+                "name": "storageSyncRoleAssignmentNames",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[guid(resourceGroup().id, string(copyIndex('storageSyncRoleAssignmentNames')))]"
+            },
             {
                 "name": "syncGroupNames",
                 "count": "[parameters('syncGroupCount')]",
@@ -179,10 +184,10 @@
 
         {
             "copy": {
-                "name": "storageAccountRoleAssignmentCopy",
+                "name": "storageSyncRoleAssignmentCopy",
                 "count": "[parameters('syncGroupCount')]"
             },
-            "name": "[concat(variables('storageSyncRoleAssignmentsDeploymentNamePrefix'), padLeft(copyIndex(1), 3, '0'))]",
+            "name": "[variables('storageSyncRoleAssignmentDeploymentName')[copyIndex()]]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
             "dependsOn": [
@@ -195,7 +200,7 @@
                 },
                 "parameters": {
                     "name": {
-                        "value": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]"
+                        "value": "[variables('storageSyncRoleAssignmentNames')[copyIndex()]]"
                     },
                     "scope": {
                         "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
@@ -253,7 +258,7 @@
         //         "name": "storageSyncRoleAssignmentCopy",
         //         "count": "[parameters('syncGroupCount')]"
         //     },
-        //     "name": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]",
+        //     "name": "[variables('storageSyncRoleAssignmentNames')[copyIndex()]]",
         //     "type": "Microsoft.Authorization/roleAssignments",
         //     "apiVersion": "2021-04-01-preview",
         //     "dependsOn": [
@@ -307,7 +312,7 @@
             "apiVersion": "2020-09-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountNames')[copyIndex()], 'default', variables('fileShareName'))]",
-                "[resourceId('Microsoft.Resources/deployments', concat(variables('storageSyncRoleAssignmentsDeploymentNamePrefix'), copyIndex()))]",
+                "[resourceId('Microsoft.Resources/deployments', variables('storageSyncRoleAssignmentDeploymentName')[copyIndex()])]",
                 "[resourceId('Microsoft.StorageSync/storageSyncServices/syncGroups', variables('storageSyncServicesName'), variables('syncGroupNames')[copyIndex()])]"
             ],
             "properties": {
