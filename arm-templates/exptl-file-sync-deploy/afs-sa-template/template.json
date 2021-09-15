@@ -26,12 +26,33 @@
         // }
     },
     "variables": {
+
+        // General
+
         "location": "[resourceGroup().location]",
         "uniqueString": "[substring(uniqueString(resourceGroup().id), 0, 3)]",
+
+        // Storage accounts
+
         "storageAccountNameSuffix": "[concat('x', variables('uniqueString'))]",
+        "copy": [
+            {
+                "name": "storageAccountNames",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex('StorageAccountNames', 1), 3, '0'), variables('storageAccountNameSuffix'))]"
+            },
+            {
+                "name": "storageAccountRoleAssignmentNames",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[guid(subscription().subscriptionId, resourceGroup().id, string(copyIndex('storageAccountRoleAssignmentNames')))]"
+            }
+        ],
+        "fileShareName": "fsync-share",
+
+        // Storage Sync Service
+
         "storageSyncServicesName": "[concat(parameters('resourcePrefix'), variables('uniqueString'), '-fsync')]",
-        "syncGroupNamePrefix": "syncgroup-",
-        "fileShareName": "fsync-share"
+        "syncGroupNamePrefix": "syncgroup-"
     },
     "resources": [
 
@@ -42,7 +63,7 @@
                 "name": "storageAccountCopy",
                 "count": "[parameters('syncGroupCount')]"
             },
-            "name": "[concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix'))]",
+            "name": "[variables('storageAccountNames')[copyIndex()]]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2021-01-01",
             "location": "[variables('location')]",
@@ -67,7 +88,7 @@
                     "type": "fileServices",
                     "apiVersion": "2021-01-01",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]"
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
                     ],
                     "properties": {
                         // "cors": {
@@ -124,6 +145,27 @@
                     ]
                 }
             ]
+        },
+
+        // RBAC for Microsoft.StorageSync
+
+        {
+            "copy": {
+                "name": "storageSyncRoleAssignmentCopy",
+                "count": "[parameters('syncGroupCount')]"
+            },
+            "name": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2021-04-01-preview",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
+            ],
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
+            "properties": {
+                "principalType": "ServicePrincipal",
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'c12c1c16-33a1-487b-954d-41c89c60f349')]",  // Reader and Data Access
+                "principalId": "3eb9d9f3-371c-4d24-a60a-d7681c48c071"  // Microsoft.StorageSync
+            }
         },
 
         // Storage Sync Service
