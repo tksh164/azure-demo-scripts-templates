@@ -44,7 +44,7 @@
             {
                 "name": "storageAccountRoleAssignmentNames",
                 "count": "[parameters('syncGroupCount')]",
-                "input": "[guid(subscription().subscriptionId, resourceGroup().id, string(copyIndex('storageAccountRoleAssignmentNames')))]"
+                "input": "[guid(resourceGroup().id, string(copyIndex('storageAccountRoleAssignmentNames')))]"
             }
         ],
         "fileShareName": "fsync-share",
