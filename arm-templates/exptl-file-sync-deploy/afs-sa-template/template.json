@@ -6,24 +6,32 @@
             "type": "string",
             "defaultValue": "afs"
         },
-        "syncGroupCount": {
-            "type": "int",
-            "defaultValue": 30,
-            "minValue": 1,
-            "maxValue": 200
-        },
         "storageAccountNamePrefix": {
             "type": "string",
             "defaultValue": "fsync"
-        }//,
-        // "storageAccountTenantId": {
-        //     "type": "string",
-        //     "minLength": 36,
-        //     "maxLength": 36,
-        //     "metadata": {
-        //         "description": "The tenant ID (GUID) of the storage account where the storage share exists."
-        //     }
-        // }
+        },
+        "syncGroupCount": {
+            "type": "int",
+            "defaultValue": 3,
+            "minValue": 1,
+            "maxValue": 200
+        },
+        "storageSyncPrincipalId": {
+            "type": "string",
+            "minLength": 36,
+            "maxLength": 36,
+            "metadata": {
+                "description": "The Microsoft.StorageSync service principal ID. This can get by `(Get-AzADServicePrincipal -DisplayNameBeginsWith Microsoft.StorageSync | Select-Object -First 1).Id`."
+            }
+        },
+        "storageAccountTenantId": {
+            "type": "string",
+            "minLength": 36,
+            "maxLength": 36,
+            "metadata": {
+                "description": "The Azure AD tenant ID (GUID) of the storage account where the storage share exists. It can get by `(Get-AzContext).Tenant.Id`."
+            }
+        }
     },
     "variables": {
 
@@ -35,7 +43,20 @@
         // Storage accounts
 
         "storageAccountNameSuffix": "[concat('x', variables('uniqueString'))]",
+        "fileShareName": "fsync-share",
+
+        // Storage Sync Service
+
+        "storageSyncServicesName": "[concat(parameters('resourcePrefix'), variables('uniqueString'), '-fsync')]",
+        "syncGroupNamePrefix": "syncgroup-",
+        "storageSyncRoleAssignmentsDeploymentNamePrefix": "storageSyncRoleAssignments-",
+
+        // Arrays
+
         "copy": [
+
+            // Storage accounts
+
             {
                 "name": "storageAccountNames",
                 "count": "[parameters('syncGroupCount')]",
@@ -45,14 +66,21 @@
                 "name": "storageAccountRoleAssignmentNames",
                 "count": "[parameters('syncGroupCount')]",
                 "input": "[guid(resourceGroup().id, string(copyIndex('storageAccountRoleAssignmentNames')))]"
+            },
+
+            // Storage Sync Service
+
+            {
+                "name": "syncGroupNames",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[concat(variables('syncGroupNamePrefix'), padLeft(copyIndex('syncGroupNames', 1), 3, '0'))]"
+            },
+            {
+                "name": "cloudEndpointNames",
+                "count": "[parameters('syncGroupCount')]",
+                "input": "[guid(resourceGroup().id, string(copyIndex('cloudEndpointNames')))]"
             }
-        ],
-        "fileShareName": "fsync-share",
-
-        // Storage Sync Service
-
-        "storageSyncServicesName": "[concat(parameters('resourcePrefix'), variables('uniqueString'), '-fsync')]",
-        "syncGroupNamePrefix": "syncgroup-"
+        ]
     },
     "resources": [
 
@@ -132,7 +160,7 @@
                             "type": "shares",
                             "apiVersion": "2021-01-01",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default')]"
+                                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountNames')[copyIndex()], 'default')]"
                             ],
                             "properties": {
                                 //"metadata": {},
@@ -147,26 +175,97 @@
             ]
         },
 
-        // RBAC for Microsoft.StorageSync
+        // Role assignments for Microsoft.StorageSync service principal
 
         {
             "copy": {
-                "name": "storageSyncRoleAssignmentCopy",
+                "name": "storageAccountRoleAssignmentCopy",
                 "count": "[parameters('syncGroupCount')]"
             },
-            "name": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2021-04-01-preview",
+            "name": "[concat(variables('storageSyncRoleAssignmentsDeploymentNamePrefix'), padLeft(copyIndex(1), 3, '0'))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
             ],
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
             "properties": {
-                "principalType": "ServicePrincipal",
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'c12c1c16-33a1-487b-954d-41c89c60f349')]",  // Reader and Data Access
-                "principalId": "3eb9d9f3-371c-4d24-a60a-d7681c48c071"  // Microsoft.StorageSync
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]"
+                    },
+                    "scope": {
+                        "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
+                    },
+                    "roleDefinitionId": {
+                        // The Reader and Data Access role definition ID. The ID is common. This can get by (Get-AzRoleDefinition -Name 'Reader and Data Access').Id
+                        "value": "[resourceId('Microsoft.Authorization/roleDefinitions', 'c12c1c16-33a1-487b-954d-41c89c60f349')]"
+                    },
+                    "principalType": {
+                        "value": "ServicePrincipal"
+                    },
+                    "principalId": {
+                        "value": "[parameters('storageSyncPrincipalId')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "scope": {
+                            "type": "string"
+                        },
+                        "roleDefinitionId": {
+                            "type": "string"
+                        },
+                        "principalType": {
+                            "type": "string"
+                        },
+                        "principalId": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('name')]",
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2021-04-01-preview",
+                            "scope": "[parameters('scope')]",
+                            "properties": {
+                                "roleDefinitionId": "[parameters('roleDefinitionId')]",
+                                "principalType": "[parameters('principalType')]",
+                                "principalId": "[parameters('principalId')]"
+                            }
+                        }
+                    ]
+                }
             }
         },
+
+        // {
+        //     "copy": {
+        //         "name": "storageSyncRoleAssignmentCopy",
+        //         "count": "[parameters('syncGroupCount')]"
+        //     },
+        //     "name": "[variables('storageAccountRoleAssignmentNames')[copyIndex()]]",
+        //     "type": "Microsoft.Authorization/roleAssignments",
+        //     "apiVersion": "2021-04-01-preview",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
+        //     ],
+        //     "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
+        //     "properties": {
+        //         "principalType": "ServicePrincipal",
+        //         "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'xxxxxxxxxxxxxxxxxxxx')]",  // Reader and Data Access. This can get by (Get-AzRoleDefinition -Name 'Reader and Data Access').Id
+        //         "principalId": "xxxxxxxxxxxxxxxxxxxx"  // Microsoft.StorageSync. This can get by (Get-AzADServicePrincipal -DisplayNameBeginsWith Microsoft.StorageSync | Select-Object -First 1).Id
+        //     }
+        // },
 
         // Storage Sync Service
 
@@ -187,37 +286,41 @@
                 "name": "syncGroupCopy",
                 "count": "[parameters('syncGroupCount')]"
             },
-            "name": "[concat(variables('storageSyncServicesName'), '/', concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')))]",
+            "name": "[concat(variables('storageSyncServicesName'), '/', variables('syncGroupNames')[copyIndex()])]",
             "type": "Microsoft.StorageSync/storageSyncServices/syncGroups",
             "apiVersion": "2020-03-01",
             "dependsOn": [
                 "[resourceId('Microsoft.StorageSync/storageSyncServices', variables('storageSyncServicesName'))]"
             ],
             "properties": {}
-        }//,
+        },
 
-        // NOTE: Sometimes failed with "Code: MgmtStorageAccountAuthorizationFailed Message: Unable to read specified storage account. Please check the permissions and try again after some time."
-        // {
-        //     "copy": {
-        //         "name": "cloudEndpointCopy",
-        //         "count": "[parameters('syncGroupCount')]"
-        //     },
-        //     "name": "[concat(variables('storageSyncServicesName'), '/', concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')), '/', guid(resourceGroup().id, string(copyIndex())))]",
-        //     "type": "Microsoft.StorageSync/storageSyncServices/syncGroups/cloudEndpoints",
-        //     "apiVersion": "2020-03-01",
-        //     "dependsOn": [
-        //         // "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]",
-        //         // "[resourceId('Microsoft.Storage/storageAccounts/fileServices', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default')]",
-        //         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')), 'default', variables('fileShareName'))]",
-        //         //"[resourceId('Microsoft.StorageSync/storageSyncServices', variables('storageSyncServicesName'))]",
-        //         "[resourceId('Microsoft.StorageSync/storageSyncServices/syncGroups', variables('storageSyncServicesName'), concat(variables('syncGroupNamePrefix'), padLeft(copyIndex(1), 3, '0')))]"
-        //     ],
-        //     "properties": {
-        //         "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storageAccountNamePrefix'), padLeft(copyIndex(1), 3, '0'), variables('storageAccountNameSuffix')))]",
-        //         "azureFileShareName": "[variables('fileShareName')]",
-        //         "storageAccountTenantId": "[parameters('storageAccountTenantId')]"
-        //         //"friendlyName": "[variables('fileShareName')]"
-        //     }
+        // Cloud Endpoints
+
+        {
+            "copy": {
+                "name": "cloudEndpointCopy",
+                "count": "[parameters('syncGroupCount')]"
+            },
+            "name": "[concat(variables('storageSyncServicesName'), '/', variables('syncGroupNames')[copyIndex()], '/', variables('cloudEndpointNames')[copyIndex()])]",
+            "type": "Microsoft.StorageSync/storageSyncServices/syncGroups/cloudEndpoints",
+            "apiVersion": "2020-09-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountNames')[copyIndex()], 'default', variables('fileShareName'))]",
+                "[resourceId('Microsoft.Resources/deployments', concat(variables('storageSyncRoleAssignmentsDeploymentNamePrefix'), copyIndex()))]",
+                "[resourceId('Microsoft.StorageSync/storageSyncServices/syncGroups', variables('storageSyncServicesName'), variables('syncGroupNames')[copyIndex()])]"
+            ],
+            "properties": {
+                "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
+                "azureFileShareName": "[variables('fileShareName')]",
+                "storageAccountTenantId": "[parameters('storageAccountTenantId')]"
+            }
+        }
+    ],
+    "outputs": {
+        // "output1": {
+        //     "type": "array",
+        //     "value": "[variables('StorageSyncRoleAssignmentNames')]"
         // }
-    ]
+    }
 }
