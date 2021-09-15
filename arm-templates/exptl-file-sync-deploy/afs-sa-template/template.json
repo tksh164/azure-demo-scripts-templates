@@ -98,7 +98,7 @@
             },
             "name": "[variables('storageAccountNames')[copyIndex()]]",
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2021-01-01",
+            "apiVersion": "2021-04-01",
             "location": "[variables('location')]",
             "kind": "Storage",
             "sku": {
@@ -119,60 +119,22 @@
                 {
                     "name": "default",
                     "type": "fileServices",
-                    "apiVersion": "2021-01-01",
+                    "apiVersion": "2021-04-01",
                     "dependsOn": [
                         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
                     ],
-                    "properties": {
-                        // "cors": {
-                        //     "corsRules": [
-                        //         {
-                        //         "allowedOrigins": [
-                        //             "string"
-                        //         ],
-                        //         "allowedMethods": [
-                        //             "string"
-                        //         ],
-                        //         "maxAgeInSeconds": "integer",
-                        //         "exposedHeaders": [
-                        //             "string"
-                        //         ],
-                        //         "allowedHeaders": [
-                        //             "string"
-                        //         ]
-                        //         }
-                        //     ]
-                        // },
-                        // "shareDeleteRetentionPolicy": {
-                        //     "enabled": "boolean",
-                        //     "days": "integer"
-                        // },
-                        // "protocolSettings": {
-                        //     "smb": {
-                        //         "multichannel": {
-                        //             "enabled": "boolean"
-                        //         },
-                        //         "versions": "string",
-                        //         "authenticationMethods": "string",
-                        //         "kerberosTicketEncryption": "string",
-                        //         "channelEncryption": "string"
-                        //     }
-                        // }
-                    },
+                    "properties": {},
                     "resources": [
                         {
                             "name": "[variables('fileShareName')]",
                             "type": "shares",
-                            "apiVersion": "2021-01-01",
+                            "apiVersion": "2021-04-01",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountNames')[copyIndex()], 'default')]"
                             ],
                             "properties": {
-                                //"metadata": {},
-                                //"shareQuota": "integer",
-                                //"enabledProtocols": "SMB",
-                                //"rootSquash": "string",
-                                //"accessTier": "string"
+                                "accessTier": "Hot",
+                                "shareQuota": 5120
                             }
                         }
                     ]
@@ -253,31 +215,12 @@
             }
         },
 
-        // {
-        //     "copy": {
-        //         "name": "storageSyncRoleAssignmentCopy",
-        //         "count": "[parameters('syncGroupCount')]"
-        //     },
-        //     "name": "[variables('storageSyncRoleAssignmentNames')[copyIndex()]]",
-        //     "type": "Microsoft.Authorization/roleAssignments",
-        //     "apiVersion": "2021-04-01-preview",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
-        //     ],
-        //     "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
-        //     "properties": {
-        //         "principalType": "ServicePrincipal",
-        //         "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', 'xxxxxxxxxxxxxxxxxxxx')]",  // Reader and Data Access. This can get by (Get-AzRoleDefinition -Name 'Reader and Data Access').Id
-        //         "principalId": "xxxxxxxxxxxxxxxxxxxx"  // Microsoft.StorageSync. This can get by (Get-AzADServicePrincipal -DisplayNameBeginsWith Microsoft.StorageSync | Select-Object -First 1).Id
-        //     }
-        // },
-
         // Storage Sync Service
 
         {
             "name": "[variables('storageSyncServicesName')]",
             "type": "Microsoft.StorageSync/storageSyncServices",
-            "apiVersion": "2020-03-01",
+            "apiVersion": "2020-09-01",
             "location": "[variables('location')]",
             "properties": {
                 "incomingTrafficPolicy": "AllowAllTraffic"
@@ -293,7 +236,7 @@
             },
             "name": "[concat(variables('storageSyncServicesName'), '/', variables('syncGroupNames')[copyIndex()])]",
             "type": "Microsoft.StorageSync/storageSyncServices/syncGroups",
-            "apiVersion": "2020-03-01",
+            "apiVersion": "2020-09-01",
             "dependsOn": [
                 "[resourceId('Microsoft.StorageSync/storageSyncServices', variables('storageSyncServicesName'))]"
             ],
@@ -321,11 +264,5 @@
                 "storageAccountTenantId": "[parameters('storageAccountTenantId')]"
             }
         }
-    ],
-    "outputs": {
-        // "output1": {
-        //     "type": "array",
-        //     "value": "[variables('StorageSyncRoleAssignmentNames')]"
-        // }
-    }
+    ]
 }
