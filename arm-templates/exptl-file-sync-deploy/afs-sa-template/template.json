@@ -4,17 +4,26 @@
     "parameters": {
         "resourcePrefix": {
             "type": "string",
-            "defaultValue": "afs"
+            "defaultValue": "afs",
+            "metadata": {
+                "description": "Specify the prefix for the resource name."
+            }
         },
         "storageAccountNamePrefix": {
             "type": "string",
-            "defaultValue": "fsync"
+            "defaultValue": "fsync",
+            "metadata": {
+                "description": "Specify the prefix for the storage account resource name."
+            }
         },
         "syncGroupCount": {
             "type": "int",
             "defaultValue": 3,
             "minValue": 1,
-            "maxValue": 200
+            "maxValue": 200,
+            "metadata": {
+                "description": "Specify the number of sync groups to create."
+            }
         },
         "storageSyncPrincipalId": {
             "type": "string",
