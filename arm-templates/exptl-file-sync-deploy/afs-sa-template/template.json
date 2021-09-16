@@ -23,14 +23,6 @@
             "metadata": {
                 "description": "The Microsoft.StorageSync service principal ID. This can get by `(Get-AzADServicePrincipal -DisplayNameBeginsWith Microsoft.StorageSync | Select-Object -First 1).Id`."
             }
-        },
-        "storageAccountTenantId": {
-            "type": "string",
-            "minLength": 36,
-            "maxLength": 36,
-            "metadata": {
-                "description": "The Azure AD tenant ID (GUID) of the storage account where the storage share exists. It can get by `(Get-AzContext).Tenant.Id`."
-            }
         }
     },
     "variables": {
@@ -261,7 +253,7 @@
             "properties": {
                 "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]",
                 "azureFileShareName": "[variables('fileShareName')]",
-                "storageAccountTenantId": "[parameters('storageAccountTenantId')]"
+                "storageAccountTenantId": "[subscription().tenantId]"
             }
         }
     ]
