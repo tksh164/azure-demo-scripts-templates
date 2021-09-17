@@ -46,7 +46,7 @@ Also you can specify the resource group name via -ResourceGroupName parameter.
 This script deletes all Azure File Sync related resources in the specified resource group such as Server endpoints, Cloud endpoints, Sync Groups, Registered servers, Storage Sync Service, Storage accounts.
 
 ```PowerShell
-.\delete-afs-res.ps1 -ResourceGroupName lab-afs1
+.\undeploy-afs.ps1 -ResourceGroupName lab-afs1
 ```
 
 <!--
