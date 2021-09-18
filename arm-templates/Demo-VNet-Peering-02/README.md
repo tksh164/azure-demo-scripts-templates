@@ -4,7 +4,7 @@
 
 Full-mesh virtual network peering with three virtual networks.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -28,7 +28,7 @@ All the below names are the default value.
     - Subnet: `subnet3`
         - Address prefix: `192.168.2.0/24`
 
-### Non-deployments
+### Not deployment
 
 - n/a
 
