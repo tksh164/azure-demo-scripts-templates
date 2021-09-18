@@ -28,10 +28,6 @@ All the below names are the default value.
     - Subnet: `subnet3`
         - Address prefix: `192.168.2.0/24`
 
-### Not deployment
-
-- n/a
-
 ### Diagram
 
 ![Diagram](./diagram.drawio.svg)
