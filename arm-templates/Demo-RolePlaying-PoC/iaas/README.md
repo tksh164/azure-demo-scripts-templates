@@ -16,7 +16,7 @@ PS > .\deploy.ps1
 
 ![Template overview](./template.drawio.svg)
 
-### Deployments
+### Deployment
 
 - Resource group: `demo-roleplaying-poc`
     - VNet: `poc-vnet`
@@ -71,7 +71,7 @@ PS > .\deploy.ps1
     - Recovery Services vault: `backup####-rsv`
 
 
-### Non-deployments
+### Not deployment
 
 - The guest OS configurations.
 - The internal load balancer is not configured.
