@@ -2,7 +2,7 @@
 
 ## Template overview
 
-### Deployments
+### Deployment
 
 - Resource group: `Demo-VPN-VNet-VNet`
 - VNet: `vnet1`
@@ -16,7 +16,7 @@
 - Public IP Address: `vnet1-vpngw-ip` - For VPN gateway.
 - Public IP Address: `vnet2-vpngw-ip` - For VPN gateway.
 
-### Non-deployments
+### Not deployment
 
 - Deploy no virtual machines.
 - Create no connections inter VPN gateways.
