@@ -4,7 +4,7 @@
 
 Deploy a first domain controller virtual machine of Active Directory domain service into an existing virtual network.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -22,14 +22,6 @@ All the below names are the default value.
     - For the inbound NAT of RDP to the domain controller.
     - Public IP address: `dc-lb-ip`
         - DNS name label: `dc-lb-****`
-
-### Non-deployments
-
-- n/a
-
-### Diagram
-
-- n/a
 
 ## Notes
 
