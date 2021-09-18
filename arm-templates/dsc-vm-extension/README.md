@@ -4,7 +4,7 @@
 
 Virtual machine with DSC VM extension.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -20,10 +20,6 @@ All the below names are the default value.
                 - Private IP address: `10.0.0.5`, Static
             - Public IP address: `dscext-vm1-ip`
             - Network security group: `dscext-vm1-nsg`
-
-### Non-deployments
-
-- n/a
 
 ## Notes
 
