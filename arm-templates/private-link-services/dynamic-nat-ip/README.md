@@ -24,7 +24,7 @@ PS > .\deploy.ps1 -ResourceGroupName lab-privatelink
 
 n/a
 
-### Deployments
+### Deployment
 
 - Resource group: `lab-privatelink-dynamic`
     - VNet: `provider-vnet`
@@ -34,7 +34,7 @@ n/a
             - Internal load balancer: `backend-lbi`
     - Private link service: `provider-pls`
 
-### Non-deployments
+### Not deployment
 
 - The backend pool of internal load balancer is not configured (empty).
 
