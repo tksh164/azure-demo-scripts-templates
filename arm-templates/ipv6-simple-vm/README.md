@@ -2,7 +2,7 @@
 
 ## Template overview
 
-Deploy simple IPv6 virtual network and virtual machine
+Deploy simple IPv6 virtual network and virtual machine.
 
 <!--
 
