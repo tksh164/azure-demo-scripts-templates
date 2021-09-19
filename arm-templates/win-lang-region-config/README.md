@@ -10,7 +10,7 @@ You can use non-English language options and region settings since first login e
 
 Simple PowerShell script version is [here](https://github.com/tksh164/change-windows-language-regional-settings).
 
-### Deployments
+### Deployment
 
 - Resource group: `exptl-langregion`
 - Virtual network: `langregion-vnet`
@@ -26,14 +26,6 @@ Simple PowerShell script version is [here](https://github.com/tksh164/change-win
             - Network security group: `langregion-vm1-nsg`
 
 All the above names are the default value.
-
-### Non-deployments
-
-- n/a
-
-### Diagram
-
-- n/a
 
 ## Notes
 
