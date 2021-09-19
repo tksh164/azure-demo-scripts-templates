@@ -22,8 +22,6 @@ PS > .\deploy.ps1 -ResourceGroupName lab-privatelink
 
 ## Template overview
 
-n/a
-
 ### Deployment
 
 - Resource group: `lab-privatelink-dynamic`
