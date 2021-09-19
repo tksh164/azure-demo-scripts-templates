@@ -4,9 +4,10 @@
 
 Deploy simple IPv6 virtual network and virtual machine
 
+<!--
+
 ### Deployments
 
-<!--
 All the below names are the default value.
 
 - Resource group: Specified existing resource group through the parameter.
@@ -24,14 +25,6 @@ All the below names are the default value.
     - Public IP address: `dc-lb-ip`
         - DNS name label: `dc-lb-****`
 -->
-
-### Non-deployments
-
-- n/a
-
-### Diagram
-
-- n/a
 
 ## Notes
 
