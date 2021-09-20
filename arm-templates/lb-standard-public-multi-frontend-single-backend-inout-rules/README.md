@@ -4,7 +4,7 @@
 
 Groom outbound connections to a specific set of public IP addresses in Public Standard load balancer.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -35,10 +35,6 @@ All the below names are the default value.
                 - Private IP address: `10.0.0.5` - Static
             - Public IP address: `lboutip-jump-vm1-ip`
             - Network security group: `lboutip-jump-vm1-nsg`
-
-### Non-deployments
-
-- n/a
 
 ### Diagram
 
