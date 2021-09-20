@@ -4,7 +4,7 @@
 
 Enable only outbound connection in Public Standard load balancer.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -34,10 +34,6 @@ All the below names are the default value.
                 - Private IP address: `10.0.0.5` - Static
             - Public IP address: `lboutonly-jump-vm1-ip`
             - Network security group: `lboutonly-jump-vm1-nsg`
-
-### Non-deployments
-
-- n/a
 
 ## Notes
 
