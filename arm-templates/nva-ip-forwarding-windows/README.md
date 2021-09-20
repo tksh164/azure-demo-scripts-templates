@@ -4,7 +4,7 @@
 
 Deploy a Windows-based network virtual appliance virtual machine into an existing virtual network.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -22,14 +22,6 @@ All the below names are the default value.
                 - Network security group: `nva-vm1-nsg`
 - Route table: `nva-rt`
     - Route: `example`
-
-### Non-deployments
-
-- n/a
-
-### Diagram
-
-- n/a
 
 ## Notes
 
