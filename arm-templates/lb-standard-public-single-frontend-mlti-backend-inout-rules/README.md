@@ -4,7 +4,7 @@
 
 Public Standard load balancer with single frontend and multiple backends. One backend is for load balancing other one is for outbound.
 
-### Deployments
+### Deployment
 
 All the below names are the default value.
 
@@ -36,7 +36,7 @@ All the below names are the default value.
             - Public IP address: `lboutip-jump-vm1-ip`
             - Network security group: `lboutip-jump-vm1-nsg`
 
-### Non-deployments
+### Not deployment
 
 - Any services were not configured on the backend virtual machine.
 
