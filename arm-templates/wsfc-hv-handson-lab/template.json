@@ -79,15 +79,15 @@
             ]
         },
 
-        "diskType": "StandardSSD_LRS",
-        //"diskType": "Premium_LRS",
+        //"diskType": "StandardSSD_LRS",
+        "diskType": "Premium_LRS",
 
         "vmParams": {
             "jumpBox": {
                 "name": "[variables('vmNames').jumpBox]",
                 "computerName": "jb1",
-                //"vmSize": "Standard_D2s_v4",
-                "vmSize": "Standard_B2ms",  // for test
+                "vmSize": "Standard_D2s_v4",
+                //"vmSize": "Standard_B2ms",  // for test
                 "osDiskType": "[variables('diskType')]",
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
