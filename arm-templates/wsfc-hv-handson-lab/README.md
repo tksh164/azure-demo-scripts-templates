@@ -2,6 +2,7 @@
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwsfc-hv-handson-lab%2Ftemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwsfc-hv-handson-lab%2FcreateUiDefinition.json)
 
+<!--
 ## Template overview
 
 TBW
@@ -17,6 +18,7 @@ TBW
 ### Diagram
 
 - n/a
+-->
 
 ## Notes
 
