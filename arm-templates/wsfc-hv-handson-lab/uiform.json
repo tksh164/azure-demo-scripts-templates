@@ -7,7 +7,7 @@
             "steps": [
                 {
                     "name": "basics",
-                    "label": "label",
+                    "label": "Lab Environment Setup",
                     "description": "Welcome to the Hyper-V cluster hands-on lab training. This deployment will deploy your hands-on lab environment on Azure.",
                     "elements": [
                         {
