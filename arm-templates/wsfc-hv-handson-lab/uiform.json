@@ -64,7 +64,7 @@
                                     "type": "Microsoft.Common.InfoBox",
                                     "visible": true,
                                     "options": {
-                                        "icon": "Info",
+                                        "style": "Info",
                                         "text": "Please take note the administrator account information. The administrator account information will use in your hands-on lab training."
                                     }
                                 }
@@ -107,7 +107,7 @@
                                     "type": "Microsoft.Common.InfoBox",
                                     "visible": true,
                                     "options": {
-                                        "icon": "Info",
+                                        "style": "Info",
                                         "text": "You can check your current source IP address from <a href='https://whatismyipaddress.com/'>whatismyipaddress.com</a>."
                                     }
                                 }
