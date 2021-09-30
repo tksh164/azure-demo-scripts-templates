@@ -121,7 +121,7 @@
             "parameters": {
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
-                "rdpSourceAddressPrefix": "[basics('labAccessSection').rdpSourceAddressPrefix]"
+                "rdpSourceAddressPrefix": "[steps('labAccessSection').rdpSourceAddressPrefix]"
             },
             "kind": "Tenant",
             "location": "[steps('basics').resourceScope.location.name]"
