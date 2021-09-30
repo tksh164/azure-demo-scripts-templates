@@ -124,7 +124,7 @@
                 "rdpSourceAddressPrefix": "[steps('basics').labAccessSection.rdpSourceAddressPrefix]"
             },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[sptes('basics').resourceScope.resourceGroup.id]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "location": "[steps('basics').resourceScope.location.name]"
         }
     }
