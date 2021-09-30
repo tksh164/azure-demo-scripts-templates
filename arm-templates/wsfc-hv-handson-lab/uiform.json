@@ -119,13 +119,12 @@
         },
         "outputs": {
             "parameters": {
-                "adminUserName": "[basics('adminAccountSection').adminUserName]",
-                "adminPassword": "[basics('adminAccountSection').adminPassword.password]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
                 "rdpSourceAddressPrefix": "[basics('labAccessSection').rdpSourceAddressPrefix]"
             },
             "kind": "Tenant",
             "location": "[steps('basics').resourceScope.location.name]"
         }
-
     }
 }
