@@ -123,7 +123,8 @@
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
                 "rdpSourceAddressPrefix": "[steps('basics').labAccessSection.rdpSourceAddressPrefix]"
             },
-            "kind": "Tenant",
+            "kind": "ResourceGroup",
+            "resourceGroupId": "[sptes('basics').resourceScope.resourceGroup.id]",
             "location": "[steps('basics').resourceScope.location.name]"
         }
     }
