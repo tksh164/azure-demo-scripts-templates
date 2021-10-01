@@ -2,24 +2,6 @@
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwsfc-hv-handson-lab%2Ftemplate.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwsfc-hv-handson-lab%2Fuiform.json)
 
-<!--
-## Template overview
-
-TBW
-
-### Deployments
-
-TBW
-
-### Non-deployments
-
-- n/a
-
-### Diagram
-
-- n/a
--->
-
 ## Notes
 
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
