@@ -1,5 +1,5 @@
 $metadata = Invoke-RestMethod -Method Get -Headers @{ 'Metadata' = 'true' } -Uri 'http://169.254.169.254/metadata/instance?api-version=2021-02-01'
-if ($metadata.compute.platformFaultDomain -eq "0")
+if ($metadata.compute.platformFaultDomain -eq '0')
 {
     $driveLetter = 'W'
     $volumeLabel = 'Witness'
