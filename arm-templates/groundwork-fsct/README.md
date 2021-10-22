@@ -8,7 +8,7 @@ This template provides groundworks for the File Server Capacity Tool lab environ
 
 - Domain controller VM
     - The AD DS feature and related management tools are installed.
-    - The data disk for AD DS is formatted.
+    - The data disk for AD DS is formatted with drive letter `N:`.
 - File server VM
     - The File Server feature is installed.
 - FSCT controller VM
