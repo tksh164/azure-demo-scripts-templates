@@ -434,7 +434,7 @@
                     "dataDisks": [
                         {
                             "lun": 0,
-                            "caching": "ReadOnly",
+                            "caching": "None",
                             "createOption": "Attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('sharedDiskNames').wsfcWitness)]"
