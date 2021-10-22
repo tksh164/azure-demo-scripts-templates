@@ -1,0 +1,691 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the resources should be deployed."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for VMs."
+            }
+        },
+        "rdpSourceAddressPrefix": {
+            "type": "string",
+            "defaultValue": "*",
+            "metadata": {
+                "description": "Specify the allowed source IPv4 address prefix for RDP connections."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+            "metadata": {
+                "description": "The seed for the unique suffix. Do not need set this value when deployment."
+            }
+        }
+    },
+    "variables": {
+
+        // General
+
+        "prefix": "fsct",
+        "uniqueSuffix": "[toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 4))]",
+
+        // Virtual network
+
+        "vnetName": "[concat(variables('prefix'), '-vnet')]",
+        "subnetName": "default",
+        "subntNsgName": "[concat(variables('vnetName'), '-', variables('subnetName'), '-nsg')]",
+
+        // Availability set
+
+        "availabilitySetName": {
+            "dc": "[concat(variables('prefix'), '-dc-as')]"
+        },
+
+        // Virtual machine
+
+        "vmNames": {
+            "dc": "[concat(variables('prefix'), '-dc-vm1')]",
+            "fileServer": "[concat(variables('prefix'), '-fileserver-vm1')]",
+            "fsctController": "[concat(variables('prefix'), '-controller-vm1')]",
+            "fsctClients": [
+                "[concat(variables('prefix'), '-client-vm1')]",
+                "[concat(variables('prefix'), '-client-vm2')]"
+            ]
+        },
+
+        "vmParams": {
+            "dc": {
+                "name": "[variables('vmNames').dc]",
+                "computerName": "dc1",
+                "vmSize": "Standard_B2ms",
+                "osDiskType": "StandardSSD_LRS",
+                "iamge": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                "privateIpAddress": "10.0.0.11",
+                "dnsServers": null,  // Use AzureProvidedDNS
+                "osDiskName": "[concat(variables('vmNames').dc, '-osdisk')]",
+                "dataDisks": [
+                    {
+                        "name": "[concat(variables('vmNames').dc, '-datadisk1')]",
+                        "sku": "StandardSSD_LRS",
+                        "size": 4
+                    }
+                ],
+                "nicName": "[concat(variables('vmNames').dc, '-nic')]",
+                "publicIpAddressName": "[concat(variables('vmNames').dc, '-ip')]",
+                "domainNameLabel": "[concat(variables('vmNames').dc, '-', variables('uniqueSuffix'))]"
+            },
+            "fileServer": {
+                "name": "[variables('vmNames').fileServer]",
+                "computerName": "fs1",
+                "vmSize": "Standard_B2ms",
+                "osDiskType": "StandardSSD_LRS",
+                "iamge": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                "privateIpAddress": "10.0.0.20",
+                "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                "osDiskName": "[concat(variables('vmNames').fileServer, '-osdisk')]",
+                "nicName": "[concat(variables('vmNames').fileServer, '-nic')]",
+                "publicIpAddressName": "[concat(variables('vmNames').fileServer, '-ip')]",
+                "domainNameLabel": "[concat(variables('vmNames').fileServer, '-', variables('uniqueSuffix'))]"
+            },
+            "fsctController": {
+                "name": "[variables('vmNames').fsctController]",
+                "computerName": "fsctctl1",
+                "vmSize": "Standard_B2ms",
+                "osDiskType": "StandardSSD_LRS",
+                "iamge": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                "privateIpAddress": "10.0.0.51",
+                "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                "osDiskName": "[concat(variables('vmNames').fsctController, '-osdisk')]",
+                "nicName": "[concat(variables('vmNames').fsctController, '-nic')]",
+                "publicIpAddressName": "[concat(variables('vmNames').fsctController, '-ip')]",
+                "domainNameLabel": "[concat(variables('vmNames').fsctController, '-', variables('uniqueSuffix'))]"
+            },
+            "fsctClients": [
+                {
+                    "name": "[variables('vmNames').fsctClients[0]]",
+                    "computerName": "fsctcli1",
+                    "vmSize": "Standard_B2ms",
+                    "osDiskType": "StandardSSD_LRS",
+                    "iamge": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "privateIpAddress": "10.0.0.61",
+                    "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "osDiskName": "[concat(variables('vmNames').fsctClients[0], '-osdisk')]",
+                    "nicName": "[concat(variables('vmNames').fsctClients[0], '-nic')]",
+                    "publicIpAddressName": "[concat(variables('vmNames').fsctClients[0], '-ip')]",
+                    "domainNameLabel": "[concat(variables('vmNames').fsctClients[0], '-', variables('uniqueSuffix'))]"
+                },
+                {
+                    "name": "[variables('vmNames').fsctClients[1]]",
+                    "computerName": "fsctcli2",
+                    "vmSize": "Standard_B2ms",
+                    "osDiskType": "StandardSSD_LRS",
+                    "iamge": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "privateIpAddress": "10.0.0.62",
+                    "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "osDiskName": "[concat(variables('vmNames').fsctClients[1], '-osdisk')]",
+                    "nicName": "[concat(variables('vmNames').fsctClients[1], '-nic')]",
+                    "publicIpAddressName": "[concat(variables('vmNames').fsctClients[1], '-ip')]",
+                    "domainNameLabel": "[concat(variables('vmNames').fsctClients[1], '-', variables('uniqueSuffix'))]"
+                }
+            ]
+        }
+
+        // DSC extension
+
+        // "dscSettings": {
+        //     "wmfVersion": "latest",
+        //     "configuration": {
+        //         "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/win-lang-region-config/dsc-lang-region-config/dsc-lang-region-config.zip",
+        //         "script": "lang-options-and-region.ps1",
+        //         "function": "language-options-and-region"
+        //     },
+        //     "privacy": {
+        //         "dataCollection": "enable"
+        //     },
+        //     "configurationArguments": {
+        //         "PreferredLanguage": "ja-JP",
+        //         "LanguageCapabilities": "Minimum",
+        //         "GeoLocationId": 122,  // Japan
+        //         "CopySettingsToDefaultUserAccount": true,
+        //         "TimeZone": "Tokyo Standard Time",
+        //         "SystemLocale": "ja-JP"
+        //     }
+        // }
+    },
+    "resources": [
+
+        // Virtual network
+
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subntNsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [ "10.0.0.0/16" ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subntNsgName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('subntNsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "[parameters('rdpSourceAddressPrefix')]",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+
+        // AD DS Domain Controller VM
+
+        {
+            "name": "[variables('availabilitySetName').dc]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').dc.name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]",
+                "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').dc.vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').dc.osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').dc.osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').dc.iamge]",
+                    "dataDisks": [
+                        {
+                            "createOption": "Attach",
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').dc.computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').dc.nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').dc.publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').dc.privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').dc.publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').dc.dnsServers]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').dc.publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').dc.domainNameLabel]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyDCDisk",
+                "count": "[length(variables('vmParams').dc.dataDisks)]"
+            },
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2020-09-30",
+            "name": "[variables('vmParams').dc.dataDisks[copyIndex()].name]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[variables('vmParams').dc.dataDisks[copyIndex()].sku]"
+            },
+            "properties": {
+                "diskSizeGB": "[variables('vmParams').dc.dataDisks[copyIndex()].size]",
+                "creationData": {
+                    "createOption": "empty"
+                }
+            }
+        },
+
+        // File server
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').fileServer.name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fileServer.nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').fileServer.vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').fileServer.osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').fileServer.osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').fileServer.iamge]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fileServer.nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').fileServer.computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fileServer.nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fileServer.publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').fileServer.privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fileServer.publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').fileServer.dnsServers]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fileServer.publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').fileServer.domainNameLabel]"
+                }
+            }
+        },
+
+        // FSCT Controller
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').fsctController.name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fsctController.nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').fsctController.vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').fsctController.osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').fsctController.osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').fsctController.iamge]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fsctController.nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').fsctController.computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fsctController.nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fsctController.publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').fsctController.privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fsctController.publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').fsctController.dnsServers]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fsctController.publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').fsctController.domainNameLabel]"
+                }
+            }
+        },
+
+        // FSCT Clients
+
+        {
+            "copy": {
+                "name": "copyWsfcNodeVM",
+                "count": "[length(variables('vmParams').fsctClients)]"
+            },
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').fsctClients[copyIndex()].name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fsctClients[copyIndex()].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').fsctClients[copyIndex()].vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').fsctClients[copyIndex()].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').fsctClients[copyIndex()].osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').fsctClients[copyIndex()].iamge]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').fsctClients[copyIndex()].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').fsctClients[copyIndex()].computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyWsfcNodeNic",
+                "count": "[length(variables('vmParams').fsctClients)]"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fsctClients[copyIndex()].nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fsctClients[copyIndex()].publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').fsctClients[copyIndex()].privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').fsctClients[copyIndex()].publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').fsctClients[copyIndex()].dnsServers]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyWsfcNodeIp",
+                "count": "[length(variables('vmParams').fsctClients)]"
+            },
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').fsctClients[copyIndex()].publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').fsctClients[copyIndex()].domainNameLabel]"
+                }
+            }
+        }//,
+        // {
+        //     "copy": {
+        //         "name": "copyWsfcNodeDscExt",
+        //         "count": "[length(variables('vmParams').wsfcNodes)]"
+        //     },
+        //     "condition": "[variables('vmParams').wsfcNodes[copyIndex()].isDeployLanguageOptionsDsc]",
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "apiVersion": "2021-03-01",
+        //     "name": "[concat(variables('vmParams').wsfcNodes[copyIndex()].name, '/Microsoft.Powershell.DSC')]",
+        //     "location": "[parameters('location')]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').wsfcNodes[copyIndex()].name)]"
+        //     ],
+        //     "properties": {
+        //         "publisher": "Microsoft.Powershell",
+        //         "type": "DSC",
+        //         "typeHandlerVersion": "2.83",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": "[variables('dscSettings')]",
+        //         "protectedSettings": {}
+        //     }
+        // }//,
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        }
+    }
+}
