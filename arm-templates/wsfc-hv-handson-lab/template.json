@@ -429,17 +429,17 @@
                     "imageReference": "[variables('vmParams').dc.iamge]",
                     "dataDisks": [
                         {
-                            "createOption": "Attach",
                             "lun": 0,
                             "caching": "ReadOnly",
+                            "createOption": "Attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]"
                             }
                         },
                         {
-                            "createOption": "Attach",
                             "lun": 1,
                             "caching": "ReadOnly",
+                            "createOption": "Attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[1].name)]"
                             }
@@ -505,7 +505,6 @@
                 "enableAcceleratedNetworking": "[variables('vmParams').dc.enableAcceleratedNetworking]"
             }
         },
-
         {
             "condition": "[variables('vmParams').dc.isDeployPublicIpAddress]",
             "type": "Microsoft.Network/publicIPAddresses",
@@ -522,7 +521,6 @@
                 }
             }
         },
-
         {
             "copy": {
                 "name": "copyDCDisk",
