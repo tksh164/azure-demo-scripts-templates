@@ -1,0 +1,587 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the resources should be deployed."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for VMs."
+            }
+        },
+        "rdpSourceAddressPrefix": {
+            "type": "string",
+            "defaultValue": "*",
+            "metadata": {
+                "description": "Specify the allowed source IPv4 address prefix for RDP connections."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+            "metadata": {
+                "description": "The seed for the unique suffix. Do not need set this value when deployment."
+            }
+        }
+    },
+    "variables": {
+
+        // General
+
+        "prefix": "wsfc",
+        "uniqueSuffix": "[toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 4))]",
+
+        // Virtual network
+
+        "vnetName": "[concat(variables('prefix'), '-vnet')]",
+        "subnetName": "default",
+        "subntNsgName": "[concat(variables('vnetName'), '-', variables('subnetName'), '-nsg')]",
+
+        // Availability set
+
+        "availabilitySetName": {
+            "dc": "[concat(variables('prefix'), '-dc-as')]"
+        },
+
+        // Virtual machine
+
+        "vmNames": {
+            "dc": "[concat(variables('prefix'), '-dc-vm1')]",
+            "wsfcNodes": [
+                "[concat(variables('prefix'), '-wsfcnode-vm1')]",
+                "[concat(variables('prefix'), '-wsfcnode-vm2')]"
+            ],
+            "client": "[concat(variables('prefix'), '-client-vm1')]"
+        },
+
+        "vmParams": {
+            "dc": {
+                "name": "[variables('vmNames').dc]",
+                "computerName": "dc1",
+                "vmSize": "Standard_B2ms",
+                "osDiskType": "StandardSSD_LRS",
+                "iamge": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                "privateIpAddress": "10.0.0.11",
+                "dnsServers": null,  // Use AzureProvidedDNS
+                "osDiskName": "[concat(variables('vmNames').dc, '-osdisk')]",
+                "dataDisks": [
+                    {
+                        "name": "[concat(variables('vmNames').dc, '-datadisk1')]",
+                        "sku": "StandardSSD_LRS",
+                        "size": 4
+                    }
+                ],
+                "nicName": "[concat(variables('vmNames').dc, '-nic')]",
+                "publicIpAddressName": "[concat(variables('vmNames').dc, '-ip')]",
+                "domainNameLabel": "[concat(variables('vmNames').dc, '-', variables('uniqueSuffix'))]"
+            },
+            "wsfcNodes": [
+                {
+                    "name": "[variables('vmNames').wsfcNodes[0]]",
+                    "computerName": "n1",
+                    "vmSize": "Standard_B2ms",
+                    "osDiskType": "StandardSSD_LRS",
+                    "iamge": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "privateIpAddress": "10.0.0.51",
+                    "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "osDiskName": "[concat(variables('vmNames').wsfcNodes[0], '-osdisk')]",
+                    "nicName": "[concat(variables('vmNames').wsfcNodes[0], '-nic')]",
+                    "publicIpAddressName": "[concat(variables('vmNames').wsfcNodes[0], '-ip')]",
+                    "domainNameLabel": "[concat(variables('vmNames').wsfcNodes[0], '-', variables('uniqueSuffix'))]"
+                },
+                {
+                    "name": "[variables('vmNames').wsfcNodes[1]]",
+                    "computerName": "n2",
+                    "vmSize": "Standard_B2ms",
+                    "osDiskType": "StandardSSD_LRS",
+                    "iamge": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "privateIpAddress": "10.0.0.52",
+                    "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                    "osDiskName": "[concat(variables('vmNames').wsfcNodes[1], '-osdisk')]",
+                    "nicName": "[concat(variables('vmNames').wsfcNodes[1], '-nic')]",
+                    "publicIpAddressName": "[concat(variables('vmNames').wsfcNodes[1], '-ip')]",
+                    "domainNameLabel": "[concat(variables('vmNames').wsfcNodes[1], '-', variables('uniqueSuffix'))]"
+                }
+            ],
+            "client": {
+                "name": "[variables('vmNames').client]",
+                "computerName": "cli1",
+                "vmSize": "Standard_B2ms",
+                "osDiskType": "StandardSSD_LRS",
+                "iamge": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                "privateIpAddress": "10.0.0.101",
+                "dnsServers": [ "10.0.0.11", "168.63.129.16" ],
+                "osDiskName": "[concat(variables('vmNames').client, '-osdisk')]",
+                "nicName": "[concat(variables('vmNames').client, '-nic')]",
+                "publicIpAddressName": "[concat(variables('vmNames').client, '-ip')]",
+                "domainNameLabel": "[concat(variables('vmNames').client, '-', variables('uniqueSuffix'))]"
+            }
+        }
+    },
+    "resources": [
+
+        // Virtual network
+
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subntNsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [ "10.0.0.0/16" ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subntNsgName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('subntNsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "direction": "Inbound",
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "sourceAddressPrefix": "[parameters('rdpSourceAddressPrefix')]",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]   
+            }
+        },
+
+        // AD DS Domain Controller VM
+
+        {
+            "name": "[variables('availabilitySetName').dc]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').dc.name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]",
+                "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').dc.vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').dc.osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').dc.osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').dc.iamge]",
+                    "dataDisks": [
+                        {
+                            "createOption": "Attach",
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').dc.nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').dc.computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').dc)]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').dc.nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').dc.publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').dc.privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').dc.publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').dc.dnsServers]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').dc.publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').dc.domainNameLabel]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyDCDisk",
+                "count": "[length(variables('vmParams').dc.dataDisks)]"
+            },
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2020-09-30",
+            "name": "[variables('vmParams').dc.dataDisks[copyIndex()].name]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[variables('vmParams').dc.dataDisks[copyIndex()].sku]"
+            },
+            "properties": {
+                "diskSizeGB": "[variables('vmParams').dc.dataDisks[copyIndex()].size]",
+                "creationData": {
+                    "createOption": "empty"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').dc.name, '/CustomScript.prep-adds-dc')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').dc.name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-adds-dc.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-adds-dc.ps1"
+                },
+                "protectedSettings": {}
+            }
+        },
+
+        // WSFC nodes
+
+        {
+            "copy": {
+                "name": "copyWsfcNodeVM",
+                "count": "[length(variables('vmParams').wsfcNodes)]"
+            },
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').wsfcNodes[copyIndex()].name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').wsfcNodes[copyIndex()].nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').wsfcNodes[copyIndex()].vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').wsfcNodes[copyIndex()].osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').wsfcNodes[copyIndex()].osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').wsfcNodes[copyIndex()].iamge]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').wsfcNodes[copyIndex()].nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').wsfcNodes[copyIndex()].computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyWsfcNodeNic",
+                "count": "[length(variables('vmParams').wsfcNodes)]"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').wsfcNodes[copyIndex()].nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').wsfcNodes[copyIndex()].publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').wsfcNodes[copyIndex()].privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').wsfcNodes[copyIndex()].publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').wsfcNodes[copyIndex()].dnsServers]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyWsfcNodeIp",
+                "count": "[length(variables('vmParams').wsfcNodes)]"
+            },
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').wsfcNodes[copyIndex()].publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').wsfcNodes[copyIndex()].domainNameLabel]"
+                }
+            }
+        },
+        {
+            "copy": {
+                "name": "copyWsfcNodeCustomScriptExt",
+                "count": "[length(variables('vmParams').wsfcNodes)]"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').wsfcNodes[copyIndex()].name, '/CustomScript.prep-wsfc')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').wsfcNodes[copyIndex()].name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-wsfc.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-wsfc.ps1"
+                },
+                "protectedSettings": {}
+            }
+        },
+
+        // Client
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vmParams').client.name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').client.nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmParams').client.vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vmParams').client.osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('vmParams').client.osDiskType]"
+                        }
+                    },
+                    "imageReference": "[variables('vmParams').client.iamge]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').client.nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmParams').client.computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').client.nicName]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').client.publicIpAddressName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+                            },
+                            "privateIpAddress": "[variables('vmParams').client.privateIpAddress]",
+                            "privateIpAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmParams').client.publicIpAddressName)]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": "[variables('vmParams').client.dnsServers]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vmParams').client.publicIpAddressName]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vmParams').client.domainNameLabel]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        }
+    }
+}
