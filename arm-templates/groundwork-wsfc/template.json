@@ -53,7 +53,14 @@
         // Availability set
 
         "availabilitySetName": {
-            "dc": "[concat(variables('prefix'), '-dc-as')]"
+            "dc": "[concat(variables('prefix'), '-dc-as')]",
+            "wsfcNode": "[concat(variables('prefix'), '-wsfcnode-as')]"
+        },
+
+        // Shared disk
+
+        "sharedDiskNames": {
+            "wsfcWitness": "[concat(variables('prefix'), '-wsfcwtiness-shareddisk1')]"
         },
 
         // Virtual machine
@@ -244,9 +251,9 @@
                     "imageReference": "[variables('vmParams').dc.iamge]",
                     "dataDisks": [
                         {
-                            "createOption": "Attach",
                             "lun": 0,
                             "caching": "ReadOnly",
+                            "createOption": "Attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]"
                             }
@@ -362,8 +369,41 @@
             }
         },
 
+        // Shared disk
+
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2020-09-30",
+            "name": "[variables('sharedDiskNames').wsfcWitness]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "StandardSSD_LRS"
+            },
+            "properties": {
+                "osType": "Windows",
+                "diskSizeGB": 4,
+                "creationData": {
+                    "createOption": "empty"
+                },
+                "maxShares": "[length(variables('vmParams').wsfcNodes)]"
+            }
+        },        
+
         // WSFC nodes
 
+        {
+            "name": "[variables('availabilitySetName').wsfcNode]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            }
+        },
         {
             "copy": {
                 "name": "copyWsfcNodeVM",
@@ -374,7 +414,9 @@
             "name": "[variables('vmParams').wsfcNodes[copyIndex()].name]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').wsfcNodes[copyIndex()].nicName)]"
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').wsfcNode)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmParams').wsfcNodes[copyIndex()].nicName)]",
+                "[resourceId('Microsoft.Compute/disks', variables('sharedDiskNames').wsfcWitness)]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -388,7 +430,17 @@
                             "storageAccountType": "[variables('vmParams').wsfcNodes[copyIndex()].osDiskType]"
                         }
                     },
-                    "imageReference": "[variables('vmParams').wsfcNodes[copyIndex()].iamge]"
+                    "imageReference": "[variables('vmParams').wsfcNodes[copyIndex()].iamge]",
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "caching": "ReadOnly",
+                            "createOption": "Attach",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks', variables('sharedDiskNames').wsfcWitness)]"
+                            }
+                        }
+                    ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -401,6 +453,9 @@
                     "computerName": "[variables('vmParams').wsfcNodes[copyIndex()].computerName]",
                     "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]"
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName').wsfcNode)]"
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
