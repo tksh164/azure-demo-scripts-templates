@@ -169,28 +169,6 @@
                 }
             ]
         }
-
-        // DSC extension
-
-        // "dscSettings": {
-        //     "wmfVersion": "latest",
-        //     "configuration": {
-        //         "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/win-lang-region-config/dsc-lang-region-config/dsc-lang-region-config.zip",
-        //         "script": "lang-options-and-region.ps1",
-        //         "function": "language-options-and-region"
-        //     },
-        //     "privacy": {
-        //         "dataCollection": "enable"
-        //     },
-        //     "configurationArguments": {
-        //         "PreferredLanguage": "ja-JP",
-        //         "LanguageCapabilities": "Minimum",
-        //         "GeoLocationId": 122,  // Japan
-        //         "CopySettingsToDefaultUserAccount": true,
-        //         "TimeZone": "Tokyo Standard Time",
-        //         "SystemLocale": "ja-JP"
-        //     }
-        // }
     },
     "resources": [
 
@@ -380,6 +358,28 @@
                 }
             }
         },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').dc.name, '/CustomScript.prep-adds-dc')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').dc.name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-fsct/scripts/prep-adds-dc.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-adds-dc.ps1"
+                },
+                "protectedSettings": {}
+            }
+        },
 
         // File server
 
@@ -467,6 +467,28 @@
                 "dnsSettings": {
                     "domainNameLabel": "[variables('vmParams').fileServer.domainNameLabel]"
                 }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').fileServer.name, '/CustomScript.prep-fileserver')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').fileServer.name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-fsct/scripts/prep-fileserver.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-fileserver.ps1"
+                },
+                "protectedSettings": {}
             }
         },
 
@@ -558,12 +580,34 @@
                 }
             }
         },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').fsctController.name, '/CustomScript.prep-fsct')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').fsctController.name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-fsct/scripts/prep-fsct.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-fsct.ps1"
+                },
+                "protectedSettings": {}
+            }
+        },
 
         // FSCT Clients
 
         {
             "copy": {
-                "name": "copyWsfcNodeVM",
+                "name": "copyFsctClientVM",
                 "count": "[length(variables('vmParams').fsctClients)]"
             },
             "type": "Microsoft.Compute/virtualMachines",
@@ -608,7 +652,7 @@
         },
         {
             "copy": {
-                "name": "copyWsfcNodeNic",
+                "name": "copyFsctClientNic",
                 "count": "[length(variables('vmParams').fsctClients)]"
             },
             "type": "Microsoft.Network/networkInterfaces",
@@ -642,7 +686,7 @@
         },
         {
             "copy": {
-                "name": "copyWsfcNodeIp",
+                "name": "copyFsctClientIp",
                 "count": "[length(variables('vmParams').fsctClients)]"
             },
             "type": "Microsoft.Network/publicIPAddresses",
@@ -658,29 +702,33 @@
                     "domainNameLabel": "[variables('vmParams').fsctClients[copyIndex()].domainNameLabel]"
                 }
             }
-        }//,
-        // {
-        //     "copy": {
-        //         "name": "copyWsfcNodeDscExt",
-        //         "count": "[length(variables('vmParams').wsfcNodes)]"
-        //     },
-        //     "condition": "[variables('vmParams').wsfcNodes[copyIndex()].isDeployLanguageOptionsDsc]",
-        //     "type": "Microsoft.Compute/virtualMachines/extensions",
-        //     "apiVersion": "2021-03-01",
-        //     "name": "[concat(variables('vmParams').wsfcNodes[copyIndex()].name, '/Microsoft.Powershell.DSC')]",
-        //     "location": "[parameters('location')]",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').wsfcNodes[copyIndex()].name)]"
-        //     ],
-        //     "properties": {
-        //         "publisher": "Microsoft.Powershell",
-        //         "type": "DSC",
-        //         "typeHandlerVersion": "2.83",
-        //         "autoUpgradeMinorVersion": true,
-        //         "settings": "[variables('dscSettings')]",
-        //         "protectedSettings": {}
-        //     }
-        // }//,
+        },
+        {
+            "copy": {
+                "name": "copyFsctClientCustomScriptExt",
+                "count": "[length(variables('vmParams').fsctClients)]"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vmParams').fsctClients[copyIndex()].name, '/CustomScript.prep-fsct')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmParams').fsctClients[copyIndex()].name)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-fsct/scripts/prep-fsct.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-fsct.ps1"
+                },
+                "protectedSettings": {}
+            }
+        }
     ],
     "outputs": {
         "adminUserName": {
