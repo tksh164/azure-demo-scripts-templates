@@ -263,9 +263,9 @@
                     "imageReference": "[variables('vmParams').dc.iamge]",
                     "dataDisks": [
                         {
-                            "createOption": "Attach",
                             "lun": 0,
                             "caching": "ReadOnly",
+                            "createOption": "Attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('vmParams').dc.dataDisks[0].name)]"
                             }
