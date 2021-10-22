@@ -54,12 +54,7 @@
 
         "vnetName": "lab-vnet",
         "subnetName": "default",
-
         "subntNsgName": "[concat(variables('vnetName'), '-', variables('subnetName'), '-nsg')]",
-
-        // Internal load balancer
-
-        // "lbName": "wsfc-lb",
 
         // Availability set
 
@@ -705,59 +700,7 @@
                 "settings": "[variables('dscSettings')]",
                 "protectedSettings": {}
             }
-        }//,
-
-        // Intenral load balancer for WSFC
-
-        // {
-        //     "type": "Microsoft.Network/loadBalancers",
-        //     "apiVersion": "2020-11-01",
-        //     "name": "[variables('lbName')]",
-        //     "location": "[parameters('location')]",
-        //     "dependsOn": [],
-        //     "tags": {},
-        //     "properties": {
-        //         "frontendIPConfigurations": [
-        //             // TODO: Use copyied variables.
-        //             {
-        //                 "name": "cno",
-        //                 "properties": {
-        //                     "privateIPAddressVersion": "IPv4",
-        //                     "privateIPAllocationMethod": "Static",
-        //                     "privateIPAddress": "10.0.0.100",
-        //                     "subnet": {
-        //                         "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
-        //                     }
-        //                 }
-        //             },
-        //             {
-        //                 "name": "vco1",
-        //                 "properties": {
-        //                     "privateIPAddressVersion": "IPv4",
-        //                     "privateIPAllocationMethod": "Static",
-        //                     "privateIPAddress": "10.0.0.101",
-        //                     "subnet": {
-        //                         "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
-        //                     }
-        //                 }
-        //             }
-        //         ],
-        //         "backendAddressPools": [
-        //             {
-        //                 // Add VM's NIC to backend pool.
-        //                 "name": "backendpool1"
-        //             }
-        //         ],
-        //         "probes": [],
-        //         "loadBalancingRules": [],
-        //         "inboundNatRules": [],
-        //         "outboundRules": []
-        //     },
-        //     "sku": {
-        //         "name": "Standard",
-        //         "tier": "Regional"
-        //     }
-        // }
+        }
     ],
     "outputs": {
         "adminUserName": {
