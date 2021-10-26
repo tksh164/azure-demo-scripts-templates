@@ -9,10 +9,10 @@ This template provides groundworks for the Windows Server Failover Clustering la
 - Domain controller VM
     - The AD DS feature and related management tools are installed.
     - The data disk for AD DS is formatted with drive letter `N:`.
-- WSF node 1 VM
+- WSFC node 1 VM
     - The Failover Clustering feature and related management tools are installed.
     - The shared data disk for witness is formatted with drive letter `W:` if this VM's fault domain is equals `0`.
-- WSF node 2 VM
+- WSFC node 2 VM
     - The Failover Clustering feature is installed.
     - The shared data disk for witness is formatted with drive letter `W:` if this VM's fault domain is equals `0`.
 - Client VM
