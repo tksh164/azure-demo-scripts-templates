@@ -318,10 +318,10 @@
             "name": "[variables('vmParams').dc.publicIpAddressName]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "Basic"
+                "name": "Standard"
             },
             "properties": {
-                "publicIpAllocationMethod": "Dynamic",
+                "publicIpAllocationMethod": "Static",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('vmParams').dc.domainNameLabel]"
                 }
@@ -508,10 +508,10 @@
             "name": "[variables('vmParams').wsfcNodes[copyIndex()].publicIpAddressName]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "Basic"
+                "name": "Standard"
             },
             "properties": {
-                "publicIpAllocationMethod": "Dynamic",
+                "publicIpAllocationMethod": "Static",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('vmParams').wsfcNodes[copyIndex()].domainNameLabel]"
                 }
@@ -623,10 +623,10 @@
             "name": "[variables('vmParams').client.publicIpAddressName]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "Basic"
+                "name": "Standard"
             },
             "properties": {
-                "publicIpAllocationMethod": "Dynamic",
+                "publicIpAllocationMethod": "Static",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('vmParams').client.domainNameLabel]"
                 }
