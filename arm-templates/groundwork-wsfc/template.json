@@ -22,6 +22,21 @@
                 "description": "The admin user password for VMs."
             }
         },
+        "imageSku": {
+            "type": "string",
+            "defaultValue": "2019-datacenter-smalldisk-g2",
+            "allowedValues": [
+                "2019-datacenter-gensecond",
+                "2019-datacenter-smalldisk-g2",
+                "2022-datacenter-g2",
+                "2022-datacenter-smalldisk-g2",
+                "2022-datacenter-azure-edition",
+                "2022-datacenter-azure-edition-smalldisk"
+            ],
+            "metadata": {
+                "description": "Specify the VM image SKU for all VMs."
+            }
+        },
         "rdpSourceAddressPrefix": {
             "type": "string",
             "defaultValue": "*",
@@ -83,7 +98,7 @@
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
-                    "sku": "2019-datacenter-smalldisk-g2",
+                    "sku": "[parameters('imageSku')]",
                     "version": "latest"
                 },
                 "privateIpAddress": "10.0.0.11",
@@ -109,7 +124,7 @@
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2019-datacenter-smalldisk-g2",
+                        "sku": "[parameters('imageSku')]",
                         "version": "latest"
                     },
                     "privateIpAddress": "10.0.0.51",
@@ -127,7 +142,7 @@
                     "iamge": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2019-datacenter-smalldisk-g2",
+                        "sku": "[parameters('imageSku')]",
                         "version": "latest"
                     },
                     "privateIpAddress": "10.0.0.52",
@@ -146,7 +161,7 @@
                 "iamge": {
                     "publisher": "MicrosoftWindowsServer",
                     "offer": "WindowsServer",
-                    "sku": "2019-datacenter-smalldisk-g2",
+                    "sku": "[parameters('imageSku')]",
                     "version": "latest"
                 },
                 "privateIpAddress": "10.0.0.101",
