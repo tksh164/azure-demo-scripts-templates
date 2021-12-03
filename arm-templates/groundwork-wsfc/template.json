@@ -362,11 +362,9 @@
                 "settings": {
                     "fileUris": [
                         "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-adds-dc.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step1.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step2.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-ws2019.psd1"
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-lang.ps1"
                     ],
-                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-adds-dc.ps1"
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-adds-dc.ps1 & powershell.exe -ExecutionPolicy Unrestricted -File prep-lang.ps1"
                 },
                 "protectedSettings": {}
             }
@@ -540,11 +538,9 @@
                 "settings": {
                     "fileUris": [
                         "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-wsfc.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step1.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step2.ps1",
-                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-ws2019.psd1"
+                        "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/prep-lang.ps1"
                     ],
-                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-wsfc.ps1"
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File prep-wsfc.ps1 & powershell.exe -ExecutionPolicy Unrestricted -File prep-lang.ps1"
                 },
                 "protectedSettings": {}
             }
