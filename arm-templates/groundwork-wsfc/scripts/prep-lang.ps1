@@ -5,15 +5,15 @@ if ($PSVersionTable.BuildVersion.Build -eq 17763)
 
     @(
         [PSCustomObject] @{
-            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step1.ps1'
+            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang/lang-step1.ps1'
             Destination = 'C:\work\lang-jajp-step1.ps1'
         },
         [PSCustomObject] @{
-            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-step2.ps1'
+            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang/lang-step2.ps1'
             Destination = 'C:\work\lang-jajp-step2.ps1'
         },
         [PSCustomObject] @{
-            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang-jajp/lang-jajp-ws2019.psd1'
+            Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang/lang-ws2019-jajp.psd1'
             Destination = 'C:\work\lang-jajp-ws2019.psd1'
         }
     ) | ForEach-Object -Process {
