@@ -1,10 +1,15 @@
 #Requires -RunAsAdministrator
 
-$VerbosePreference = [System.Management.Automation.ActionPreference]::Continue
+param (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $LangConfigFileName
+)
 
+$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
+$VerbosePreference = [System.Management.Automation.ActionPreference]::Continue
 Start-Transcript -OutputDirectory $PSScriptRoot
 
-Import-LocalizedData -BindingVariable 'LangConfig' -BaseDirectory $PSScriptRoot -FileName 'lang-jajp-ws2019.psd1'
+Import-LocalizedData -BindingVariable 'LangConfig' -BaseDirectory $PSScriptRoot -FileName ([System.IO.Path]::GetFileName($LangConfigFileName))
 
 function Install-LanguagePack
 {
