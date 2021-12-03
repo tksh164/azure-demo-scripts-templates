@@ -61,5 +61,12 @@ else
         $params.Verbose = $true
     }
 
-    New-AzResourceGroupDeployment @params
+    try
+    {
+        New-AzResourceGroupDeployment @params
+    }
+    catch
+    {
+        Resolve-AzError -Last
+    }
 }
