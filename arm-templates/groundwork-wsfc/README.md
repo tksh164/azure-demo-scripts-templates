@@ -17,26 +17,26 @@ This template provides groundworks for the Windows Server Failover Clustering la
     - The shared data disk for witness is formatted with drive letter `W:` if this VM's fault domain is equals `0`.
 - Client VM
 
-### Localization scripts
+### Language settings changing scripts
 
-You can use localization scripts if you need localization. The localization scripts for Japanese are located under the `C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\x.y.z\Downloads\0`.
+You can use the language settings changing scripts if you want change the operating system's language settings. The language settings changing scripts for Japanese are located under the `C:\work`.
 
-You should run the localization scripts before server's role setup (e.g. Domain controller, Failover cluster node).
+You should run the language settings changing scripts before server's role setup (e.g. Domain controller, Failover cluster node).
 
-The two scripts change the operating system's language settings.
+Steps for changing language settings:
 
-Localization steps:
-
-1. Install the language pack and language capabilities by `lang-jajp-step1.ps1`. The system reboots after finish the script. This script takes few minutes for running.
+1. Install the language pack and language capabilities by `lang-step1.ps1`. The system reboots after finish the script. This script takes few minutes for running.
 
     ```powershell
-    PS > .\lang-jajp-step1.ps1
+    cd C:\work
+    .\lang-step1.ps1 lang-ws2019-jajp.psd1
     ```
 
-2. Change language related settings by `lang-jajp-step2.ps1`. The system reboots after finish the script. This script takes less a minute for running.
+2. Change language related settings by `lang-step2.ps1`. The system reboots after finish the script. This script takes less a minute for running.
 
     ```powershell
-    PS > .\lang-jajp-step2.ps1
+    cd C:\work
+    .\lang-step2.ps1 lang-ws2019-jajp.psd1
     ```
 
 ### Domain controller VM
