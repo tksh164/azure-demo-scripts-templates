@@ -39,13 +39,13 @@ Steps for changing language settings:
     .\lang-step2.ps1 lang-ws2019-jajp.psd1
     ```
 
-### Domain controller VM
+### Make the domain controller
 
 ```powershell
 Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -LogPath N:\Windows\NTDS -SysvolPath N:\Windows\SYSVOL -Force -Verbose
 ```
 
-### WSFC nodes
+### Make the WSFC nodes
 
 ```powershell
 New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
