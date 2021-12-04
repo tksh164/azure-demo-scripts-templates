@@ -9,7 +9,6 @@
         # - Cannot configure a language pack for Windows Server 2019 Desktop Experience
         #   https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
         IsoFileUri               = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # for WS2019
-        PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.1'
         CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
         OffsetToCabFileInIsoFile = 0x3BD26800
         CabFileSize              = 62015873
