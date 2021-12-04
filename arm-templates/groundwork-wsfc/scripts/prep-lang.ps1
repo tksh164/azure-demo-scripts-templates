@@ -17,6 +17,14 @@ if ($PSVersionTable.BuildVersion.Build -eq 17763)
         Destination = 'C:\work\lang-ws2019-jajp.psd1'
     }
 }
+# Windows Server 2019
+elseif ($PSVersionTable.BuildVersion.Build -eq 20348)
+{
+    $files += [PSCustomObject] @{
+        Source      = 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/groundwork-wsfc/scripts/lang/lang-ws2022-jajp.psd1'
+        Destination = 'C:\work\lang-ws2022-jajp.psd1'
+    }
+}
 
 New-Item -Path 'C:\work' -ItemType Directory -Force
 $files | ForEach-Object -Process {
