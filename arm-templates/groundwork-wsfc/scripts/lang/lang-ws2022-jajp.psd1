@@ -1,5 +1,4 @@
 @{
-
     PreferredLanguage = 'ja-JP'
     SystemLocale = 'ja-JP'
     TimeZoneId = 'Tokyo Standard Time'  # Get from [System.TimeZoneInfo]::GetSystemTimeZones()
