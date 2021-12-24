@@ -48,6 +48,10 @@ Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -Lo
 ### Make the WSFC nodes
 
 ```powershell
+Add-Computer -DomainName lab.contoso.com -Restart -PassThru -Verbose
+```
+
+```powershell
 New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
 ```
 
