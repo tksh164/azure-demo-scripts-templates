@@ -17,6 +17,28 @@ This template provides groundworks for the Windows Server Failover Clustering la
     - The shared data disk for witness is formatted with drive letter `W:` if this VM's fault domain is equals `0`.
 - Client VM
 
+### Taks on the domain controller VM after the deployment
+
+Use the following command in the domain contoller VM to make the VM to domain controller.
+
+```powershell
+Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -LogPath N:\Windows\NTDS -SysvolPath N:\Windows\SYSVOL -Force -Verbose
+```
+
+### Tasks on the WSFC node VMs after the deployment
+
+Use the following command in the WSFC node VMs to join the VM to the lab.contoso.com domain.
+
+```powershell
+Add-Computer -DomainName lab.contoso.com -Restart -PassThru -Verbose
+```
+
+Use the following command in one of the WSFC node VM to make a new failover cluster.
+
+```powershell
+New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
+```
+
 ### Language settings changing scripts
 
 You can use the language settings changing scripts if you want change the operating system's language settings. The language settings changing scripts for Japanese are located under the `C:\work`.
@@ -38,28 +60,6 @@ Steps for changing language settings:
     cd C:\work
     .\lang-step2.ps1 lang-ws2019-jajp.psd1
     ```
-
-### On the domain controller VM
-
-Use the following command in the domain contoller VM to make the VM to domain controller.
-
-```powershell
-Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -LogPath N:\Windows\NTDS -SysvolPath N:\Windows\SYSVOL -Force -Verbose
-```
-
-### On the WSFC node VMs
-
-Use the following command in the WSFC node VMs to join the VM to the lab.contoso.com domain.
-
-```powershell
-Add-Computer -DomainName lab.contoso.com -Restart -PassThru -Verbose
-```
-
-Use the following command in one of the WSFC node VM to make a new failover cluster.
-
-```powershell
-New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
-```
 
 ## Notes
 
