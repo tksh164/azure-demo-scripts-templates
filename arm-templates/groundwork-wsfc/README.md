@@ -49,7 +49,7 @@ Steps for changing language settings:
 
 1. Install the language pack and language capabilities by `lang-step1.ps1`. The system reboots after finish the script. This script takes few minutes for running.
 
-    You can also run the following from `Run command` in Azure portal that able to run it without RDP connections.
+    You can also run the following from **[Run command](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command)** in Azure portal that able to run it without RDP connections.
 
     ```powershell
     cd C:\work
@@ -58,7 +58,7 @@ Steps for changing language settings:
 
 2. Change language related settings by `lang-step2.ps1`. The system reboots after finish the script. This script takes less a minute for running.
 
-    You can also run the following from `Run command` in Azure portal that able to run it without RDP connections.
+    You can also run the following from **[Run command](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command)** in Azure portal that able to run it without RDP connections.
 
     ```powershell
     cd C:\work
