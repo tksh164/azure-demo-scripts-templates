@@ -47,14 +47,14 @@ You should run the language settings changing scripts before server's role setup
 
 Steps for changing language settings:
 
-1. Install the language pack and language capabilities by `lang-step1.ps1`. The system reboots after finish the script. This script takes few minutes for running.
+1. Install the language pack and language capabilities by `lang-step1.ps1`. The system reboots after finish the script. This script takes few minutes for running. You can also run the following from `Run command` in Azure portal that able to run it without RDP connections.
 
     ```powershell
     cd C:\work
     .\lang-step1.ps1 lang-ws2019-jajp.psd1
     ```
 
-2. Change language related settings by `lang-step2.ps1`. The system reboots after finish the script. This script takes less a minute for running.
+2. Change language related settings by `lang-step2.ps1`. The system reboots after finish the script. This script takes less a minute for running. You can also run the following from `Run command` in Azure portal that able to run it without RDP connections.
 
     ```powershell
     cd C:\work
