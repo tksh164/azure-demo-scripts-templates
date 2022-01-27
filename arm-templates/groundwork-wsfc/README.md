@@ -19,25 +19,25 @@ This template provides groundworks for the Windows Server Failover Clustering la
 
 ### Taks on the domain controller VM after the deployment
 
-Use the following command in the domain contoller VM to make the VM to domain controller.
+1. Use the following command in the domain contoller VM to make the VM to domain controller.
 
-```powershell
-Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -LogPath N:\Windows\NTDS -SysvolPath N:\Windows\SYSVOL -Force -Verbose
-```
+    ```powershell
+    Install-ADDSForest -DomainName lab.contoso.com -DatabasePath N:\Windows\NTDS -LogPath N:\Windows\NTDS -SysvolPath N:\Windows\SYSVOL -Force -Verbose
+    ```
 
 ### Tasks on the WSFC node VMs after the deployment
 
-Use the following command in the WSFC node VMs to join the VM to the lab.contoso.com domain.
+1. Use the following command in the WSFC node VMs to join the VM to the lab.contoso.com domain.
 
-```powershell
-Add-Computer -DomainName lab.contoso.com -Restart -PassThru -Verbose
-```
+    ```powershell
+    Add-Computer -DomainName lab.contoso.com -Restart -PassThru -Verbose
+    ```
 
-Use the following command in one of the WSFC node VM to make a new failover cluster.
+2. Use the following command in one of the WSFC node VM to make a new failover cluster.
 
-```powershell
-New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
-```
+    ```powershell
+    New-Cluster -Name clus1 -ManagementPointNetworkType Distributed -Node n1,n2
+    ```
 
 ### Language settings changing scripts
 
