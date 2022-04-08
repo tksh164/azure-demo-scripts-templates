@@ -1,7 +1,5 @@
 # Change the Windows language options and regional settings using the DSC extension
 
-## Template overview
-
 This template demonstrates that change the Windows language options and region settings using the DSC extension.
 
 You can use non-English language options and region settings since first login even if use the Azure Marketplace image because the DSC extension changes the Windows language options and region settings for the default user account and system account. It's meaning the new user's language and welcome screen language are changed.
