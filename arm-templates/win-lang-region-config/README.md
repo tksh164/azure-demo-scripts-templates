@@ -6,7 +6,7 @@ You can use non-English language options and region settings since first login e
 
 Simple PowerShell script version is [here](https://github.com/tksh164/change-windows-language-regional-settings).
 
-### Deployment
+## Deployment
 
 - Resource group: `exptl-langregion`
 - Virtual network: `langregion-vnet`
