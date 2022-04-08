@@ -1,0 +1,196 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subnetId": {
+            "type": "string",
+            "metadata": {
+                "description": "The subnet's ID that deploying the VM in it."
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of deploying VM."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for the VM."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for the VM."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+            "metadata": {
+                "description": "The seed for the unique suffix. Do not need set this value when deployment."
+            }
+        }
+    },
+    "variables": {
+
+        // Common
+
+        "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+
+        // Virtual machine
+
+        "vm": {
+            "vmName": "[parameters('vmName')]",
+            "computerName": "vm1",
+            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
+            "nicName": "[concat(parameters('vmName'), '-nic')]",
+            "ipName": "[concat(parameters('vmName'), '-ip')]",
+            "domainNameLabel": "[concat(parameters('vmName'), '-', variables('uniqueSuffix'))]"
+        }
+    },
+    "resources": [
+
+        // Virtual machine
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('vm').vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2s"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vm').osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vm').computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vm').nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[parameters('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vm').ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vm').domainNameLabel]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-03-01",
+            "name": "[concat(variables('vm').vmName, '/Microsoft.Powershell.DSC')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vm').vmName)]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.83",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "wmfVersion": "latest",
+                    "configuration": {
+                        "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/win-lang-region-config/dsc-lang-region-config/dsc-lang-region-config.zip",
+                        "script": "lang-options-and-region.ps1",
+                        "function": "language-options-and-region"
+                    },
+                    "privacy": {
+                        "dataCollection": "enable"
+                    },
+                    "configurationArguments": {
+                        "PreferredLanguage": "ja-JP",
+                        "LanguageCapabilities": "Minimum",
+                        "GeoLocationId": 122,  // Japan
+                        "CopySettingsToDefaultUserAccount": true,
+                        "TimeZone": "Tokyo Standard Time",
+                        "SystemLocale": "ja-JP"
+                    }
+                },
+                "protectedSettings": {}
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "fqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)).dnsSettings.fqdn]"
+        }
+    }
+}
