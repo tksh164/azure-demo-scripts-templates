@@ -1,1 +1,1 @@
-# Azure Virtual Desktop custom configuration ARM template sample
+# Azure Virtual Desktop post deployment custom configuration ARM template sample
