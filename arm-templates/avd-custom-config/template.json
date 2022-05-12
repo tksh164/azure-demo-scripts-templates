@@ -1,0 +1,77 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of the session host VMs."
+            }
+        },
+        "vmNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The prefix of the session host VMs."
+            }
+        },
+        "vmNameFormat": {
+            "type": "string",
+            "defaultValue": "{0}-{1}",
+            "metadata": {
+                "description": "The session host VM naming format."
+            }
+        },
+        "vmInitialNumber": {
+            "type": "int",
+            "metadata": {
+                "description": "VM name prefix initial number."
+            }
+        },
+        "vmNumberOfInstances": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of session host VMs that will be created and added to the hostpool."
+            }
+        },
+        "customScriptFileUri": {
+            "type": "string",
+            "metadata": {
+                "description": "The URI of the custom script file."
+            }
+        },
+        "customScriptCommandToExecute": {
+            "type": "string",
+            "metadata": {
+                "description": "The command line to execute the custom script."
+            }
+        }
+    },
+    "variables": {
+        "vmIndexRange": "[range(parameters('vmInitialNumber'), parameters('vmNumberOfInstances'))]"
+    },
+    "resources": [
+        {
+            "copy": {
+                "name": "avdSessionHostCustomConfig",
+                "count": "[length(variables('vmIndexRange'))]"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-11-01",
+            "location": "[parameters('location')]",
+            "name": "[format(concat(parameters('vmNameFormat'), '/avdSessionHostCustomConfig'), parameters('vmNamePrefix'), variables('vmIndexRange')[copyIndex()])]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('customScriptFileUri')]"
+                    ],
+                    "commandToExecute": "[parameters('customScriptCommandToExecute')]"
+                },
+                "protectedSettings": {}
+            }
+        }
+    ]
+}

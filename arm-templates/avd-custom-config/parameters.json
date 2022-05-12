@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "japaneast",
+            "metadata": {
+                "description": "The location of the session host VMs."
+            }
+        },
+        "vmNamePrefix": {
+            "value": "avdsh",
+            "metadata": {
+                "description": "The prefix of the session host VMs."
+            }
+        },
+        "vmNameFormat": {
+            "value": "{0}-{1}",
+            "metadata": {
+                "description": "The session host VM naming format."
+            }
+        },
+        "vmInitialNumber": {
+            "value": 2,
+            "metadata": {
+                "description": "VM name prefix initial number."
+            }
+        },
+        "vmNumberOfInstances": {
+            "value": 1,
+            "metadata": {
+                "description": "Number of session host VMs that will be created and added to the hostpool."
+            }
+        },
+        "customScriptFileUri": {
+            "value": "https://********.blob.core.windows.net/avd-custom-config/script.ps1",
+            "metadata": {
+                "description": "The URI of the custom script file."
+            }
+        },
+        "customScriptCommandToExecute": {
+            "value": "powershell.exe -ExecutionPolicy Unrestricted -File script.ps1",
+            "metadata": {
+                "description": "The command line to execute the custom script."
+            }
+        }
+    }
+}
