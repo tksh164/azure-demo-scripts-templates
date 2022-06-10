@@ -5,7 +5,7 @@ $filePath = '.\blob-128kb.dat'
 
 $storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName
 
-$containerName = [datetime]::Now.ToString('MMdd-hhmmss')
+$containerName = ('{0}-x{1}' -f [datetime]::Now.ToString('MMddhhmmss'), $numOfBlobCreating)
 $container = New-AzStorageContainer -Context $storageAccount.Context -Name $containerName -Permission Off
 
 # [UInt64]::MaxValue = 18446744073709551615
