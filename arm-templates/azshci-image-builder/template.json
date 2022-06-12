@@ -1,0 +1,366 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "The admin user name for the image builder VM."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "The admin user password for the image builder VM."
+            }
+        },
+        "imageName": {
+            "type": "string",
+            "defaultValue": "azshci-img1",
+            "metadata": {
+                "description": "Azure Stack HCI Image resource name."
+            }
+        },
+        "utcNow": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "Current timestamp that uses for the seed of a unique suffix and the start time for storage SAS. Do not need to set this value at deploy."
+            }
+        }
+    },
+    "variables": {
+
+        // Common
+
+        "location": "[resourceGroup().location]",
+        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('utcNow')), 3)))]",
+        "prefix": "azshcibld",
+
+        // Virtual network
+
+        "vnetName": "[concat(variables('prefix'), '-vnet')]",
+        "vnetSubnetName": "default",
+        "nsgName": "[concat(variables('vnetName'), '-', variables('vnetSubnetName'), '-nsg')]",
+
+        // Virtual machine
+
+        "vm": {
+            "vmName": "[concat(variables('prefix'), '-vm1')]",
+            "computerName": "vm1",
+            "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
+            "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
+            "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
+            "privateIPAddress": "10.0.0.5",
+            "ipName": "[concat(variables('prefix'), '-vm1-ip')]",
+            "domainNameLabel": "[concat(variables('prefix'), '-vm1-', variables('uniqueSuffix'))]"
+        },
+
+        "dscExtensionName": "Microsoft.Powershell.DSC",
+
+        // Storage Account
+
+        "storageAccountName": "[concat(variables('prefix'), variables('uniqueSuffix'))]",
+        "containerName": "vhd",
+        "listServiceSasFunctionValues": {
+            "canonicalizedResource": "[concat('/blob/', variables('storageAccountName'), '/', variables('containerName'))]",
+            "signedResource": "c",
+            "signedPermission": "w",
+            "signedProtocol": "https",
+            "signedExpiry": "[dateTimeAdd(parameters('utcNow'), 'PT2H')]"  // 2 hours
+        },
+
+        // Image
+
+        "imageName": "[parameters('imageName')]",
+        "azshciVhdFileName": "azshci.vhd"
+    },
+    "resources": [
+
+        // Network Security Group
+
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+
+        // Virtual network
+
+        {
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('vnetSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                            }
+                        }
+                    }
+                ],
+                "enableDdosProtection": false
+            }
+        },
+
+        // Virtual machine
+
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('vm').vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v5"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('vm').osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[variables('vm').dataDiskName]",
+                            "createOption": "Empty",
+                            "diskSizeGB": 256,
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "storageAccountType": "StandardSSD_LRS"
+                            },
+                            "deleteOption": "Delete"
+                        }
+                    ]    
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vm').computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "apiVersion": "2021-11-01",
+                    "name": "[concat(variables('vm').vmName, '/', variables('dscExtensionName'))]",
+                    "location": "[variables('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines', variables('vm').vmName)]",
+                        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', variables('storageAccountName'), 'default', variables('containerName'))]"  // TODO: use more clear ID
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Powershell",
+                        "type": "DSC",
+                        "typeHandlerVersion": "2.83",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "wmfVersion": "latest",
+                            "configuration": {
+                                "url": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/azshci-image-builder/dsc/azshciimgbuilder.zip",
+                                "script": "AzSHciImageBuilder.ps1",
+                                "function": "AzSHciImageBuilder"
+                            },
+                            "privacy": {
+                                "dataCollection": "enable"
+                            },
+                            "configurationArguments": {
+                                "AzSHciVersion": "21H2",
+                                "AzSHciIsoUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",
+                                "AzcopyUri": "https://aka.ms/downloadazcopy-v10-windows",
+                                "AzSHciVhdFileName": "[variables('azshciVhdFileName')]",
+                                "VhdBlobDestinationUri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob, variables('containerName'), '?', listServiceSas(variables('storageAccountName'), '2021-09-01', variables('listServiceSasFunctionValues')).serviceSasToken)]"
+                            }
+                        },
+                        "protectedSettings": {}
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vm').nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vnetSubnetName'))]"
+                            },
+                            "privateIPAddress": "[variables('vm').privateIPAddress]",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": true
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('vm').ipName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('vm').domainNameLabel]"
+                }
+            }
+        },
+
+        // Storage Account
+
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-09-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": true,
+                "minimumTlsVersion": "TLS1_2",
+                "publicNetworkAccess": "Enabled",
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "allowCrossTenantReplication": false,
+                "defaultToOAuthAuthentication": false
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Storage/storageAccounts/blobServices",
+                    "apiVersion": "2021-09-01",
+                    "name": "[concat(variables('storageAccountName'), '/default')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+                    ],
+                    "properties": {
+                        "restorePolicy": {
+                            "enabled": false
+                        },
+                        "deleteRetentionPolicy": {
+                            "enabled": false
+                        },
+                        "containerDeleteRetentionPolicy": {
+                            "enabled": false
+                        },
+                        "changeFeed": {
+                            "enabled": false
+                        },
+                        "isVersioningEnabled": false
+                    }
+                },
+                {
+                    "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+                    "apiVersion": "2021-09-01",
+                    "name": "[concat(variables('storageAccountName'), '/default/', variables('containerName'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName'), 'default')]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                }
+            ]
+        },
+
+        // Image
+
+        {
+            "type": "Microsoft.Compute/images",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('imageName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vm').vmName, variables('dscExtensionName'))]"
+            ],
+            "properties": {
+                "hyperVGeneration": "V2",
+                "storageProfile": {
+                    "osDisk": {
+                        "osType": "Windows",
+                        "osState": "Generalized",
+                        "caching": "ReadWrite",
+                        "storageAccountType": "Standard_LRS",
+                        "blobUri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob, variables('containerName'), '/', variables('azshciVhdFileName'))]"
+                    },
+                    "dataDisks": [],
+                    "zoneResilient": false
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "fqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)).dnsSettings.fqdn]"
+        }
+    }
+}
