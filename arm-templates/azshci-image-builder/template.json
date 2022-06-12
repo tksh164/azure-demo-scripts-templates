@@ -68,7 +68,7 @@
             "signedResource": "c",
             "signedPermission": "w",
             "signedProtocol": "https",
-            "signedExpiry": "[dateTimeAdd(parameters('utcNow'), 'PT2H')]"  // 2 hours
+            "signedExpiry": "[dateTimeAdd(parameters('utcNow'), 'PT1H')]"  // 1 hours
         },
 
         // Image
