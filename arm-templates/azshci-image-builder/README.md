@@ -1,9 +1,10 @@
 # Azure Stack HCI VM image builder
 
-This template creates Azure Stack HCI VM image.
+This template creates an Azure Stack HCI VM image.
 
 You can delete deployed resources such as VM, Disk, etc. except Image resource after complete the deployment.
 
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fazshci-image-builder%2Ftemplate.json)
 
 ## Using PowerShell modules
 
