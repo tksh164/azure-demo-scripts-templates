@@ -361,6 +361,14 @@
         "fqdn": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)).dnsSettings.fqdn]"
+        },
+        "VhdBlobDestinationUri": {
+            "type": "string",
+            "value": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob, variables('containerName'), '?', listServiceSas(variables('storageAccountName'), '2021-09-01', variables('listServiceSasFunctionValues')).serviceSasToken)]"
+        },
+        "imageResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Compute/images', variables('imageName'))]"
         }
     }
 }
