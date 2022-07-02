@@ -2,6 +2,9 @@ Configuration AzSHciImageBuilder
 {
     param 
     (
+        [Parameter(Mandatory = $true)]
+        [string] $VhdBlobDestinationUri,
+
         [Parameter(Mandatory = $false)]
         [string] $WorkingDriveLetter = 'W',
 
@@ -45,13 +48,13 @@ Configuration AzSHciImageBuilder
         [string] $AzcopyExpandPath = [System.IO.Path]::Combine($WorkingFolderPath, 'azcopy'),
 
         [Parameter(Mandatory = $false)]
-        [string] $VhdTempPath = $WorkingFolderPath,
-
-        [Parameter(Mandatory = $true)]
-        [string] $VhdBlobDestinationUri
+        [string] $VhdTempPath = $WorkingFolderPath
     )
     
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
+
+    $vbsRegKeyPath = 'HKLM:\TempHive\ControlSet001\Control\DeviceGuard'
+    $vbsRegValueNames = 'Locked', 'EnableVirtualizationBasedSecurity'
 
     Node localhost
     {
@@ -65,7 +68,8 @@ Configuration AzSHciImageBuilder
         Script 'Format working disk'
         {
             GetScript  = {
-                @{ 'Result' = if ((Get-Volume -DriveLetter $using:WorkingDriveLetter).FileSystem -eq 'NTFS') { 'Formatted' } Else { 'Not formatted' } }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = if ($result) { 'Formatted' } else { 'Not formatted' } }
             }
             SetScript  = {
                 Get-Disk |
@@ -104,8 +108,8 @@ Configuration AzSHciImageBuilder
         Script 'Download Servicing Stack Update for Azure Stach HCI'
         {
             GetScript  = {
-                $result = Test-Path -Path (Join-Path -Path $using:SsuFolderPath -ChildPath '*') -Include '*.msu'
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 $ssuSearchString = 'Servicing Stack Update for Azure Stack HCI, version ' + $using:AzSHciVersion + ' for x64-based Systems'
@@ -116,8 +120,7 @@ Configuration AzSHciImageBuilder
                 $ssuUpdate | Save-MSCatalogUpdate -Destination $using:SsuFolderPath
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -Path (Join-Path -Path $using:SsuFolderPath -ChildPath '*') -Include '*.msu'
             }
             DependsOn  = '[File]Create folder for Servicing Stack Update'
         }
@@ -125,8 +128,8 @@ Configuration AzSHciImageBuilder
         Script 'Download Cumulative Update for Azure Stach HCI'
         {
             GetScript  = {
-                $result = Test-Path -Path (Join-Path -Path $using:CuFolderPath -ChildPath '*') -Include '*.msu'
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 $cuSearchString = 'Cumulative Update for Azure Stack HCI, version ' + $using:AzSHciVersion
@@ -138,8 +141,7 @@ Configuration AzSHciImageBuilder
                 $cuUpdate | Save-MSCatalogUpdate -Destination $using:CuFolderPath
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -Path (Join-Path -Path $using:CuFolderPath -ChildPath '*') -Include '*.msu'
             }
             DependsOn  = '[File]Create folder for Cumulative Update'
         }
@@ -147,15 +149,14 @@ Configuration AzSHciImageBuilder
         Script 'Download Azure Stack HCI ISO file'
         {
             GetScript  = {
-                $result = Test-Path -PathType Leaf -Path $using:AzSHciIsoFilePath
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 Start-BitsTransfer -Source $using:AzSHciIsoUri -Destination $using:AzSHciIsoFilePath
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -PathType Leaf -Path $using:AzSHciIsoFilePath
             }
             DependsOn  = '[File]Create working folder'
         }
@@ -163,8 +164,8 @@ Configuration AzSHciImageBuilder
         Script 'Prepare Azure Stack HCI VHD file'
         {
             GetScript  = {
-                $result = Test-Path -PathType Leaf -Path $using:AzSHciVhdFilePath
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 $params = @{
@@ -182,8 +183,7 @@ Configuration AzSHciImageBuilder
                 # TODO: Apply SSU and CU.
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -PathType Leaf -Path $using:AzSHciVhdFilePath
             }
             DependsOn = @(
                 '[Script]Download Servicing Stack Update for Azure Stach HCI',
@@ -234,18 +234,18 @@ Configuration AzSHciImageBuilder
                 '[Script]Prepare Azure Stack HCI VHD file'
             )
         }
+
         Script 'Download azcopy archive file'
         {
             GetScript  = {
-                $result = Test-Path -PathType Leaf -Path $using:AzcopyZipFilePath
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 Start-BitsTransfer -Source $using:AzcopyUri -Destination $using:AzcopyZipFilePath
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -PathType Leaf -Path $using:AzcopyZipFilePath
             }
             DependsOn  = '[File]Create working folder'
         }
@@ -253,15 +253,14 @@ Configuration AzSHciImageBuilder
         Script 'Expand azcopy archive file'
         {
             GetScript  = {
-                $result = Test-Path -PathType Container -Path $using:AzcopyExpandPath
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 Expand-Archive -Path $using:AzcopyZipFilePath -DestinationPath $using:AzcopyExpandPath
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                Test-Path -PathType Container -Path $using:AzcopyExpandPath
             }
             DependsOn  = '[Script]Download azcopy archive file'
         }
@@ -269,11 +268,8 @@ Configuration AzSHciImageBuilder
         Script 'Upload Azure Stack HCI VHD file'
         {
             GetScript  = {
-                $logFile = Get-ChildItem -Path (Join-Path -Path $using:AzcopyExpandPath -ChildPath '*.log') -Exclude '*scanning.log' |
-                    Sort-Object -Descending -Property 'CreationTimeUtc' |
-                    Select-Object -First 1
-                $result = ($logFile | Get-Content -Tail 2 | Select-Object -First 1) -eq 'Final Job Status: Completed'
-                @{ 'Result' = $result }
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
             }
             SetScript  = {
                 $env:AZCOPY_LOG_LOCATION = $using:AzcopyExpandPath
@@ -281,11 +277,13 @@ Configuration AzSHciImageBuilder
                 & $azcopy.FullName copy $using:AzSHciVhdFilePath $using:VhdBlobDestinationUri --blob-type PageBlob
             }
             TestScript = {
-                $state = [scriptblock]::Create($GetScript).Invoke()
-                $state.Result
+                $logFile = Get-ChildItem -Path (Join-Path -Path $using:AzcopyExpandPath -ChildPath '*.log') -Exclude '*scanning.log' |
+                    Sort-Object -Descending -Property 'CreationTimeUtc' |
+                    Select-Object -First 1
+                ($logFile | Get-Content -Tail 2 | Select-Object -First 1) -eq 'Final Job Status: Completed'
             }
             DependsOn = @(
-                '[Script]Prepare Azure Stack HCI VHD file',
+                '[Script]Disable Virtualization-based Security',
                 '[Script]Expand azcopy archive file'
             )
         }
