@@ -57,7 +57,7 @@
             "domainNameLabel": "[concat(variables('prefix'), '-vm1-', variables('uniqueSuffix'))]"
         },
 
-        "dscExtensionName": "Microsoft.Powershell.DSC",
+        "dscExtensionName": "BuildAzSHciImage",
 
         // Storage Account
 
