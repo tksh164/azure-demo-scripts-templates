@@ -192,6 +192,48 @@ Configuration AzSHciImageBuilder
             )
         }
 
+        Script 'Disable Virtualization-based Security'
+        {
+            GetScript  = {
+                $result = [scriptblock]::Create($TestScript).Invoke()
+                @{ 'Result' = $result.ToString() }
+            }
+            SetScript  = {
+                $mountResult = Mount-DiskImage -ImagePath $using:AzSHciVhdFilePath -StorageType VHD -Access ReadWrite
+                $windowsPartition = Get-Partition -DiskNumber $mountResult.Number | Where-Object -Property 'Type' -EQ -Value 'Basic' | Select-Object -First 1
+                $systemHiveFilePath = '{0}:\Windows\System32\config\SYSTEM' -f $windowsPartition.DriveLetter
+                & 'C:\Windows\System32\reg.exe' load HKLM\TempHive $systemHiveFilePath
+
+                $properties = Get-ItemProperty -LiteralPath $using:vbsRegKeyPath
+                $using:vbsRegValueNames | ForEach-Object -Process {
+                    if (($properties | Get-Member -Name $_) -ne $null) {
+                        Remove-ItemProperty -LiteralPath $using:vbsRegKeyPath -Name $_
+                    }
+                }
+
+                & 'C:\Windows\System32\reg.exe' unload HKLM\TempHive
+                Dismount-DiskImage -ImagePath $mountResult.ImagePath
+            }
+            TestScript = {
+                $mountResult = Mount-DiskImage -ImagePath $using:AzSHciVhdFilePath -StorageType VHD -Access ReadOnly
+                $windowsPartition = Get-Partition -DiskNumber $mountResult.Number | Where-Object -Property 'Type' -EQ -Value 'Basic' | Select-Object -First 1
+                $systemHiveFilePath = '{0}:\Windows\System32\config\SYSTEM' -f $windowsPartition.DriveLetter
+                & 'C:\Windows\System32\reg.exe' load HKLM\TempHive $systemHiveFilePath
+
+                $properties = Get-ItemProperty -LiteralPath $using:vbsRegKeyPath
+                $result = $true
+                $using:vbsRegValueNames | ForEach-Object -Process {
+                    $result = $result -and (($properties | Get-Member -Name $_) -eq $null)
+                }
+
+                & 'C:\Windows\System32\reg.exe' unload HKLM\TempHive
+                Dismount-DiskImage -ImagePath $mountResult.ImagePath
+                $result
+            }
+            DependsOn = @(
+                '[Script]Prepare Azure Stack HCI VHD file'
+            )
+        }
         Script 'Download azcopy archive file'
         {
             GetScript  = {
