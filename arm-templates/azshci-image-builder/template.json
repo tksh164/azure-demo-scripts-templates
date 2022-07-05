@@ -337,6 +337,9 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vm').vmName, variables('dscExtensionName'))]"
             ],
+            // "tags": {
+            // TODO: Creation date
+            // },
             "properties": {
                 "hyperVGeneration": "V2",
                 "storageProfile": {
