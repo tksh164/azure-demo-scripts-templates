@@ -1,78 +1,65 @@
+[CmdletBinding()]
 param (
-    [string] $ResourceGroupName,
-    [string] $TemplateFile = 'template.json',
-    [string] $TemplateParametersFile = 'parameters.json',
+    [string] $ResourceGroupName = 'exptl-adds',
+    [string] $ResourceGroupLocation = 'japaneast',
+    [string] $TemplateFile = './template.json',
+    [string] $TemplateParametersFile = './parameters.json',
+    [HashTable] $ResourceGroupTag = @{ 'usage' = 'experimental' },
+    [switch] $WhatIf,
     [switch] $ValidateOnly
 )
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
 Set-StrictMode -Version 3
 
-function Format-ValidationOutput
-{
-    param (
-        $ValidationOutput,
-        [int] $Depth = 0
-    )
-
-    Set-StrictMode -Off
-    return @($ValidationOutput |
-        Where-Object { $_ -ne $null } |
-        ForEach-Object { @('  ' * $Depth + ': ' + $_.Message) + @(Format-ValidationOutput @($_.Details) ($Depth + 1)) })
-}
+$TemplateFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateFile))
+$TemplateParametersFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
 
 Get-AzContext
 
-$OptionalParameters = New-Object -TypeName Hashtable
-$TemplateFile = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateFile))
-$TemplateParametersFile = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
-
-# Test for the specified resource group existence.
-Get-AzResourceGroup -Name $ResourceGroupName -ErrorAction Stop
+New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -Tag $ResourceGroupTag -Verbose -Force
 
 if ($ValidateOnly)
 {
     $params = @{
         ResourceGroupName = $ResourceGroupName
-        TemplateFile      = $TemplateFile
+        TemplateFile      = $TemplateFilePath
     }
 
-    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
+    if (Test-Path -LiteralPath $TemplateParametersFilePath -PathType Leaf)
     {
-        $params.TemplateParameterFile = $TemplateParametersFile
+        $params.TemplateParameterFile = $TemplateParametersFilePath
     }
 
-    $errorMessages = Format-ValidationOutput (Test-AzResourceGroupDeployment @params @OptionalParameters)
-
-    if ($errorMessages)
+    $result = Test-AzResourceGroupDeployment @params
+    if ($result.Count -eq 0)
     {
-        Write-Output '', 'Validation returned the following errors:', @($errorMessages), '', 'Template is invalid.'
+        Write-Output -InputObject '', 'Template is valid.'
     }
     else
     {
-        Write-Output '', 'Template is valid.'
+        $result    
     }
 }
 else
 {
     $params = @{
-        Name              = ('{0}-{1}'-f (Get-ChildItem -LiteralPath $TemplateFile).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
         ResourceGroupName = $ResourceGroupName
-        TemplateFile      = $TemplateFile
-        Force             = $true
-        Verbose           = $true
-        ErrorVariable     = 'errorMessages'
+        TemplateFile      = $TemplateFilePath
+        WhatIf            = $WhatIf
     }
 
-    if (Test-Path -PathType Leaf -LiteralPath $TemplateParametersFile)
+    if (Test-Path -LiteralPath $TemplateParametersFilePath -PathType Leaf)
     {
-        $params.TemplateParameterFile = $TemplateParametersFile
+        $params.TemplateParameterFile = $TemplateParametersFilePath
     }
 
-    New-AzResourceGroupDeployment @params @OptionalParameters
-
-    if ($errorMessages)
+    if (-not $WhatIf)
     {
-        Write-Output '', 'Template deployment returned the following errors:', @(@($errorMessages) | ForEach-Object { $_.Exception.Message.TrimEnd("`r`n") })
+        $params.Name    = ('{0}-{1}'-f (Get-Item -LiteralPath $TemplateFilePath).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
+        $params.Force   = $true
+        $params.Verbose = $true
     }
+
+    New-AzResourceGroupDeployment @params
 }
