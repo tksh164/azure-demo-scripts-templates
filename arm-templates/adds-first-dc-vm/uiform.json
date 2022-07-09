@@ -3,11 +3,11 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Deploy a first AD DS domain controller into an existing VNet",
+            "title": "Deploy a first AD DS domain controller into a VNet",
             "steps": [
                 {
-                    "name": "basics",
-                    "label": "Deployment",
+                    "name": "deployment",
+                    "label": "AD DS Deployment",
                     "description": "This template will deploy a first AD DS domain controller into an existing virtual network.",
                     "elements": [
                         {
@@ -25,7 +25,7 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Use this administrator account credentials as local administrator account on the first AD DS domain controller VM."
+                                        "text": "Enter the administrator account credentials for the local administrator account on the first AD DS domain controller VM."
                                     }
                                 },
                                 {
@@ -72,7 +72,7 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Deploy the first AD DS domain controller VM into this virtual network."
+                                        "text": "Select the virtual network and the subnet for deploying the first AD DS domain controller VM."
                                     }
                                 },
                                 {
@@ -87,11 +87,11 @@
                                         "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
                                         "subnets": "The subnet to deploy a first AD DS domain controller VM."
                                     },
-                                    "scope": {
-                                        "subscriptionId": "[steps('basics').resourceScope.subscription.id]",
-                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
-                                        "location": "[steps('basics').resourceScope.location.name]"
-                                    },
+                                    // "scope": {
+                                    //     "subscriptionId": "[steps('deployment').resourceScope.subscription.id]",
+                                    //     "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.name]",
+                                    //     "location": "[steps('deployment').resourceScope.location.name]"
+                                    // },
                                     "options": {
                                         "hideExisting": false
                                     },
@@ -125,15 +125,15 @@
         },
         "outputs": {
             "parameters": {
-                "existingVNetName": "[steps('basics').vnetSection.vnet.name]",
-                "existingVNetLocation": "[steps('basics').resourceScope.location.name]",
-                "existingSubnetName":"[steps('basics').vnetSection.vnet.subnets.addsSubnet.name]",
-                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]"
+                "existingVNetName": "[steps('deployment').vnetSection.vnet.name]",
+                "existingVNetLocation": "[steps('deployment').resourceScope.location.name]",
+                "existingSubnetName":"[steps('deployment').vnetSection.vnet.subnets.addsSubnet.name]",
+                "adminUserName": "[steps('deployment').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('deployment').adminAccountSection.adminPassword.password]"
            },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
-            "location": "[steps('basics').resourceScope.location.name]"
+            "resourceGroupId": "[steps('deployment').resourceScope.resourceGroup.id]",
+            "location": "[steps('deployment').resourceScope.location.name]"
         }
     }
 }
