@@ -87,11 +87,6 @@
                                         "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
                                         "subnets": "The subnet to deploy a first AD DS domain controller VM."
                                     },
-                                    // "scope": {
-                                    //     "subscriptionId": "[steps('deployment').resourceScope.subscription.id]",
-                                    //     "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.name]",
-                                    //     "location": "[steps('deployment').resourceScope.location.name]"
-                                    // },
                                     "options": {
                                         "hideExisting": false
                                     },
