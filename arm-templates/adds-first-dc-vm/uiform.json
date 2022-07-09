@@ -7,7 +7,7 @@
             "steps": [
                 {
                     "name": "basics",
-                    "label": "Lab setup",
+                    "label": "Deployment",
                     "description": "This template will deploy a first AD DS domain controller into an existing virtual network.",
                     "elements": [
                         {
@@ -18,7 +18,7 @@
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Administrator account for the first AD DS domain controller VM",
+                            "label": "Administrator account",
                             "elements": [
                                 {
                                     "name": "adminAccountSectionText",
@@ -65,7 +65,7 @@
                             "name": "vnetSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Virtual network for the first AD DS domain controller VM.",
+                            "label": "Virtual network",
                             "elements": [
                                 {
                                     "name": "adminAccountSectionText",
@@ -79,11 +79,6 @@
                                     "name": "vnet",
                                     "type": "Microsoft.Network.VirtualNetworkCombo",
                                     "visible": true,
-                                    "scope": {
-                                        "subscriptionId": "[steps('basics').resourceScope.subscription.id]",
-                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
-                                        "location": "[steps('basics').resourceScope.location.name]"
-                                    },
                                     "label": {
                                         "virtualNetwork": "Virtual network",
                                         "subnets": "Subnet"
@@ -91,6 +86,11 @@
                                     "toolTip": {
                                         "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
                                         "subnets": "The subnet to deploy a first AD DS domain controller VM."
+                                    },
+                                    "scope": {
+                                        "subscriptionId": "[steps('basics').resourceScope.subscription.id]",
+                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                        "location": "[steps('basics').resourceScope.location.name]"
                                     },
                                     "options": {
                                         "hideExisting": false
@@ -125,9 +125,9 @@
         },
         "outputs": {
             "parameters": {
-                "existingVNetName": "[steps('basics').vnetSection.name]",
+                "existingVNetName": "[steps('basics').vnetSection.vnet.name]",
                 "existingVNetLocation": "[steps('basics').resourceScope.location.name]",
-                "existingSubnetName":"[steps('basics').vnetSection.subnets.addsSubnet.name]",
+                "existingSubnetName":"[steps('basics').vnetSection.vnet.subnets.addsSubnet.name]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]"
            },
