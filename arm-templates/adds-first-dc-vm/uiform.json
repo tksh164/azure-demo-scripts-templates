@@ -8,7 +8,7 @@
                 {
                     "name": "deployment",
                     "label": "AD DS Deployment",
-                    "description": "This template will deploy a first AD DS domain controller into an existing virtual network.",
+                    "description": "This template will deploy a first AD DS domain controller into a virtual network.",
                     "elements": [
                         {
                             "name": "resourceScope",
@@ -95,7 +95,7 @@
                                         "addressPrefixSize": "/16"
                                     },
                                     "constraints": {
-                                        "minAddressPrefixSize": "/27"
+                                        "minAddressPrefixSize": "/29"
                                     },
                                     "subnets": {
                                         "addsSubnet": {
@@ -105,7 +105,7 @@
                                                 "addressPrefixSize": "/24"
                                             },
                                             "constraints": {
-                                                "minAddressPrefixSize": "/27",
+                                                "minAddressPrefixSize": "/29",
                                                 "minAddressCount": 1,
                                                 "requireContiguousAddresses": true
                                             }
