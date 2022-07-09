@@ -129,7 +129,7 @@
                 "existingVNetLocation": "[steps('basics').resourceScope.location.name]",
                 "existingSubnetName":"[steps('basics').vnetSection.subnets.addsSubnet.name]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]"
            },
             "kind": "ResourceGroup",
             "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
