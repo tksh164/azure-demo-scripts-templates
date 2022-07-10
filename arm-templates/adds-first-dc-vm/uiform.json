@@ -252,8 +252,8 @@
                 "vmImageSku": "[steps('adds').vmIamgeSection.vmIamge]"
             },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
-            "location": "[steps('basics').resourceScope.location.name]"
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
         }
     }
 }
