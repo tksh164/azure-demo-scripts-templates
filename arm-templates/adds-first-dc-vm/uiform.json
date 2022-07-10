@@ -89,8 +89,8 @@
                                     },
                                     "scope": {
                                         "subscriptionId": "[steps('deployment').resourceScope.subscription.subscriptionId]",
-                                        "location": "[steps('deployment').resourceScope.location.name]",
-                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.name]"
+                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId",
+                                        "location": "[steps('deployment').resourceScope.location.name]"
                                     },
                                     "options": {
                                         "hideExisting": false
@@ -112,7 +112,7 @@
                                             "constraints": {
                                                 "minAddressPrefixSize": "/29",
                                                 "minAddressCount": 1,
-                                                "requireContiguousAddresses": true
+                                                "requireContiguousAddresses": false
                                             }
                                         }
                                     }
@@ -133,9 +133,9 @@
                 "subnetAddressPrefix": "[steps('deployment').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
                 "adminUserName": "[steps('deployment').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('deployment').adminAccountSection.adminPassword.password]"
-           },
+            },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[steps('deployment').resourceScope.resourceGroup.id]",
+            "resourceGroupId": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId]",
             "location": "[steps('deployment').resourceScope.location.name]"
         }
     }
