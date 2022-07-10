@@ -99,6 +99,9 @@
                                     "label": "Domain name",
                                     "toolTip": "Specify the FQDN for the new AD DS forest.",
                                     "multiLine": false,
+                                    "constraints": {
+                                        "required": true
+                                    },
                                     "placeholder": "lab.contoso.com",
                                     "defaultValue": "lab.contoso.com"
                                 }
@@ -148,6 +151,52 @@
                                     "options": {
                                         "hideConfirmation": false
                                     }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "vmIamgeSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Domain controller VM image",
+                            "elements": [
+                                {
+                                    "name": "vmIamgeSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
+                                    }
+                                },
+                                {
+                                    "name": "element1",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "label": "Example drop down",
+                                    "placeholder": "",
+                                    "defaultValue": "Value two",
+                                    "toolTip": "",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "filterPlaceholder": "Filter items ...",
+                                    "multiLine": true,
+                                    "defaultDescription": "A value for selection",
+                                    "constraints": {
+                                        "allowedValues": [
+                                            {
+                                                "label": "[smalldisk] Windows Server 2019",
+                                                "description": "The value to select for option 1.",
+                                                "value": "2019-Datacenter-smalldisk"
+                                            },
+                                            {
+                                                "label": "Windows Server 2019",
+                                                "description": "The value to select for option 2.",
+                                                "value": "2019-Datacenter"
+                                            }
+                                        ],
+                                        "required": true
+                                    },
+                                    "visible": true
                                 }
                             ]
                         }
