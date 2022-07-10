@@ -83,6 +83,53 @@
                     "description": "Specify the AD DS configuration.",
                     "elements": [
                         {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminAccountSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller VM and domain administrator account."
+                                    }
+                                },
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "Specify the administrator username.",
+                                    "osPlatform": "Windows",
+                                    "defaultValue": "vmadmin",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminPassword",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password"
+                                    },
+                                    "toolTip": {
+                                        "password": "Specify the administrator password."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "name": "domainNameSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
@@ -112,19 +159,11 @@
                             ]
                         },
                         {
-                            "name": "vmIamgeSection",
+                            "name": "dcVmSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Domain controller VM image",
+                            "label": "Domain controller VM",
                             "elements": [
-                                {
-                                    "name": "vmIamgeSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Select the VM image for the domain controller VM."
-                                    }
-                                },
                                 {
                                     "name": "vmIamge",
                                     "type": "Microsoft.Common.DropDown",
@@ -184,22 +223,32 @@
                                             }
                                         ]
                                     }
-                                }
-                            ]
-                        },
-                        {
-                            "name": "computerNameSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Computer name",
-                            "elements": [
+                                },
                                 {
-                                    "name": "computerNameSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
+                                    "name": "vmSize",
+                                    "type": "Microsoft.Compute.SizeSelector",
+                                    "label": "Size",
+                                    "toolTip": "The VM size for the domain controller VM.",
+                                    "recommendedSizes": [
+                                        "Standard_B2ms"
+                                    ],
+                                    "constraints": {
+                                    },
                                     "options": {
-                                        "text": "Specify the computer name for the domain controller VM. Naming conventions for the computer name is <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>."
-                                    }
+                                        "hideDiskTypeFilter": false
+                                    },
+                                    "scope": {
+                                        "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                        "location": "[steps('basics').resourceScope.location.name]"
+                                    },
+                                    "osPlatform": "Windows",
+                                    "imageReference": {
+                                        "publisher": "MicrosoftWindowsServer",
+                                        "offer": "WindowsServer",
+                                        "sku": "[steps('adds').dcVmSection.vmIamge]"
+                                    },
+                                    "count": 1,
+                                    "visible": true
                                 },
                                 {
                                     "name": "computerName",
@@ -207,7 +256,7 @@
                                     "visible": true,
                                     "multiLine": false,
                                     "label": "Computer name",
-                                    "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name is <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
+                                    "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name are <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
                                     "constraints": {
                                         "required": true,
                                         "validations": [
@@ -219,53 +268,44 @@
                                     },
                                     "placeholder": "e.g. dc1",
                                     "defaultValue": "dc1"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "adminAccountSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Administrator account",
-                            "elements": [
-                                {
-                                    "name": "adminAccountSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller VM and domain administrator account."
-                                    }
                                 },
                                 {
-                                    "name": "adminUserName",
-                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "name": "addsDriveLetter",
+                                    "type": "Microsoft.Common.TextBox",
                                     "visible": true,
-                                    "label": "Username",
-                                    "toolTip": "Specify the administrator username.",
-                                    "osPlatform": "Windows",
-                                    "defaultValue": "vmadmin",
+                                    "multiLine": false,
+                                    "label": "AD DS data drive letter",
+                                    "toolTip": "TODO",
                                     "constraints": {
-                                        "required": true
-                                    }
+                                        "required": true,
+                                        "validations": [
+                                            {
+                                                "regex": "^[E-Z]{1}$",
+                                                "message": "E - Z"
+                                            }
+                                        ]
+                                    },
+                                    "placeholder": "e.g. N",
+                                    "defaultValue": "N"
                                 },
                                 {
-                                    "name": "adminPassword",
-                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "name": "addsDriveLabel",
+                                    "type": "Microsoft.Common.TextBox",
                                     "visible": true,
-                                    "label": {
-                                        "password": "Password",
-                                        "confirmPassword": "Confirm password"
-                                    },
-                                    "toolTip": {
-                                        "password": "Specify the administrator password."
-                                    },
-                                    "osPlatform": "Windows",
+                                    "multiLine": false,
+                                    "label": "AD DS data drive label",
+                                    "toolTip": "TODO",
                                     "constraints": {
-                                        "required": true
+                                        "required": true,
+                                        "validations": [
+                                            {
+                                                "regex": "^[a-zA-Z0-9\\-\\_ ]{1,64}$",
+                                                "message": "TODO"
+                                            }
+                                        ]
                                     },
-                                    "options": {
-                                        "hideConfirmation": false
-                                    }
+                                    "placeholder": "e.g. ADDS Data",
+                                    "defaultValue": "ADDS Data"
                                 }
                             ]
                         }
@@ -281,11 +321,11 @@
                 "vnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.addressPrefix]",
                 "subnetName": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.name]",
                 "subnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
-                "domainName": "[steps('adds').domainNameSection.domainName]",
-                "vmImageSku": "[steps('adds').vmIamgeSection.vmIamge]",
-                "computerName": "[steps('adds').computerNameSection.computerName]",
                 "adminUserName": "[steps('adds').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]"
+                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]",
+                "domainName": "[steps('adds').domainNameSection.domainName]",
+                "vmImageSku": "[steps('adds').dcVmSection.vmIamge]",
+                "computerName": "[steps('adds').dcVmSection.computerName]"
             },
             "kind": "ResourceGroup",
             "location": "[steps('basics').resourceScope.location.name]",
