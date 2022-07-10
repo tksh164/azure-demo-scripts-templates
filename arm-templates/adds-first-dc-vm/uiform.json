@@ -19,7 +19,7 @@
                 {
                     "name": "virtualNetwork",
                     "label": "Virtual network",
-                    "description": "This template will deploy a first AD DS domain controller into a virtual network.",
+                    "description": "Select the virtual network and the subnet for deploying the first AD DS domain controller VM.",
                     "elements": [
                         {
                             "name": "vnetSection",
@@ -27,14 +27,6 @@
                             "visible": true,
                             "label": "Virtual network",
                             "elements": [
-                                {
-                                    "name": "adminAccountSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Select the virtual network and the subnet for deploying the first AD DS domain controller VM."
-                                    }
-                                },
                                 {
                                     "name": "vnet",
                                     "type": "Microsoft.Network.VirtualNetworkCombo",
