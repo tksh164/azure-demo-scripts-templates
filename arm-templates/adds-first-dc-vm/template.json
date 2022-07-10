@@ -197,7 +197,7 @@
             "name": "[variables('dcVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]",
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('dcVm').avSetName)]",
                 "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
             ],
@@ -247,7 +247,7 @@
                     }
                 },
                 "availabilitySet": {
-                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('dcVm').avSetName)]"
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
