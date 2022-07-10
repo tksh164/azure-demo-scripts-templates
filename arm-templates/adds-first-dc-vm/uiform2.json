@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Deploy a domain controller VM into a VNet",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "description": "This template will deploy an AD DS first domain controller into a virtual network.",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+                        {
+                            "name": "vnetSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "",
+                            "elements": [
+                                {
+                                    "name": "vnet",
+                                    "type": "Microsoft.Network.VirtualNetworkCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "virtualNetwork": "Virtual network",
+                                        "subnets": "Subnets"
+                                    },
+                                    "toolTip": {
+                                        "virtualNetwork": "Specify the virtual network to deploy the AD DS domain controller VM.",
+                                        "subnets": "Specify the subnet to deploy the AD DS domain controller VM."
+                                    },
+                                    "options": {
+                                        "hideExisting": false
+                                    },
+                                    "defaultValue": {
+                                        "name": "adds-vnet",
+                                        "addressPrefixSize": "/16"
+                                    },
+                                    "constraints": {
+                                        "minAddressPrefixSize": "/29"
+                                    },
+                                    "subnets": {
+                                        "addsSubnet": {
+                                            "label": "Subnet",
+                                            "defaultValue": {
+                                                "name": "adds",
+                                                "addressPrefixSize": "/24"
+                                            },
+                                            "constraints": {
+                                                "minAddressPrefixSize": "/29",
+                                                "minAddressCount": 1,
+                                                "requireContiguousAddresses": false
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminAccountSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the AD DS domain controller VM and domain administrator account."
+                                    }
+                                },
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "Specify the administrator username.",
+                                    "osPlatform": "Windows",
+                                    "defaultValue": "vmadmin",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminPassword",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password"
+                                    },
+                                    "toolTip": {
+                                        "password": "Specify the administrator password."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "vnetNewOrExisting": "[steps('basics').vnetSection.vnet.newOrExisting]",
+                "vnetResourceGroupName": "[steps('basics').vnetSection.vnet.resourceGroup]",
+                "vnetName": "[steps('basics').vnetSection.vnet.name]",
+                "vnetAddressPrefix": "[steps('basics').vnetSection.vnet.addressPrefix]",
+                "subnetName": "[steps('basics').vnetSection.vnet.subnets.addsSubnet.name]",
+                "subnetAddressPrefix": "[steps('basics').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]"
+            },
+            "kind": "ResourceGroup",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.resourceGroupId]",
+            "location": "[steps('basics').resourceScope.location.name]"
+        }
+    }
+}
