@@ -12,7 +12,11 @@
                     "elements": [
                         {
                             "name": "resourceScope",
-                            "type": "Microsoft.Common.ResourceScope"
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "label": "Region for AD DS VM",
+                                "toolTip": "Specify the region to deploy the AD DS domain controller VM."
+                            }
                         }
                     ]
                 },
@@ -169,34 +173,34 @@
                                     }
                                 },
                                 {
-                                    "name": "element1",
+                                    "name": "vmIamge",
                                     "type": "Microsoft.Common.DropDown",
-                                    "label": "Example drop down",
+                                    "visible": true,
+                                    "label": "Image",
                                     "placeholder": "",
-                                    "defaultValue": "Value two",
+                                    "defaultValue": "2019-Datacenter-smalldisk",
                                     "toolTip": "",
                                     "multiselect": false,
                                     "selectAll": false,
                                     "filter": true,
-                                    "filterPlaceholder": "Filter items ...",
+                                    "filterPlaceholder": "Filter images...",
                                     "multiLine": true,
                                     "defaultDescription": "A value for selection",
                                     "constraints": {
+                                        "required": true,
                                         "allowedValues": [
                                             {
-                                                "label": "[smalldisk] Windows Server 2019",
-                                                "description": "The value to select for option 1.",
-                                                "value": "2019-Datacenter-smalldisk"
+                                                "label": "Windows Server 2019 Gen 1",
+                                                "description": "Windows Server 2019 Gen 1.",
+                                                "value": "2019-Datacenter"
                                             },
                                             {
-                                                "label": "Windows Server 2019",
-                                                "description": "The value to select for option 2.",
-                                                "value": "2019-Datacenter"
+                                                "label": "Windows Server 2019 Gen 1 (smalldisk)",
+                                                "description": "Windows Server 2019 Gen 1 small-disk.",
+                                                "value": "2019-Datacenter-smalldisk"
                                             }
-                                        ],
-                                        "required": true
-                                    },
-                                    "visible": true
+                                        ]
+                                    }
                                 }
                             ]
                         }
