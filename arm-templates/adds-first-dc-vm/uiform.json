@@ -12,11 +12,7 @@
                     "elements": [
                         {
                             "name": "resourceScope",
-                            "type": "Microsoft.Common.ResourceScope",
-                            "location": {
-                                "label": "Region for AD DS VM",
-                                "toolTip": "Specify the region to deploy the AD DS domain controller VM."
-                            }
+                            "type": "Microsoft.Common.ResourceScope"
                         }
                     ]
                 },
