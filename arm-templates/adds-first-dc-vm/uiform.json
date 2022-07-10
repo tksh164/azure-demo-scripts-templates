@@ -41,7 +41,7 @@
                                     },
                                     "scope": {
                                         "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.name]",
+                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
                                         "location": "[steps('basics').resourceScope.location.name]"
                                     },
                                     "options": {
@@ -97,7 +97,7 @@
                                     "type": "Microsoft.Common.TextBox",
                                     "visible": true,
                                     "label": "Domain name",
-                                    "toolTip": "Specify the fully qualified domain name (FQDN) for the new AD DS forest.",
+                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
                                     "multiLine": false,
                                     "placeholder": "lab.contoso.com",
                                     "defaultValue": "lab.contoso.com"
