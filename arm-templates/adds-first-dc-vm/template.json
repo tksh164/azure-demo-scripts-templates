@@ -103,7 +103,7 @@
 
         // Virtual network
 
-        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",  // 'new' or 'existing'
 
         "existingSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
@@ -186,7 +186,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[variables('existingSubnetId')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
                             },
                             "privateIPAllocationMethod": "Dynamic"
                        }
@@ -277,7 +277,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2021-11-01",
-            "name": "[concat(variables('dcVm').vmName, '/FirstADDSDC')]",
+            "name": "[concat(variables('dcVm').vmName, '/configure-adds-first-dc')]",
             "location": "[parameters('vnetLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('dcVm').vmName)]"
@@ -285,7 +285,7 @@
             "properties": {
                 "publisher": "Microsoft.Powershell",
                 "type": "DSC",
-                "typeHandlerVersion": "2.80",
+                "typeHandlerVersion": "2.83",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "wmfVersion": "latest",
