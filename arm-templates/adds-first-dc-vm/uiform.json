@@ -250,7 +250,7 @@
                 "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]"
             },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.resourceGroupId]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "location": "[steps('basics').resourceScope.location.name]"
         }
     }
