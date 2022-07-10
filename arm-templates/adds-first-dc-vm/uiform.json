@@ -45,6 +45,7 @@
                                     },
                                     "scope": {
                                         "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.name]",
                                         "location": "[steps('basics').resourceScope.location.name]"
                                     },
                                     "options": {
