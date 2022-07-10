@@ -25,7 +25,7 @@
                             "name": "vnetSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Virtual network",
+                            "label": "",
                             "elements": [
                                 {
                                     "name": "vnet",
@@ -41,7 +41,7 @@
                                     },
                                     "scope": {
                                         "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                        "resourceGroupName": "exptl-azshci-builder",
                                         "location": "[steps('basics').resourceScope.location.name]"
                                     },
                                     "options": {
