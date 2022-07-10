@@ -100,13 +100,13 @@
                                     "name": "domainName",
                                     "type": "Microsoft.Common.TextBox",
                                     "visible": true,
+                                    "multiLine": false,
                                     "label": "Domain name",
                                     "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "multiLine": false,
                                     "constraints": {
                                         "required": true
                                     },
-                                    "placeholder": "lab.contoso.com",
+                                    "placeholder": "e.g. sub.example.com",
                                     "defaultValue": "lab.contoso.com"
                                 }
                             ]
@@ -169,34 +169,64 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
+                                        "text": "Select the VM image for the domain controller VM."
                                     }
                                 },
                                 {
                                     "name": "vmIamge",
                                     "type": "Microsoft.Common.DropDown",
                                     "visible": true,
-                                    "label": "Image",
-                                    "placeholder": "",
-                                    "defaultValue": "2019-Datacenter-smalldisk",
-                                    "toolTip": "",
                                     "multiselect": false,
                                     "selectAll": false,
                                     "filter": true,
-                                    "filterPlaceholder": "Filter images...",
                                     "multiLine": true,
-                                    "defaultDescription": "A value for selection",
+                                    "label": "Image",
+                                    "toolTip": "The VM image for the domain controller VM.",
+                                    "placeholder": "Select the VM image...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter images...",
+                                    "defaultValue": "Windows Server 2022 Gen 2 (smalldisk)",
                                     "constraints": {
                                         "required": true,
                                         "allowedValues": [
                                             {
+                                                "label": "Windows Server 2022 Gen 2",
+                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
+                                                "value": "2022-datacenter-g2"
+                                            },
+                                            {
+                                                "label": "Windows Server 2022 Gen 2 (smalldisk)",
+                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
+                                                "value": "2022-datacenter-smalldisk-g2"
+                                            },
+                                            {
+                                                "label": "Windows Server 2022 Gen 1",
+                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
+                                                "value": "2022-datacenter"
+                                            },
+                                            {
+                                                "label": "Windows Server 2022 Gen 1 (smalldisk)",
+                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
+                                                "value": "2022-datacenter-smalldisk"
+                                            },
+                                            {
+                                                "label": "Windows Server 2019 Gen 2",
+                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
+                                                "value": "2019-datacenter-gensecond"
+                                            },                                            
+                                            {
+                                                "label": "Windows Server 2019 Gen 2 (smalldisk)",
+                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
+                                                "value": "2019-datacenter-smalldisk-g2"
+                                            },
+                                            {
                                                 "label": "Windows Server 2019 Gen 1",
-                                                "description": "Windows Server 2019 Gen 1.",
+                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
                                                 "value": "2019-Datacenter"
                                             },
                                             {
                                                 "label": "Windows Server 2019 Gen 1 (smalldisk)",
-                                                "description": "Windows Server 2019 Gen 1 small-disk.",
+                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
                                                 "value": "2019-Datacenter-smalldisk"
                                             }
                                         ]
