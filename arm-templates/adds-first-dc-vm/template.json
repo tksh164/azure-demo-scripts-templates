@@ -2,22 +2,40 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "existingVNetName": {
+        "vnetNewOrExisting": {
+            "type": "string",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "vnetName": {
             "type": "string",
             "metadata": {
                 "description": "The name of vNet that to deploy the domain controller virtual machine."
             }
         },
-        "existingVNetLocation": {
+        "vnetLocation": {
             "type": "string",
             "metadata": {
                 "description": "The location of vNet that to deploy the domain controller virtual machine."
             }
         },
-        "existingSubnetName": {
+        "vnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "subnetName": {
             "type": "string",
             "metadata": {
                 "description": "The name of subnet that to deploy the domain controller virtual machine."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": ""
             }
         },
         "adminUserName": {
@@ -85,7 +103,9 @@
 
         // Virtual network
 
-        "existingSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVNetName'), parameters('existingSubnetName'))]",
+        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+
+        "existingSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
         // Availability set for the domain controller virtual machine
 
@@ -108,27 +128,77 @@
             "domainName": "[parameters('domainName')]",
             "dataVolumeDriveLetter": "N",
             "dataVolumeLabel": "ADDS Data"
-        },
-
-        // LB for the inbound RDP NAT to the domain controller
-
-        "lb": {
-            "lbName": "[concat(variables('prefix'), '-lb')]",
-            "lbIpName": "[concat(variables('prefix'), '-lb-ip')]",
-            "domainNameLabel": "[concat(variables('prefix'), '-lb-', variables('uniqueSuffix'))]",
-            "frontendIpConfigName": "lb-frontend",
-            "natRuleName": "rdp-dc"
         }
     },
     "resources": [
 
+        // Virtual network
+
+        {
+            "condition": "[variables('isCreateNewVNet')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('vnetName')]",
+            "location": "[parameters('vnetLocation')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+
         // Domain controller virtual machine
 
         {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('avSetName')]",
+            "location": "[parameters('vnetLocation')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 2
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('dcVm').nicName]",
+            "location": "[parameters('vnetLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('existingSubnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                       }
+                    }
+                ]
+            }
+        },
+        {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2021-11-01",
             "name": "[variables('dcVm').vmName]",
-            "location": "[parameters('existingVNetLocation')]",
+            "location": "[parameters('vnetLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]",
                 "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
@@ -191,11 +261,11 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2021-12-01",
             "name": "[variables('dcVm').dataDiskName]",
-            "location": "[parameters('existingVNetLocation')]",
+            "location": "[parameters('vnetLocation')]",
             "sku": {
-                "name": "StandardSSD_LRS"
+                "name": "Standard_LRS"
             },
             "properties": {
                 "diskSizeGB": 4,
@@ -203,67 +273,12 @@
                     "createOption": "empty"
                 }
             }
-        },        
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-12-01",
-            "name": "[variables('dcVm').nicName]",
-            "location": "[parameters('existingVNetLocation')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lb').lbName, variables('lb').natRuleName)]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcVm').nsgName)]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "subnet": {
-                                "id": "[variables('existingSubnetId')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "loadBalancerInboundNatRules": [
-                                {
-                                    "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', variables('lb').lbName, variables('lb').natRuleName)]"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "enableIPForwarding": true,
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcVm').nsgName)]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-12-01",
-            "name": "[variables('dcVm').nsgName]",
-            "location": "[parameters('existingVNetLocation')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "AllowRdpInbound",
-                        "properties": {
-                            "direction": "Inbound",
-                            "priority": 500,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "3389"
-                        }
-                    }
-                ]
-            }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-07-01",
-            "name": "[concat(variables('dcVm').vmName, '/Microsoft.Powershell.DSC')]",
-            "location": "[parameters('existingVNetLocation')]",
+            "apiVersion": "2021-11-01",
+            "name": "[concat(variables('dcVm').vmName, '/FirstADDSDC')]",
+            "location": "[parameters('vnetLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('dcVm').vmName)]"
             ],
@@ -299,83 +314,6 @@
                             "Password": "[parameters('adminPassword')]"
                         }
                     }
-                }
-            }
-        },
-
-        // Availability set for the domain controller virtual machine
-
-        {
-            "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2019-07-01",
-            "name": "[variables('avSetName')]",
-            "location": "[parameters('existingVNetLocation')]",
-            "sku": {
-                "name": "Aligned"
-            },
-            "properties": {
-                "platformUpdateDomainCount": 5,
-                "platformFaultDomainCount": 2
-            }
-        },
-
-        // Load balancer for the inbound RDP NAT to the domain controller
-
-        {
-            "type": "Microsoft.Network/loadBalancers",
-            "apiVersion": "2019-12-01",
-            "name": "[variables('lb').lbName]",
-            "location": "[parameters('existingVNetLocation')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', variables('lb').lbIpName)]"
-            ],
-            "sku": {
-                "name": "Basic"
-            },
-            "properties": {
-                "frontendIPConfigurations": [
-                    {
-                        "name": "[variables('lb').frontendIpConfigName]",
-                        "properties": {
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('lb').lbIpName)]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-            "apiVersion": "2019-12-01",
-            "name": "[concat(variables('lb').lbName, '/', variables('lb').natRuleName)]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', variables('lb').lbName)]"
-            ],
-            "properties": {
-                "frontendIPConfiguration": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lb').lbName, variables('lb').frontendIpConfigName)]"
-                },
-                "protocol": "Tcp",
-                "frontendPort": 33891,
-                "backendPort": 3389,
-                "idleTimeoutInMinutes": 4,
-                "enableTcpReset": false,
-                "enableFloatingIP": false
-            }
-        },
-        {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2019-12-01",
-            "name": "[variables('lb').lbIpName]",
-            "location": "[parameters('existingVNetLocation')]",
-            "sku": {
-                "name": "Basic"
-            },
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[variables('lb').domainNameLabel]"
                 }
             }
         }

@@ -81,7 +81,7 @@
                                     "visible": true,
                                     "label": {
                                         "virtualNetwork": "Virtual network",
-                                        "subnets": "Subnet"
+                                        "subnets": "Subnets"
                                     },
                                     "toolTip": {
                                         "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
@@ -125,9 +125,12 @@
         },
         "outputs": {
             "parameters": {
-                "existingVNetName": "[steps('deployment').vnetSection.vnet.name]",
-                "existingVNetLocation": "[steps('deployment').resourceScope.location.name]",
-                "existingSubnetName":"[steps('deployment').vnetSection.vnet.subnets.addsSubnet.name]",
+                "vnetNewOrExisting": "[steps('deployment').vnetSection.vnet.newOrExisting]",
+                "vnetName": "[steps('deployment').vnetSection.vnet.name]",
+                "vnetLocation": "[steps('deployment').resourceScope.location.name]",
+                "vnetAddressPrefix": "[steps('deployment').vnetSection.vnet.addressPrefix]",
+                "subnetName": "[steps('deployment').vnetSection.vnet.subnets.addsSubnet.name]",
+                "subnetAddressPrefix": "[steps('deployment').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
                 "adminUserName": "[steps('deployment').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('deployment').adminAccountSection.adminPassword.password]"
            },
