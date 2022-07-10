@@ -89,7 +89,7 @@
                                     },
                                     "scope": {
                                         "subscriptionId": "[steps('deployment').resourceScope.subscription.subscriptionId]",
-                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId",
+                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId]",
                                         "location": "[steps('deployment').resourceScope.location.name]"
                                     },
                                     "options": {
