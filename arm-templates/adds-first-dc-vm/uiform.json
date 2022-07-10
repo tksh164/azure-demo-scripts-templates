@@ -6,14 +6,86 @@
             "title": "Deploy a first AD DS domain controller into a VNet",
             "steps": [
                 {
-                    "name": "deployment",
-                    "label": "AD DS Deployment",
+                    "name": "basics",
+                    "label": "Basics",
                     "description": "This template will deploy a first AD DS domain controller into a virtual network.",
                     "elements": [
                         {
                             "name": "resourceScope",
                             "type": "Microsoft.Common.ResourceScope"
-                        },
+                        }
+                    ]
+                },
+                {
+                    "name": "virtualNetwork",
+                    "label": "Virtual network",
+                    "description": "This template will deploy a first AD DS domain controller into a virtual network.",
+                    "elements": [
+                        {
+                            "name": "vnetSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Virtual network",
+                            "elements": [
+                                {
+                                    "name": "adminAccountSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Select the virtual network and the subnet for deploying the first AD DS domain controller VM."
+                                    }
+                                },
+                                {
+                                    "name": "vnet",
+                                    "type": "Microsoft.Network.VirtualNetworkCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "virtualNetwork": "Virtual network",
+                                        "subnets": "Subnets"
+                                    },
+                                    "toolTip": {
+                                        "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
+                                        "subnets": "The subnet to deploy a first AD DS domain controller VM."
+                                    },
+                                    "scope": {
+                                        "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.resourceGroupId]",
+                                        "location": "[steps('basics').resourceScope.location.name]"
+                                    },
+                                    "options": {
+                                        "hideExisting": false
+                                    },
+                                    "defaultValue": {
+                                        "name": "adds-vnet",
+                                        "addressPrefixSize": "/16"
+                                    },
+                                    "constraints": {
+                                        "minAddressPrefixSize": "/29"
+                                    },
+                                    "subnets": {
+                                        "addsSubnet": {
+                                            "label": "Subnet",
+                                            "defaultValue": {
+                                                "name": "adds",
+                                                "addressPrefixSize": "/24"
+                                            },
+                                            "constraints": {
+                                                "minAddressPrefixSize": "/29",
+                                                "minAddressCount": 1,
+                                                "requireContiguousAddresses": false
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "adds",
+                    "label": "AD DS",
+                    "description": "This template will deploy a first AD DS domain controller into a virtual network.",
+                    "elements": [
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
@@ -60,64 +132,6 @@
                                     }
                                 }
                             ]
-                        },
-                        {
-                            "name": "vnetSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Virtual network",
-                            "elements": [
-                                {
-                                    "name": "adminAccountSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Select the virtual network and the subnet for deploying the first AD DS domain controller VM."
-                                    }
-                                },
-                                {
-                                    "name": "vnet",
-                                    "type": "Microsoft.Network.VirtualNetworkCombo",
-                                    "visible": true,
-                                    "label": {
-                                        "virtualNetwork": "Virtual network",
-                                        "subnets": "Subnets"
-                                    },
-                                    "toolTip": {
-                                        "virtualNetwork": "The virtual network to deploy a first AD DS domain controller VM.",
-                                        "subnets": "The subnet to deploy a first AD DS domain controller VM."
-                                    },
-                                    "scope": {
-                                        "subscriptionId": "[steps('deployment').resourceScope.subscription.subscriptionId]",
-                                        "resourceGroupName": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId]",
-                                        "location": "[steps('deployment').resourceScope.location.name]"
-                                    },
-                                    "options": {
-                                        "hideExisting": false
-                                    },
-                                    "defaultValue": {
-                                        "name": "adds-vnet",
-                                        "addressPrefixSize": "/16"
-                                    },
-                                    "constraints": {
-                                        "minAddressPrefixSize": "/29"
-                                    },
-                                    "subnets": {
-                                        "addsSubnet": {
-                                            "label": "Subnet",
-                                            "defaultValue": {
-                                                "name": "adds",
-                                                "addressPrefixSize": "/24"
-                                            },
-                                            "constraints": {
-                                                "minAddressPrefixSize": "/29",
-                                                "minAddressCount": 1,
-                                                "requireContiguousAddresses": false
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
                         }
                     ]
                 }
@@ -125,18 +139,18 @@
         },
         "outputs": {
             "parameters": {
-                "vnetNewOrExisting": "[steps('deployment').vnetSection.vnet.newOrExisting]",
-                "vnetName": "[steps('deployment').vnetSection.vnet.name]",
-                "vnetLocation": "[steps('deployment').resourceScope.location.name]",
-                "vnetAddressPrefix": "[steps('deployment').vnetSection.vnet.addressPrefix]",
-                "subnetName": "[steps('deployment').vnetSection.vnet.subnets.addsSubnet.name]",
-                "subnetAddressPrefix": "[steps('deployment').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
-                "adminUserName": "[steps('deployment').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('deployment').adminAccountSection.adminPassword.password]"
+                "vnetNewOrExisting": "[steps('virtualNetwork').vnetSection.vnet.newOrExisting]",
+                "vnetName": "[steps('virtualNetwork').vnetSection.vnet.name]",
+                "vnetLocation": "[steps('basics').resourceScope.location.name]",
+                "vnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.addressPrefix]",
+                "subnetName": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.name]",
+                "subnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
+                "adminUserName": "[steps('adds').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]"
             },
             "kind": "ResourceGroup",
-            "resourceGroupId": "[steps('deployment').resourceScope.resourceGroup.resourceGroupId]",
-            "location": "[steps('deployment').resourceScope.location.name]"
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.resourceGroupId]",
+            "location": "[steps('basics').resourceScope.location.name]"
         }
     }
 }
