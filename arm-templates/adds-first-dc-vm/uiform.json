@@ -12,11 +12,7 @@
                     "elements": [
                         {
                             "name": "resourceScope",
-                            "type": "Microsoft.Common.ResourceScope",
-                            "location": {
-                                "label": "Region for AD DS VM",
-                                "toolTip": "Specify the region to deploy the AD DS domain controller VM."
-                            }
+                            "type": "Microsoft.Common.ResourceScope"
                         }
                     ]
                 },
@@ -82,6 +78,32 @@
                     "label": "AD DS",
                     "description": "Specify the AD DS configuration.",
                     "elements": [
+                        {
+                            "name": "domainSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Active Directory domain",
+                            "elements": [
+                                {
+                                    "name": "domainSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
+                                    }
+                                },
+                                {
+                                    "name": "domainName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": true,
+                                    "label": "Domain name",
+                                    "toolTip": "Specify the fully qualified domain name (FQDN) for the new AD DS forest.",
+                                    "multiLine": false,
+                                    "placeholder": "lab.contoso.com",
+                                    "defaultValue": "lab.contoso.com"
+                                }
+                            ]
+                        },
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
