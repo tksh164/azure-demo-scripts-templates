@@ -101,60 +101,13 @@
                                     "type": "Microsoft.Common.TextBox",
                                     "visible": true,
                                     "multiLine": false,
-                                    "label": "Domain name",
+                                    "label": "AD Domain name",
                                     "toolTip": "Specify the FQDN for the new AD DS forest.",
                                     "constraints": {
                                         "required": true
                                     },
                                     "placeholder": "e.g. sub.example.com",
                                     "defaultValue": "lab.contoso.com"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "adminAccountSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Administrator account",
-                            "elements": [
-                                {
-                                    "name": "adminAccountSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller VM and domain administrator account."
-                                    }
-                                },
-                                {
-                                    "name": "adminUserName",
-                                    "type": "Microsoft.Compute.UserNameTextBox",
-                                    "visible": true,
-                                    "label": "Username",
-                                    "toolTip": "Specify the administrator username.",
-                                    "osPlatform": "Windows",
-                                    "defaultValue": "vmadmin",
-                                    "constraints": {
-                                        "required": true
-                                    }
-                                },
-                                {
-                                    "name": "adminPassword",
-                                    "type": "Microsoft.Compute.CredentialsCombo",
-                                    "visible": true,
-                                    "label": {
-                                        "password": "Password",
-                                        "confirmPassword": "Confirm password"
-                                    },
-                                    "toolTip": {
-                                        "password": "Specify the administrator password."
-                                    },
-                                    "osPlatform": "Windows",
-                                    "constraints": {
-                                        "required": true
-                                    },
-                                    "options": {
-                                        "hideConfirmation": false
-                                    }
                                 }
                             ]
                         },
@@ -233,6 +186,88 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "name": "computerNameSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Computer name",
+                            "elements": [
+                                {
+                                    "name": "computerNameSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the computer name for the domain controller VM. Naming conventions for the computer name is <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>."
+                                    }
+                                },
+                                {
+                                    "name": "computerName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": true,
+                                    "multiLine": false,
+                                    "label": "Computer name",
+                                    "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name is <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
+                                    "constraints": {
+                                        "required": true,
+                                        "validations": [
+                                            {
+                                                "regex": "^[a-zA-Z0-9\\-]{1,15}$",
+                                                "message": "Only alphanumeric characters are allowed, and the value must be 1-15 characters long."
+                                            }
+                                        ]
+                                    },
+                                    "placeholder": "e.g. dc1",
+                                    "defaultValue": "dc1"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminAccountSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller VM and domain administrator account."
+                                    }
+                                },
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "Specify the administrator username.",
+                                    "osPlatform": "Windows",
+                                    "defaultValue": "vmadmin",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminPassword",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password"
+                                    },
+                                    "toolTip": {
+                                        "password": "Specify the administrator password."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -247,9 +282,10 @@
                 "subnetName": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.name]",
                 "subnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
                 "domainName": "[steps('adds').domainNameSection.domainName]",
+                "vmImageSku": "[steps('adds').vmIamgeSection.vmIamge]",
+                "computerName": "[steps('adds').computerNameSection.computerName]",
                 "adminUserName": "[steps('adds').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]",
-                "vmImageSku": "[steps('adds').vmIamgeSection.vmIamge]"
+                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]"
             },
             "kind": "ResourceGroup",
             "location": "[steps('basics').resourceScope.location.name]",

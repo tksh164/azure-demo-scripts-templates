@@ -38,19 +38,6 @@
                 "description": "Specify the address prefix of the target subnet."
             }
         },
-        "adminUserName": {
-            "type": "string",
-            "defaultValue": "vmadmin",
-            "metadata": {
-                "description": "Specify the admin user name for the domain controller virtual machine."
-            }
-        },
-        "adminPassword": {
-            "type": "secureString",
-            "metadata": {
-                "description": "Specify the admin user password for the domain controller virtual machine."
-            }
-        },
         "domainName": {
             "type": "string",
             "defaultValue": "lab.contoso.com",
@@ -92,6 +79,28 @@
                 // "2012-Datacenter-smalldisk"
             ]
         },
+        "computerName": {
+            "type": "string",
+            "defaultValue": "dc1",
+            "minLength": 1,
+            "maxLength": 15,
+            "metadata": {
+                "description": "Specify the computer name for the domain controller virtual machine."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "Specify the admin user name for the domain controller virtual machine."
+            }
+        },
+        "adminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Specify the admin user password for the domain controller virtual machine."
+            }
+        },
         "uniqueSuffixSeed": {
             "type": "string",
             "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
@@ -117,7 +126,7 @@
 
         "dcVm": {
             "vmName": "[concat(variables('prefix'), '-vm1')]",
-            "computerName": "[concat(variables('prefix'), 'vm1')]",
+            "computerName": "[parameters('computerName')]",
             "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
             "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
             "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
