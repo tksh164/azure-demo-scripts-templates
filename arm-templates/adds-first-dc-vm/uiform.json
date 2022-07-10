@@ -83,13 +83,13 @@
                     "description": "Specify the AD DS configuration.",
                     "elements": [
                         {
-                            "name": "domainSection",
+                            "name": "domainNameSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
                             "label": "Active Directory domain",
                             "elements": [
                                 {
-                                    "name": "domainSectionText",
+                                    "name": "domainNameSectionText",
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
@@ -246,8 +246,10 @@
                 "vnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.addressPrefix]",
                 "subnetName": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.name]",
                 "subnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
+                "domainName": "[steps('adds').domainNameSection.domainName]",
                 "adminUserName": "[steps('adds').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]"
+                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]",
+                "vmImageSku": "[steps('adds').vmIamgeSection.vmIamge]"
             },
             "kind": "ResourceGroup",
             "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
