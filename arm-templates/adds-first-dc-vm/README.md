@@ -20,16 +20,11 @@ All the below names are the default value.
 - Virtual network: Specified existing virtual network through the parameter.
     - Subnet: Specified existing subnet through the parameter.
         - Availability set: `dc-as`
-            - NVA virtual machine: `dc-vm1`
+            - Virtual machine: `dc-vm1`
                 - OS disk: `dc-vm1-osdisk`
                 - Data disk: `dc-vm1-datadisk1`
                 - Network interface: `dc-vm1-nic`
                     - Private IP address: Dynamic
-                - Network security group: `dc-vm1-nsg`
-- Load balancer: `dc-lb`
-    - For the inbound NAT of RDP to the domain controller.
-    - Public IP address: `dc-lb-ip`
-        - DNS name label: `dc-lb-****`
 
 ## Notes
 
