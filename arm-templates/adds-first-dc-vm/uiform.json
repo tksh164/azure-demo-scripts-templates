@@ -43,6 +43,11 @@
                                         "virtualNetwork": "Specify the virtual network to deploy the AD DS domain controller VM.",
                                         "subnets": "Specify the subnet to deploy the AD DS domain controller VM."
                                     },
+                                    "scope": {
+                                        "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                        "location": "[steps('basics').resourceScope.location.name]"
+                                    },
                                     "options": {
                                         "hideExisting": false
                                     },
@@ -77,35 +82,6 @@
                     "label": "AD DS",
                     "description": "Specify the AD DS configuration.",
                     "elements": [
-                        {
-                            "name": "domainSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Active Directory domain",
-                            "elements": [
-                                {
-                                    "name": "domainSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
-                                    }
-                                },
-                                {
-                                    "name": "domainName",
-                                    "type": "Microsoft.Common.TextBox",
-                                    "visible": true,
-                                    "multiLine": false,
-                                    "label": "Domain name",
-                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "constraints": {
-                                        "required": true
-                                    },
-                                    "placeholder": "e.g. sub.example.com",
-                                    "defaultValue": "lab.contoso.com"
-                                }
-                            ]
-                        },
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
@@ -149,82 +125,6 @@
                                     },
                                     "options": {
                                         "hideConfirmation": false
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "name": "vmIamgeSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Domain controller VM image",
-                            "elements": [
-                                {
-                                    "name": "vmIamgeSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Select the VM image for the domain controller VM."
-                                    }
-                                },
-                                {
-                                    "name": "vmIamge",
-                                    "type": "Microsoft.Common.DropDown",
-                                    "visible": true,
-                                    "multiselect": false,
-                                    "selectAll": false,
-                                    "filter": true,
-                                    "multiLine": true,
-                                    "label": "Image",
-                                    "toolTip": "The VM image for the domain controller VM.",
-                                    "placeholder": "Select the VM image...",
-                                    "defaultDescription": "---",
-                                    "filterPlaceholder": "Filter images...",
-                                    "defaultValue": "Windows Server 2022 Gen 2 (smalldisk)",
-                                    "constraints": {
-                                        "required": true,
-                                        "allowedValues": [
-                                            {
-                                                "label": "Windows Server 2022 Gen 2",
-                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
-                                                "value": "2022-datacenter-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 2 (smalldisk)",
-                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
-                                                "value": "2022-datacenter-smalldisk-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 1",
-                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
-                                                "value": "2022-datacenter"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 1 (smalldisk)",
-                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
-                                                "value": "2022-datacenter-smalldisk"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 2",
-                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
-                                                "value": "2019-datacenter-gensecond"
-                                            },                                            
-                                            {
-                                                "label": "Windows Server 2019 Gen 2 (smalldisk)",
-                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
-                                                "value": "2019-datacenter-smalldisk-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 1",
-                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
-                                                "value": "2019-Datacenter"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 1 (smalldisk)",
-                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
-                                                "value": "2019-Datacenter-smalldisk"
-                                            }
-                                        ]
                                     }
                                 }
                             ]
