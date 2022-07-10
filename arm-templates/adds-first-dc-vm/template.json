@@ -5,57 +5,57 @@
         "vnetNewOrExisting": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "Specify the target VNet existence by 'new' or 'existing'."
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the resource group name that contains the target VNet."
             }
         },
         "vnetName": {
             "type": "string",
             "metadata": {
-                "description": "The name of vNet that to deploy the domain controller virtual machine."
-            }
-        },
-        "vnetLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "The location of vNet that to deploy the domain controller virtual machine."
+                "description": "Specify the target VNet name that to deploy the domain controller virtual machine."
             }
         },
         "vnetAddressPrefix": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "Specify the address prefix of the target VNet."
             }
         },
         "subnetName": {
             "type": "string",
             "metadata": {
-                "description": "The name of subnet that to deploy the domain controller virtual machine."
+                "description": "Specify the target subnet name that to deploy the domain controller virtual machine."
             }
         },
         "subnetAddressPrefix": {
             "type": "string",
             "metadata": {
-                "description": ""
+                "description": "Specify the address prefix of the target subnet."
             }
         },
         "adminUserName": {
             "type": "string",
             "defaultValue": "vmadmin",
             "metadata": {
-                "description": "The admin user name for the domain controller virtual machine."
+                "description": "Specify the admin user name for the domain controller virtual machine."
             }
         },
         "adminPassword": {
             "type": "secureString",
             "metadata": {
-                "description": "The admin user password for the domain controller virtual machine."
+                "description": "Specify the admin user password for the domain controller virtual machine."
             }
         },
         "domainName": {
             "type": "string",
             "defaultValue": "lab.contoso.com",
             "metadata": {
-                "description": "The domain name for the new AD DS forest."
+                "description": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
             }
         },
         "vmImagePublisher": {
@@ -90,7 +90,7 @@
             "type": "string",
             "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
             "metadata": {
-                "description": "Do not need change this value."
+                "description": "Don't change this value."
             }
         }
     },
@@ -99,18 +99,14 @@
         // Common
 
         "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+        "location": "[resourceGroup().location]",
         "prefix": "dc",
 
         // Virtual network
 
-        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",  // 'new' or 'existing'
+        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
-        "existingSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
-
-        // Availability set for the domain controller virtual machine
-
-        "avSetName": "[concat(variables('prefix'), '-as')]",
-        
         // Domain controller virtual machine
 
         "dcVm": {
@@ -119,12 +115,13 @@
             "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
             "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
             "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
-            "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]"
+            "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]",
+            "avSetName": "[concat(variables('prefix'), '-as')]"
         },
-        
-        // AD DS domain
 
-        "adds": {
+        // AD DS domain configuration
+
+        "addsConfig": {
             "domainName": "[parameters('domainName')]",
             "dataVolumeDriveLetter": "N",
             "dataVolumeLabel": "ADDS Data"
@@ -139,7 +136,7 @@
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-11-01",
             "name": "[parameters('vnetName')]",
-            "location": "[parameters('vnetLocation')]",
+            "location": "[variables('location')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -162,8 +159,8 @@
         {
             "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "2021-11-01",
-            "name": "[variables('avSetName')]",
-            "location": "[parameters('vnetLocation')]",
+            "name": "[variables('dcVm').avSetName]",
+            "location": "[variables('location')]",
             "sku": {
                 "name": "Aligned"
             },
@@ -176,7 +173,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
             "name": "[variables('dcVm').nicName]",
-            "location": "[parameters('vnetLocation')]",
+            "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
             ],
@@ -186,7 +183,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                                "id": "[variables('subnetId')]"
                             },
                             "privateIPAllocationMethod": "Dynamic"
                        }
@@ -198,7 +195,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2021-11-01",
             "name": "[variables('dcVm').vmName]",
-            "location": "[parameters('vnetLocation')]",
+            "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]",
                 "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
@@ -263,7 +260,7 @@
             "type": "Microsoft.Compute/disks",
             "apiVersion": "2021-12-01",
             "name": "[variables('dcVm').dataDiskName]",
-            "location": "[parameters('vnetLocation')]",
+            "location": "[variables('location')]",
             "sku": {
                 "name": "Standard_LRS"
             },
@@ -278,7 +275,7 @@
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2021-11-01",
             "name": "[concat(variables('dcVm').vmName, '/configure-adds-first-dc')]",
-            "location": "[parameters('vnetLocation')]",
+            "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('dcVm').vmName)]"
             ],
@@ -298,9 +295,9 @@
                         "dataCollection": "enable"
                     },
                     "configurationArguments": {
-                        "DomainName": "[variables('adds').domainName]",
-                        "DataVolumeDriveLetter": "[variables('adds').dataVolumeDriveLetter]",
-                        "DataVolumeLabel": "[variables('adds').dataVolumeLabel]"
+                        "DomainName": "[variables('addsConfig').domainName]",
+                        "DataVolumeDriveLetter": "[variables('addsConfig').dataVolumeDriveLetter]",
+                        "DataVolumeLabel": "[variables('addsConfig').dataVolumeLabel]"
                     }
                 },
                 "protectedSettings": {
