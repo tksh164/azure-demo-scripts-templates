@@ -125,7 +125,7 @@
                 "vnetResourceGroupName": "[steps('basics').vnetSection.vnet.resourceGroup]",
                 "vnetName": "[steps('basics').vnetSection.vnet.name]",
                 "vnetAddressPrefix": "[steps('basics').vnetSection.vnet.addressPrefix]",
-                "subnetName": "[steps('basics').vnetSection.vnet.addressPrefix]",
+                "subnetName": "[steps('basics').vnetSection.vnet.subnets.addsSubnet.name]",
                 "subnetAddressPrefix": "[steps('basics').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]"
