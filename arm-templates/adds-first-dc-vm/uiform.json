@@ -83,6 +83,35 @@
                     "description": "Specify the AD DS configuration.",
                     "elements": [
                         {
+                            "name": "domainNameSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Active Directory domain",
+                            "elements": [
+                                {
+                                    "name": "domainNameSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
+                                    }
+                                },
+                                {
+                                    "name": "domainName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": true,
+                                    "multiLine": false,
+                                    "label": "AD Domain name",
+                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "placeholder": "e.g. sub.example.com",
+                                    "defaultValue": "lab.contoso.com"
+                                }
+                            ]
+                        },
+                        {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
@@ -130,40 +159,30 @@
                             ]
                         },
                         {
-                            "name": "domainNameSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Active Directory domain",
-                            "elements": [
-                                {
-                                    "name": "domainNameSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
-                                    }
-                                },
-                                {
-                                    "name": "domainName",
-                                    "type": "Microsoft.Common.TextBox",
-                                    "visible": true,
-                                    "multiLine": false,
-                                    "label": "AD Domain name",
-                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "constraints": {
-                                        "required": true
-                                    },
-                                    "placeholder": "e.g. sub.example.com",
-                                    "defaultValue": "lab.contoso.com"
-                                }
-                            ]
-                        },
-                        {
                             "name": "dcVmSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
                             "label": "Domain controller VM",
                             "elements": [
+                                {
+                                    "name": "computerName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": true,
+                                    "multiLine": false,
+                                    "label": "Computer name",
+                                    "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name are <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
+                                    "constraints": {
+                                        "required": true,
+                                        "validations": [
+                                            {
+                                                "regex": "^[a-zA-Z0-9\\-]{1,15}$",
+                                                "message": "Only alphanumeric characters are allowed, and the value must be 1-15 characters long."
+                                            }
+                                        ]
+                                    },
+                                    "placeholder": "e.g. dc1",
+                                    "defaultValue": "dc1"
+                                },
                                 {
                                     "name": "vmIamge",
                                     "type": "Microsoft.Common.DropDown",
@@ -225,6 +244,41 @@
                                     }
                                 },
                                 {
+                                    "name": "osDiskStorageType",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "multiLine": true,
+                                    "label": "OS disk storage type",
+                                    "toolTip": "TODO",
+                                    "placeholder": "Select the OS disk storage type...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter OS disk storage types...",
+                                    "defaultValue": "Standard SSD (LRS)",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Premium SSD (LRS)",
+                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Premium_LRS"
+                                            },
+                                            {
+                                                "label": "Standard SSD (LRS)",
+                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "StandardSSD_LRS"
+                                            },
+                                            {
+                                                "label": "Standard HDD (LRS)",
+                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Standard_LRS"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
                                     "name": "vmSize",
                                     "type": "Microsoft.Compute.SizeSelector",
                                     "label": "Size",
@@ -251,42 +305,108 @@
                                     "visible": true
                                 },
                                 {
-                                    "name": "computerName",
-                                    "type": "Microsoft.Common.TextBox",
-                                    "visible": true,
-                                    "multiLine": false,
-                                    "label": "Computer name",
-                                    "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name are <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
-                                    "constraints": {
-                                        "required": true,
-                                        "validations": [
-                                            {
-                                                "regex": "^[a-zA-Z0-9\\-]{1,15}$",
-                                                "message": "Only alphanumeric characters are allowed, and the value must be 1-15 characters long."
-                                            }
-                                        ]
-                                    },
-                                    "placeholder": "e.g. dc1",
-                                    "defaultValue": "dc1"
-                                },
-                                {
                                     "name": "addsDriveLetter",
-                                    "type": "Microsoft.Common.TextBox",
+                                    "type": "Microsoft.Common.DropDown",
                                     "visible": true,
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
                                     "multiLine": false,
                                     "label": "AD DS data drive letter",
                                     "toolTip": "TODO",
+                                    "placeholder": "Select the drive letter...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter drive letter...",
+                                    "defaultValue": "N",
                                     "constraints": {
                                         "required": true,
-                                        "validations": [
+                                        "allowedValues": [
                                             {
-                                                "regex": "^[E-Z]{1}$",
-                                                "message": "E - Z"
+                                                "label": "F",
+                                                "value": "F"
+                                            },
+                                            {
+                                                "label": "G",
+                                                "value": "G"
+                                            },
+                                            {
+                                                "label": "H",
+                                                "value": "H"
+                                            },
+                                            {
+                                                "label": "I",
+                                                "value": "I"
+                                            },
+                                            {
+                                                "label": "J",
+                                                "value": "J"
+                                            },
+                                            {
+                                                "label": "K",
+                                                "value": "K"
+                                            },
+                                            {
+                                                "label": "L",
+                                                "value": "L"
+                                            },
+                                            {
+                                                "label": "M",
+                                                "value": "M"
+                                            },
+                                            {
+                                                "label": "N",
+                                                "value": "N"
+                                            },
+                                            {
+                                                "label": "O",
+                                                "value": "O"
+                                            },
+                                            {
+                                                "label": "P",
+                                                "value": "P"
+                                            },
+                                            {
+                                                "label": "Q",
+                                                "value": "Q"
+                                            },
+                                            {
+                                                "label": "R",
+                                                "value": "R"
+                                            },
+                                            {
+                                                "label": "S",
+                                                "value": "S"
+                                            },
+                                            {
+                                                "label": "T",
+                                                "value": "T"
+                                            },
+                                            {
+                                                "label": "U",
+                                                "value": "U"
+                                            },
+                                            {
+                                                "label": "V",
+                                                "value": "V"
+                                            },
+                                            {
+                                                "label": "W",
+                                                "value": "W"
+                                            },
+                                            {
+                                                "label": "X",
+                                                "value": "X"
+                                            },
+                                            {
+                                                "label": "Y",
+                                                "value": "Y"
+                                            },
+                                            {
+                                                "label": "Z",
+                                                "value": "Z"
                                             }
                                         ]
-                                    },
-                                    "placeholder": "e.g. N",
-                                    "defaultValue": "N"
+                                    }
                                 },
                                 {
                                     "name": "addsDriveLabel",
@@ -306,6 +426,41 @@
                                     },
                                     "placeholder": "e.g. ADDS Data",
                                     "defaultValue": "ADDS Data"
+                                },
+                                {
+                                    "name": "addsDataDiskStorageType",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "multiLine": true,
+                                    "label": "AD DS data disk storage type",
+                                    "toolTip": "TODO",
+                                    "placeholder": "Select the AD DS data disk storage type...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter AD DS data disk storage types...",
+                                    "defaultValue": "Standard SSD (LRS)",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Premium SSD (LRS)",
+                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Premium_LRS"
+                                            },
+                                            {
+                                                "label": "Standard SSD (LRS)",
+                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "StandardSSD_LRS"
+                                            },
+                                            {
+                                                "label": "Standard HDD (LRS)",
+                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Standard_LRS"
+                                            }
+                                        ]
+                                    }
                                 }
                             ]
                         }
