@@ -79,6 +79,37 @@
                 // "2012-Datacenter-smalldisk"
             ]
         },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "metadata": {
+                "description": "Specify the VM size for the domain controller virtual machine."
+            }
+        },
+        "osDiskStorageType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "Specify the OS disk storage type for the domain controller virtual machine."
+            }
+        },
+        "addsDataDiskStorageType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "Specify the AD DS data disk storage type for the domain controller virtual machine."
+            }
+        },
         "computerName": {
             "type": "string",
             "defaultValue": "dc1",
@@ -99,6 +130,23 @@
             "type": "secureString",
             "metadata": {
                 "description": "Specify the admin user password for the domain controller virtual machine."
+            }
+        },
+        "addsDriveLetter": {
+            "type": "string",
+            "defaultValue": "N",
+            "allowedValues": [
+                "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+            ],
+            "metadata": {
+                "description": "Specify the drive letter for the AD DS data volume."
+            }
+        },
+        "addsDriveLabel": {
+            "type": "string",
+            "defaultValue": "ADDS Data",
+            "metadata": {
+                "description": "Specify the volume lavel for the AD DS data volume."
             }
         },
         "uniqueSuffixSeed": {
@@ -126,9 +174,12 @@
 
         "dcVm": {
             "vmName": "[concat(variables('prefix'), '-vm1')]",
+            "vmSize": "[parameters('vmSize')]",
             "computerName": "[parameters('computerName')]",
             "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
+            "osDiskStorageType": "[parameters('osDiskStorageType')]",
             "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
+            "dataDiskStorageType": "[parameters('addsDataDiskStorageType')]",
             "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
             "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]",
             "avSetName": "[concat(variables('prefix'), '-as')]"
@@ -138,8 +189,8 @@
 
         "addsConfig": {
             "domainName": "[parameters('domainName')]",
-            "dataVolumeDriveLetter": "N",
-            "dataVolumeLabel": "ADDS Data"
+            "dataVolumeDriveLetter": "[parameters('addsDriveLetter')]",
+            "dataVolumeLabel": "[parameters('addsDriveLabel')]"
         }
     },
     "resources": [
@@ -218,14 +269,14 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_D2s_v3"
+                    "vmSize": "[variables('dcVm').vmSize]"
                 },
                 "storageProfile": {
                     "osDisk": {
                         "name": "[variables('dcVm').osDiskName]",
                         "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "StandardSSD_LRS"
+                            "storageAccountType": "[variables('dcVm').osDiskStorageType]"
                         }
                     },
                     "imageReference": {
@@ -277,7 +328,7 @@
             "name": "[variables('dcVm').dataDiskName]",
             "location": "[variables('location')]",
             "sku": {
-                "name": "Standard_LRS"
+                "name": "[variables('dcVm').dataDiskStorageType]"
             },
             "properties": {
                 "diskSizeGB": 4,
