@@ -15,7 +15,10 @@
                             "type": "Microsoft.Common.ResourceScope",
                             "location": {
                                 "label": "Region for AD DS VM",
-                                "toolTip": "Specify the region to deploy the domain controller VM."
+                                "toolTip": "Specify the region to deploy the domain controller VM.",
+                                "resourceTypes": [
+                                    "microsoft.resources/resourcegroups"
+                                ]
                             }
                         }
                     ]
@@ -480,7 +483,12 @@
                 "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]",
                 "domainName": "[steps('adds').domainNameSection.domainName]",
                 "vmImageSku": "[steps('adds').dcVmSection.vmIamge]",
-                "computerName": "[steps('adds').dcVmSection.computerName]"
+                "computerName": "[steps('adds').dcVmSection.computerName]",
+                "vmSize": "[steps('adds').dcVmSection.vmSize]",
+                "osDiskStorageType": "[steps('adds').dcVmSection.osDiskStorageType]",
+                "addsDataDiskStorageType": "[steps('adds').dcVmSection.addsDataDiskStorageType]",
+                "addsDriveLetter": "[steps('adds').dcVmSection.addsDriveLetter]",
+                "addsDriveLabel": "[steps('adds').dcVmSection.addsDriveLabel]"
             },
             "kind": "ResourceGroup",
             "location": "[steps('basics').resourceScope.location.name]",
