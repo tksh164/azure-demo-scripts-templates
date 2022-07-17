@@ -45,19 +45,34 @@
                 "description": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
             }
         },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "adds-vm1",
+            "minLength": 1,
+            "maxLength": 64,
+            "metadata": {
+                "description": ""
+            }
+        },
         "vmImagePublisher": {
             "type": "string",
             "defaultValue": "MicrosoftWindowsServer",
             "allowedValues": [
                 "MicrosoftWindowsServer"
-            ]
+            ],
+            "metadata": {
+                "description": ""
+            }
         },
         "vmImageOffer": {
             "type": "string",
             "defaultValue": "WindowsServer",
             "allowedValues": [
                 "WindowsServer"
-            ]
+            ],
+            "metadata": {
+                "description": ""
+            }
         },
         "vmImageSku": {
             "type": "string",
@@ -77,7 +92,10 @@
                 //"2012-R2-Datacenter-smalldisk",
                 // "2012-Datacenter",
                 // "2012-Datacenter-smalldisk"
-            ]
+            ],
+            "metadata": {
+                "description": ""
+            }
         },
         "vmSize": {
             "type": "string",
@@ -161,9 +179,9 @@
 
         // Common
 
-        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+        //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
         "location": "[resourceGroup().location]",
-        "prefix": "dc",
+        //"prefix": "dc",
 
         // Virtual network
 
@@ -173,16 +191,16 @@
         // Domain controller virtual machine
 
         "dcVm": {
-            "vmName": "[concat(variables('prefix'), '-vm1')]",
+            "vmName": "[parameters('vmName')]",
             "vmSize": "[parameters('vmSize')]",
             "computerName": "[parameters('computerName')]",
-            "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
+            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
             "osDiskStorageType": "[parameters('osDiskStorageType')]",
-            "dataDiskName": "[concat(variables('prefix'), '-vm1-datadisk1')]",
+            "dataDiskName": "[concat(parameters('vmName'), '-datadisk1')]",
             "dataDiskStorageType": "[parameters('addsDataDiskStorageType')]",
-            "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
-            "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]",
-            "avSetName": "[concat(variables('prefix'), '-as')]"
+            "nicName": "[concat(parameters('vmName'), '-nic1')]",
+            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+            "avSetName": "[concat(parameters('vmName'), '-as')]"
         },
 
         // AD DS domain configuration
