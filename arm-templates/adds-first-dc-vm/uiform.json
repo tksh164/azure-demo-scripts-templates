@@ -14,106 +14,160 @@
                             "name": "resourceScope",
                             "type": "Microsoft.Common.ResourceScope",
                             "location": {
-                                "label": "Region for AD DS VM",
+                                "label": "Region",
                                 "toolTip": "Specify the region to deploy the domain controller VM.",
                                 "resourceTypes": [
                                     "microsoft.resources/resourcegroups"
                                 ]
                             }
-                        }
-                    ]
-                },
-                {
-                    "name": "virtualNetwork",
-                    "label": "Virtual network",
-                    "description": "Specify the virtual network and the subnet to deploy the domain controller VM.",
-                    "elements": [
-                        {
-                            "name": "vnetSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "",
-                            "elements": [
-                                {
-                                    "name": "vnet",
-                                    "type": "Microsoft.Network.VirtualNetworkCombo",
-                                    "visible": true,
-                                    "label": {
-                                        "virtualNetwork": "Virtual network",
-                                        "subnets": "Subnets"
-                                    },
-                                    "toolTip": {
-                                        "virtualNetwork": "Specify the virtual network to deploy the domain controller VM.",
-                                        "subnets": "Specify the subnet to deploy the domain controller VM."
-                                    },
-                                    "scope": {
-                                        "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                        "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
-                                        "location": "[steps('basics').resourceScope.location.name]"
-                                    },
-                                    "options": {
-                                        "hideExisting": false
-                                    },
-                                    "defaultValue": {
-                                        "name": "adds-vnet",
-                                        "addressPrefixSize": "/16"
-                                    },
-                                    "constraints": {
-                                        "minAddressPrefixSize": "/29"
-                                    },
-                                    "subnets": {
-                                        "addsSubnet": {
-                                            "label": "Subnet",
-                                            "defaultValue": {
-                                                "name": "adds",
-                                                "addressPrefixSize": "/24"
-                                            },
-                                            "constraints": {
-                                                "minAddressPrefixSize": "/29",
-                                                "minAddressCount": 1,
-                                                "requireContiguousAddresses": false
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "name": "adds",
-                    "label": "AD DS",
-                    "description": "Specify the AD DS configuration.",
-                    "elements": [
-                        {
-                            "name": "domainNameSection",
-                            "type": "Microsoft.Common.Section",
-                            "visible": true,
-                            "label": "Active Directory domain",
-                            "elements": [
-                                {
-                                    "name": "domainNameSectionText",
-                                    "type": "Microsoft.Common.TextBlock",
-                                    "visible": true,
-                                    "options": {
-                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
-                                    }
-                                },
-                                {
-                                    "name": "domainName",
-                                    "type": "Microsoft.Common.TextBox",
-                                    "visible": true,
-                                    "multiLine": false,
-                                    "label": "AD Domain name",
-                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "constraints": {
-                                        "required": true
-                                    },
-                                    "placeholder": "e.g. sub.example.com",
-                                    "defaultValue": "lab.contoso.com"
-                                }
-                            ]
                         },
+                        {
+                            "name": "vmName",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "multiLine": false,
+                            "label": "AD DS virtual machine name",
+                            "toolTip": "TODO",
+                            "constraints": {
+                                "required": true,
+                                "validations": [
+                                    {
+                                        "regex": "^[a-zA-Z0-9\\-\\_ ]{1,64}$",
+                                        "message": "TODO"
+                                    }
+                                ]
+                            },
+                            "placeholder": "e.g. adds-vm1",
+                            "defaultValue": ""
+                        },
+                        {
+                            "name": "vmIamge",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "multiselect": false,
+                            "selectAll": false,
+                            "filter": true,
+                            "multiLine": true,
+                            "label": "Image",
+                            "toolTip": "The VM image for the domain controller VM.",
+                            "placeholder": "Select the VM image...",
+                            "defaultDescription": "---",
+                            "filterPlaceholder": "Filter images...",
+                            "defaultValue": "Windows Server 2022 Gen 2 (smalldisk)",
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Windows Server 2022 Gen 2",
+                                        "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
+                                        "value": "2022-datacenter-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2022 Gen 2 (smalldisk)",
+                                        "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
+                                        "value": "2022-datacenter-smalldisk-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2022 Gen 1",
+                                        "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
+                                        "value": "2022-datacenter"
+                                    },
+                                    {
+                                        "label": "Windows Server 2022 Gen 1 (smalldisk)",
+                                        "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
+                                        "value": "2022-datacenter-smalldisk"
+                                    },
+                                    {
+                                        "label": "Windows Server 2019 Gen 2",
+                                        "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
+                                        "value": "2019-datacenter-gensecond"
+                                    },                                            
+                                    {
+                                        "label": "Windows Server 2019 Gen 2 (smalldisk)",
+                                        "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
+                                        "value": "2019-datacenter-smalldisk-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2019 Gen 1",
+                                        "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
+                                        "value": "2019-Datacenter"
+                                    },
+                                    {
+                                        "label": "Windows Server 2019 Gen 1 (smalldisk)",
+                                        "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
+                                        "value": "2019-Datacenter-smalldisk"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmSize",
+                            "type": "Microsoft.Compute.SizeSelector",
+                            "label": "Size",
+                            "toolTip": "The VM size for the domain controller VM.",
+                            "recommendedSizes": [
+                                "Standard_B2ms"
+                            ],
+                            "constraints": {
+                            },
+                            "options": {
+                                "hideDiskTypeFilter": false
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "osPlatform": "Windows",
+                            "imageReference": {
+                                "publisher": "MicrosoftWindowsServer",
+                                "offer": "WindowsServer",
+                                "sku": "[steps('adds').dcVmSection.vmIamge]"
+                            },
+                            "count": 1,
+                            "visible": true
+                        },
+                        {
+                            "name": "vnet",
+                            "type": "Microsoft.Network.VirtualNetworkCombo",
+                            "visible": true,
+                            "label": {
+                                "virtualNetwork": "Virtual network",
+                                "subnets": "Subnets"
+                            },
+                            "toolTip": {
+                                "virtualNetwork": "Specify the virtual network to deploy the domain controller VM.",
+                                "subnets": "Specify the subnet to deploy the domain controller VM."
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "options": {
+                                "hideExisting": false
+                            },
+                            "defaultValue": {
+                                "name": "adds-vnet",
+                                "addressPrefixSize": "/16"
+                            },
+                            "constraints": {
+                                "minAddressPrefixSize": "/29"
+                            },
+                            "subnets": {
+                                "addsSubnet": {
+                                    "label": "Subnet",
+                                    "defaultValue": {
+                                        "name": "adds",
+                                        "addressPrefixSize": "/24"
+                                    },
+                                    "constraints": {
+                                        "minAddressPrefixSize": "/29",
+                                        "minAddressCount": 1,
+                                        "requireContiguousAddresses": false
+                                    }
+                                }
+                            }
+                        },                        
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
@@ -160,12 +214,19 @@
                                     }
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "name": "details",
+                    "label": "Details",
+                    "description": "TODO",
+                    "elements": [
                         {
-                            "name": "dcVmSection",
+                            "name": "addsVMSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Domain controller VM",
+                            "label": "AD DS virtual machine",
                             "elements": [
                                 {
                                     "name": "computerName",
@@ -174,74 +235,14 @@
                                     "multiLine": false,
                                     "label": "Computer name",
                                     "toolTip": "Specify the computer name for the domain controller VM. Naming conventions for the computer name are <a href='https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou'>here</a>.",
+                                    "placeholder": "e.g. dc1",
+                                    "defaultValue": "[steps('basics').vmName]",
                                     "constraints": {
                                         "required": true,
                                         "validations": [
                                             {
                                                 "regex": "^[a-zA-Z0-9\\-]{1,15}$",
                                                 "message": "Only alphanumeric characters are allowed, and the value must be 1-15 characters long."
-                                            }
-                                        ]
-                                    },
-                                    "placeholder": "e.g. dc1",
-                                    "defaultValue": "dc1"
-                                },
-                                {
-                                    "name": "vmIamge",
-                                    "type": "Microsoft.Common.DropDown",
-                                    "visible": true,
-                                    "multiselect": false,
-                                    "selectAll": false,
-                                    "filter": true,
-                                    "multiLine": true,
-                                    "label": "Image",
-                                    "toolTip": "The VM image for the domain controller VM.",
-                                    "placeholder": "Select the VM image...",
-                                    "defaultDescription": "---",
-                                    "filterPlaceholder": "Filter images...",
-                                    "defaultValue": "Windows Server 2022 Gen 2 (smalldisk)",
-                                    "constraints": {
-                                        "required": true,
-                                        "allowedValues": [
-                                            {
-                                                "label": "Windows Server 2022 Gen 2",
-                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
-                                                "value": "2022-datacenter-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 2 (smalldisk)",
-                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
-                                                "value": "2022-datacenter-smalldisk-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 1",
-                                                "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
-                                                "value": "2022-datacenter"
-                                            },
-                                            {
-                                                "label": "Windows Server 2022 Gen 1 (smalldisk)",
-                                                "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
-                                                "value": "2022-datacenter-smalldisk"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 2",
-                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
-                                                "value": "2019-datacenter-gensecond"
-                                            },                                            
-                                            {
-                                                "label": "Windows Server 2019 Gen 2 (smalldisk)",
-                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
-                                                "value": "2019-datacenter-smalldisk-g2"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 1",
-                                                "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
-                                                "value": "2019-Datacenter"
-                                            },
-                                            {
-                                                "label": "Windows Server 2019 Gen 1 (smalldisk)",
-                                                "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
-                                                "value": "2019-Datacenter-smalldisk"
                                             }
                                         ]
                                     }
@@ -282,30 +283,39 @@
                                     }
                                 },
                                 {
-                                    "name": "vmSize",
-                                    "type": "Microsoft.Compute.SizeSelector",
-                                    "label": "Size",
-                                    "toolTip": "The VM size for the domain controller VM.",
-                                    "recommendedSizes": [
-                                        "Standard_B2ms"
-                                    ],
+                                    "name": "addsDataDiskStorageType",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "multiLine": true,
+                                    "label": "AD DS data disk storage type",
+                                    "toolTip": "TODO",
+                                    "placeholder": "Select the AD DS data disk storage type...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter AD DS data disk storage types...",
+                                    "defaultValue": "Standard SSD (LRS)",
                                     "constraints": {
-                                    },
-                                    "options": {
-                                        "hideDiskTypeFilter": false
-                                    },
-                                    "scope": {
-                                        "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                        "location": "[steps('basics').resourceScope.location.name]"
-                                    },
-                                    "osPlatform": "Windows",
-                                    "imageReference": {
-                                        "publisher": "MicrosoftWindowsServer",
-                                        "offer": "WindowsServer",
-                                        "sku": "[steps('adds').dcVmSection.vmIamge]"
-                                    },
-                                    "count": 1,
-                                    "visible": true
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Premium SSD (LRS)",
+                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Premium_LRS"
+                                            },
+                                            {
+                                                "label": "Standard SSD (LRS)",
+                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "StandardSSD_LRS"
+                                            },
+                                            {
+                                                "label": "Standard HDD (LRS)",
+                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Standard_LRS"
+                                            }
+                                        ]
+                                    }
                                 },
                                 {
                                     "name": "addsDriveLetter",
@@ -418,6 +428,8 @@
                                     "multiLine": false,
                                     "label": "AD DS data drive label",
                                     "toolTip": "TODO",
+                                    "placeholder": "e.g. ADDS Data",
+                                    "defaultValue": "ADDS Data",
                                     "constraints": {
                                         "required": true,
                                         "validations": [
@@ -426,43 +438,35 @@
                                                 "message": "TODO"
                                             }
                                         ]
-                                    },
-                                    "placeholder": "e.g. ADDS Data",
-                                    "defaultValue": "ADDS Data"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "domainNameSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Active Directory domain",
+                            "elements": [
+                                {
+                                    "name": "domainNameSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
+                                    }
                                 },
                                 {
-                                    "name": "addsDataDiskStorageType",
-                                    "type": "Microsoft.Common.DropDown",
+                                    "name": "domainName",
+                                    "type": "Microsoft.Common.TextBox",
                                     "visible": true,
-                                    "multiselect": false,
-                                    "selectAll": false,
-                                    "filter": true,
-                                    "multiLine": true,
-                                    "label": "AD DS data disk storage type",
-                                    "toolTip": "TODO",
-                                    "placeholder": "Select the AD DS data disk storage type...",
-                                    "defaultDescription": "---",
-                                    "filterPlaceholder": "Filter AD DS data disk storage types...",
-                                    "defaultValue": "Standard SSD (LRS)",
+                                    "multiLine": false,
+                                    "label": "Domain name (FQDN)",
+                                    "toolTip": "Specify the FQDN for the new AD DS forest.",
+                                    "placeholder": "e.g. sub.example.com",
+                                    "defaultValue": "lab.contoso.com",
                                     "constraints": {
-                                        "required": true,
-                                        "allowedValues": [
-                                            {
-                                                "label": "Premium SSD (LRS)",
-                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter).",
-                                                "value": "Premium_LRS"
-                                            },
-                                            {
-                                                "label": "Standard SSD (LRS)",
-                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter).",
-                                                "value": "StandardSSD_LRS"
-                                            },
-                                            {
-                                                "label": "Standard HDD (LRS)",
-                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter).",
-                                                "value": "Standard_LRS"
-                                            }
-                                        ]
+                                        "required": true
                                     }
                                 }
                             ]
@@ -473,22 +477,23 @@
         },
         "outputs": {
             "parameters": {
-                "vnetNewOrExisting": "[steps('virtualNetwork').vnetSection.vnet.newOrExisting]",
-                "vnetResourceGroupName": "[steps('virtualNetwork').vnetSection.vnet.resourceGroup]",
-                "vnetName": "[steps('virtualNetwork').vnetSection.vnet.name]",
-                "vnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.addressPrefix]",
-                "subnetName": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.name]",
-                "subnetAddressPrefix": "[steps('virtualNetwork').vnetSection.vnet.subnets.addsSubnet.addressPrefix]",
-                "adminUserName": "[steps('adds').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('adds').adminAccountSection.adminPassword.password]",
-                "domainName": "[steps('adds').domainNameSection.domainName]",
-                "vmImageSku": "[steps('adds').dcVmSection.vmIamge]",
-                "computerName": "[steps('adds').dcVmSection.computerName]",
-                "vmSize": "[steps('adds').dcVmSection.vmSize]",
-                "osDiskStorageType": "[steps('adds').dcVmSection.osDiskStorageType]",
-                "addsDataDiskStorageType": "[steps('adds').dcVmSection.addsDataDiskStorageType]",
-                "addsDriveLetter": "[steps('adds').dcVmSection.addsDriveLetter]",
-                "addsDriveLabel": "[steps('adds').dcVmSection.addsDriveLabel]"
+                "vmName": "[steps('basics').vmName]",
+                "vmImageSku": "[steps('basics').vmIamge]",
+                "vmSize": "[steps('basics').vmSize]",
+                "vnetNewOrExisting": "[steps('basics').vnet.newOrExisting]",
+                "vnetResourceGroupName": "[steps('basics').vnet.resourceGroup]",
+                "vnetName": "[steps('basics').vnet.name]",
+                "vnetAddressPrefix": "[steps('basics').vnet.addressPrefix]",
+                "subnetName": "[steps('basics').vnet.subnets.addsSubnet.name]",
+                "subnetAddressPrefix": "[steps('basics').vnet.subnets.addsSubnet.addressPrefix]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
+                "computerName": "[steps('details').addsVMSection.computerName]",
+                "osDiskStorageType": "[steps('details').addsVMSection.osDiskStorageType]",
+                "addsDataDiskStorageType": "[steps('details').addsVMSection.addsDataDiskStorageType]",
+                "addsDriveLetter": "[steps('details').addsVMSection.addsDriveLetter]",
+                "addsDriveLabel": "[steps('details').addsVMSection.addsDriveLabel]",
+                "domainName": "[steps('details').domainNameSection.domainName]"
             },
             "kind": "ResourceGroup",
             "location": "[steps('basics').resourceScope.location.name]",
