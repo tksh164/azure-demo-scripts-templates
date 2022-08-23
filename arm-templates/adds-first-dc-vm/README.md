@@ -25,3 +25,11 @@ All the below names are the default value.
 - The domain controller virtual machine is configured as domain controller through template deployment.
 - The private IP address assignment of the DC virtual machine has set as **Dynamic**. Change to **Static** if you needed.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
+
+
+## TODO
+
+- [ ] Update README
+- [ ] Add Public IP address option
+- [ ] Add NSG resource
+- [ ] Add Availability Set / Availability Zone option
