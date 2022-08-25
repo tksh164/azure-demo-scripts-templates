@@ -188,6 +188,8 @@
         "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
+        "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
+
         // Domain controller virtual machine
 
         "dcVm": {
@@ -235,6 +237,16 @@
                         }
                     }
                 ]
+            }
+        },
+
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []   
             }
         },
 
