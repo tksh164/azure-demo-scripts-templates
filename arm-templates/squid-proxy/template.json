@@ -1,0 +1,294 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetNewOrExisting": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target VNet existence by 'new' or 'existing'."
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the resource group name that contains the target VNet."
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target VNet name that to deploy the proxy server virtual machine."
+            }
+        },
+        "vnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target VNet."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target subnet name that to deploy the proxy server virtual machine."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target subnet."
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "squidproxy-vm1",
+            "minLength": 1,
+            "maxLength": 64,
+            "metadata": {
+                "description": ""
+            }
+        },
+        "vmImagePublisher": {
+            "type": "string",
+            "defaultValue": "canonical",
+            "allowedValues": [
+                "canonical"
+            ],
+            "metadata": {
+                "description": ""
+            }
+        },
+        "vmImageOffer": {
+            "type": "string",
+            "defaultValue": "0001-com-ubuntu-server-jammy",
+            "allowedValues": [
+                "0001-com-ubuntu-server-jammy"
+            ],
+            "metadata": {
+                "description": ""
+            }
+        },
+        "vmImageSku": {
+            "type": "string",
+            "defaultValue": "22_04-lts-gen2",
+            "allowedValues": [
+                "22_04-lts-gen2"
+            ],
+            "metadata": {
+                "description": ""
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "metadata": {
+                "description": "Specify the VM size for the proxy server virtual machine."
+            }
+        },
+        "osDiskStorageType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "Specify the OS disk storage type for the proxy server virtual machine."
+            }
+        },
+        "computerName": {
+            "type": "string",
+            "defaultValue": "proxy1",
+            "minLength": 1,
+            "maxLength": 64,
+            "metadata": {
+                "description": "Specify the computer name for the proxy server virtual machine."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin",
+            "metadata": {
+                "description": "Specify the admin user name for the proxy server virtual machine."
+            }
+        },
+        "adminPublicKey": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Specify the admin user's SSH public key for the proxy server virtual machine."
+            }
+        },
+        "uniqueSuffixSeed": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+            "metadata": {
+                "description": "Don't change this value."
+            }
+        }
+    },
+    "variables": {
+
+        // Common
+
+        //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
+        "location": "[resourceGroup().location]",
+
+        // Virtual network
+
+        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
+
+        "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
+
+        // Proxy server virtual machine
+
+        "proxyVm": {
+            "vmName": "[parameters('vmName')]",
+            "vmSize": "[parameters('vmSize')]",
+            "computerName": "[parameters('computerName')]",
+            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
+            "osDiskStorageType": "[parameters('osDiskStorageType')]",
+            "nicName": "[concat(parameters('vmName'), '-nic1')]",
+            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+            "avSetName": "[concat(parameters('vmName'), '-as')]"
+        }
+    },
+    "resources": [
+
+        // Virtual network
+
+        {
+            "condition": "[variables('isCreateNewVNet')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('vnetName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nsgName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+
+        // Proxy server virtual machine
+
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('proxyVm').avSetName]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 2
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('proxyVm').nicName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                       }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('proxyVm').vmName]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('proxyVm').avSetName)]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('proxyVm').vmSize]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('proxyVm').osDiskName]",
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('proxyVm').osDiskStorageType]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "[parameters('vmImagePublisher')]",
+                        "offer": "[parameters('vmImageOffer')]",
+                        "sku": "[parameters('vmImageSku')]",
+                        "version": "latest"
+                    },
+                    "dataDisks": []                    
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('proxyVm').computerName]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('adminPublicKey')]"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('proxyVm').avSetName)]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

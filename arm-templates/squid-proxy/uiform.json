@@ -1,0 +1,282 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Deploy a proxy server VM using Squid into a VNet",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "description": "This template will deploy a proxy server VM using Squid into a virtual network.",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "label": "Region",
+                                "toolTip": "Specify the region to deploy the proxy server VM.",
+                                "resourceTypes": [
+                                    "microsoft.resources/resourcegroups"
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmName",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "multiLine": false,
+                            "label": "Proxy server virtual machine name",
+                            "toolTip": "TODO",
+                            "constraints": {
+                                "required": true,
+                                "validations": [
+                                    {
+                                        "regex": "^[a-zA-Z0-9\\-\\_ ]{1,64}$",
+                                        "message": "TODO"
+                                    }
+                                ]
+                            },
+                            "placeholder": "e.g. squidproxy-vm1",
+                            "defaultValue": ""
+                        },
+                        {
+                            "name": "vmIamge",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "multiselect": false,
+                            "selectAll": false,
+                            "filter": true,
+                            "multiLine": true,
+                            "label": "Image",
+                            "toolTip": "The VM image for the proxy server VM.",
+                            "placeholder": "Select the VM image...",
+                            "defaultDescription": "---",
+                            "filterPlaceholder": "Filter images...",
+                            "defaultValue": "Ubuntu Server 22.04 LTS",
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Ubuntu Server 22.04 LTS",
+                                        "description": "Ubuntu Server 22.04 LTS for generation 2 VM.",
+                                        "value": "22_04-lts-gen2"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmSize",
+                            "type": "Microsoft.Compute.SizeSelector",
+                            "label": "Size",
+                            "toolTip": "The VM size for the proxy server VM.",
+                            "recommendedSizes": [
+                                "Standard_B2ms"
+                            ],
+                            "constraints": {
+                            },
+                            "options": {
+                                "hideDiskTypeFilter": false
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "osPlatform": "Linux",
+                            "imageReference": {
+                                "publisher": "canonical",
+                                "offer": "0001-com-ubuntu-server-jammy",
+                                "sku": "[steps('basics').vmIamge]"
+                            },
+                            "count": 1,
+                            "visible": true
+                        },
+                        {
+                            "name": "vnet",
+                            "type": "Microsoft.Network.VirtualNetworkCombo",
+                            "visible": true,
+                            "label": {
+                                "virtualNetwork": "Virtual network",
+                                "subnets": "Subnets"
+                            },
+                            "toolTip": {
+                                "virtualNetwork": "Specify the virtual network to deploy the proxy server VM.",
+                                "subnets": "Specify the subnet to deploy the proxy server VM."
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "options": {
+                                "hideExisting": false
+                            },
+                            "defaultValue": {
+                                "name": "squidproxy-vnet",
+                                "addressPrefixSize": "/16"
+                            },
+                            "constraints": {
+                                "minAddressPrefixSize": "/29"
+                            },
+                            "subnets": {
+                                "addsSubnet": {
+                                    "label": "Subnet",
+                                    "defaultValue": {
+                                        "name": "default",
+                                        "addressPrefixSize": "/24"
+                                    },
+                                    "constraints": {
+                                        "minAddressPrefixSize": "/29",
+                                        "minAddressCount": 1,
+                                        "requireContiguousAddresses": false
+                                    }
+                                }
+                            }
+                        },                        
+                        {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminAccountSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the proxy server VM."
+                                    }
+                                },
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "Specify the administrator username.",
+                                    "osPlatform": "Windows",
+                                    "defaultValue": "vmadmin",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminCredentials",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "osPlatform": "Linux",
+                                    "constraints": {
+                                        "required": true
+                                     },
+                                     "options": {
+                                        "hideConfirmation": false,
+                                        "hidePassword": true
+                                    },
+                                    "label": {
+                                        "authenticationType": "Authentication type",
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password",
+                                        "sshPublicKey": "SSH public key"
+                                    },
+                                    "toolTip": {
+                                        "authenticationType": "Choose whether the administrator account will use username/password or SSH keys for authentication.",
+                                        "password": "The administrator password for the VM.",
+                                        "sshPublicKey": "Provide an RSA public key in the single-line format (starting with \"ssh-rsa\") or the multi-line PEM format. You can generate SSH keys using ssh-keygen on Linux and OS X, or PuTTYGen on Windows."
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "details",
+                    "label": "Details",
+                    "description": "TODO",
+                    "elements": [
+                        {
+                            "name": "proxyServerVMSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Proxy server virtual machine",
+                            "elements": [
+                                {
+                                    "name": "computerName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": true,
+                                    "multiLine": false,
+                                    "label": "Computer name",
+                                    "toolTip": "Specify the computer name for the proxy server VM. Naming conventions for the computer name are <a href='https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftcompute'>here</a>.",
+                                    "placeholder": "e.g. proxy1",
+                                    "defaultValue": "[steps('basics').vmName]",
+                                    "constraints": {
+                                        "required": true,
+                                        "validations": [
+                                            {
+                                                "regex": "^[a-zA-Z0-9\\-]{1,64}$",
+                                                "message": "Only alphanumeric characters are allowed, and the value must be 1-64 characters long."
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "osDiskStorageType",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "multiLine": true,
+                                    "label": "OS disk storage type",
+                                    "toolTip": "TODO",
+                                    "placeholder": "Select the OS disk storage type...",
+                                    "defaultDescription": "---",
+                                    "filterPlaceholder": "Filter OS disk storage types...",
+                                    "defaultValue": "Standard SSD (LRS)",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Premium SSD (LRS)",
+                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Premium_LRS"
+                                            },
+                                            {
+                                                "label": "Standard SSD (LRS)",
+                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "StandardSSD_LRS"
+                                            },
+                                            {
+                                                "label": "Standard HDD (LRS)",
+                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter).",
+                                                "value": "Standard_LRS"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "vmName": "[steps('basics').vmName]",
+                "vmImageSku": "[steps('basics').vmIamge]",
+                "vmSize": "[steps('basics').vmSize]",
+                "vnetNewOrExisting": "[steps('basics').vnet.newOrExisting]",
+                "vnetResourceGroupName": "[steps('basics').vnet.resourceGroup]",
+                "vnetName": "[steps('basics').vnet.name]",
+                "vnetAddressPrefix": "[steps('basics').vnet.addressPrefix]",
+                "subnetName": "[steps('basics').vnet.subnets.addsSubnet.name]",
+                "subnetAddressPrefix": "[steps('basics').vnet.subnets.addsSubnet.addressPrefix]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPublicKey": "[steps('basics').adminAccountSection.adminCredentials.sshPublicKey]",
+                "computerName": "[steps('details').proxyServerVMSection.computerName]",
+                "osDiskStorageType": "[steps('details').proxyServerVMSection.osDiskStorageType]"
+            },
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+        }
+    }
+}
