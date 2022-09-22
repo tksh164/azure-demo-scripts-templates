@@ -1,7 +1,5 @@
 # azure-demo-scripts-templates
 
-[Open in Visual Studio Code](https://vscode.dev/github/tksh164/azure-demo-scripts-templates)
-
 ## ⚖ License
 
 Copyright (c) 2018-present Takeshi Katano. All rights reserved. This software is released under the [MIT License](https://github.com/tksh164/azure-demo-scripts-templates/blob/master/LICENSE).
