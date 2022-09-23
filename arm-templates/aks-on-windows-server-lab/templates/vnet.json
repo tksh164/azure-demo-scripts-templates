@@ -5,25 +5,25 @@
         "virtualNetworkName": {
             "type": "string",
             "metadata": {
-                "description": "The name of the Virtual Network to Create"
+                "description": "The name of the virtual network to create."
             }
         },
         "virtualNetworkAddressRange": {
             "type": "string",
             "metadata": {
-                "description": "The address range of the new VNET in CIDR format"
+                "description": "The address range of the new virtual network in CIDR format."
             }
         },
         "subnetName": {
             "type": "string",
             "metadata": {
-                "description": "The name of the subnet created in the new VNET"
+                "description": "The name of the subnet created in the new virtual network."
             }
         },
         "subnetRange": {
             "type": "string",
             "metadata": {
-                "description": "The address range of the subnet created in the new VNET"
+                "description": "The address range of the subnet created in the new virtual network."
             }
         },
         "location": {
