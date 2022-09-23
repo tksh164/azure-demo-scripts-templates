@@ -31,5 +31,5 @@ All the below names are the default value.
 
 - [ ] Update README
 - [ ] Add Public IP address option
-- [x] Add NSG resource
+- [ ] Add NSG resource assosiation
 - [ ] Add Availability Set / Availability Zone option
