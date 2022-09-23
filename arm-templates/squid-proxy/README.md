@@ -12,6 +12,7 @@ To be updated.
 
 ## Notes
 
+- Squid is installed through the template deployment.
 - The private IP address assignment of the proxy server virtual machine has set as **Dynamic**. Change to **Static** if you needed.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
 
@@ -19,4 +20,5 @@ To be updated.
 
 - [ ] Update README
 - [ ] Add Public IP address option
+- [ ] Add NSG resource assosiation
 - [ ] Add Availability Set / Availability Zone option
