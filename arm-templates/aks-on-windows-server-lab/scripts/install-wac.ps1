@@ -3,7 +3,7 @@ $ProgressPreference = [System.Management.Automation.ActionPreference]::SilentlyC
 New-Item -Path 'C:\WAC' -ItemType Directory -Force
 
 # Download the MSI file
-& 'C:\Windows\System32\curl.exe' --location --silent --show-error --output 'C:\WAC\WindowsAdminCenter.msi' 'https://aka.ms/WACDownload'
+Start-BitsTransfer -Source 'https://aka.ms/WACDownload' -Destination 'C:\WAC\WindowsAdminCenter.msi'
 
 # Install Windows Admin Center
 $msiArgs = '/i', 'C:\WAC\WindowsAdminCenter.msi', '/qn', '/L*v', 'log.txt', 'SME_PORT=443', 'SSL_CERTIFICATE_OPTION=generate'
