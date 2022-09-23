@@ -276,7 +276,8 @@
                                 }
                             ]
                         }
-                    }
+                    },
+                    "customData": "[base64(concat('#include\n', 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/squid-proxy/cloud-init.yaml'))]"
                 },
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('proxyVm').avSetName)]"
