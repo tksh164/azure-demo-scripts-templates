@@ -21,7 +21,7 @@ Configuration WsfcNodeConfig {
     }
 }
 
-$transcriptLogPath = Join-Path -Path 'C:\Temp' -ChildPath ('transcipt-{0}.log' -f (Get-Date -Format 'yyyy-MM-dd'))
+$transcriptLogPath = [IO.Path]::Combine('C:\Temp', ('transcipt-{0}.log' -f (Get-Date -Format 'yyyy-MM-dd')))
 Start-Transcript -LiteralPath $transcriptLogPath
 
 $dscConfigLocation = 'C:\Temp\WsfcNodeConfig'
