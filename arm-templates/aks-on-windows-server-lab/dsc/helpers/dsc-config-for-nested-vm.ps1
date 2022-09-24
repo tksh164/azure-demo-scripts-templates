@@ -1,4 +1,4 @@
-Configuration WsfcNodeConfig {
+Configuration NestedVMConfig {
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     Node 'localhost' {
@@ -24,11 +24,11 @@ Configuration WsfcNodeConfig {
 $transcriptLogPath = [IO.Path]::Combine('C:\Temp', ('transcipt-{0}.log' -f (Get-Date -Format 'yyyy-MM-dd')))
 Start-Transcript -LiteralPath $transcriptLogPath
 
-$dscConfigLocation = 'C:\Temp\WsfcNodeConfig'
+$dscConfigLocation = 'C:\Temp\NestedVMConfig'
 
 Remove-DscConfigurationDocument -Stage Current, Previous, Pending -Force
 
-WsfcNodeConfig -OutputPath $dscConfigLocation
+NestedVMConfig -OutputPath $dscConfigLocation
 
 Set-DscLocalConfigurationManager -Path $dscConfigLocation -Verbose
 Start-DscConfiguration -Path $dscConfigLocation -Wait -Verbose
