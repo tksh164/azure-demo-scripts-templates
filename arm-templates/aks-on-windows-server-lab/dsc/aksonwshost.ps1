@@ -935,22 +935,25 @@ Configuration aksonwshost {
             # unattend.xml for nested VM.
             $unattendXmlFilePath = [IO.Path]::Combine($nestedVMStoreFolderPath, 'unattend.xml')
 
-            # TODO: Can inject unattend.xml using Convert-WindowsImage
-            Script "Inject unattend XML to $nestedVMName" {
+            Script "Inject unattend files to $nestedVMName" {
                 TestScript = {
                     Test-Path -Path $using:unattendXmlFilePath -PathType Leaf
                 }
                 SetScript = {
+                    # Mount the nested VM's VHDX.
                     $mountResult = Mount-DiskImage -ImagePath $using:osDiskFilePath -StorageType VHDX -Access ReadWrite -ErrorAction Stop
                     $vmWinPartition = Get-Partition -DiskNumber $mountResult.Number | Where-Object -Property 'Type' -EQ -Value 'Basic' | Select-Object -First 1
 
+                    # Create a temp folder in the root of the mounted VHDX.
                     $tempFolderPath = [IO.Path]::Combine($vmWinPartition.DriveLetter + ':\', 'Temp')
                     New-Item -Path $tempFolderPath -ItemType Directory -Force -ErrorAction Stop
 
+                    # Copy a DSC configuration script for nested VMs from the Azure PowerShell DSC extension working folder to the temp folder in the mounted VHDX.
                     $nestedVMDscScriptFilePath = (Get-ChildItem -Path 'C:\Packages\Plugins\Microsoft.Powershell.DSC\*' -Recurse -Filter 'dsc-config-for-nested-vm.ps1' |
                         Sort-Object -Property 'LastWriteTimeUtc' -Descending | Select-Object -First 1).FullName
                     Copy-Item -Path $nestedVMDscScriptFilePath -Destination $tempFolderPath -Force -ErrorAction Stop
 
+                    # Create an unattend.xml in the VM's folder.
                     $params = @{
                         ComputerName               = $using:nestedVMName
                         LocalAdministratorPassword = $using:AdminCreds.Password
@@ -959,15 +962,17 @@ Configuration aksonwshost {
                         Password                   = $using:AdminCreds.Password
                         JoinDomain                 = $using:DomainName
                         AutoLogonCount             = 1
-                        PowerShellScriptFullPath   = 'C:\Temp\dsc-config-for-nested-vm.ps1'
+                        PowerShellScriptFullPath   = 'C:\Temp\dsc-config-for-nested-vm.ps1'  # This path is the path of the DSC configuration script that recognized from within the VM.
                         OutputPath                 = $using:nestedVMStoreFolderPath
                         ErrorAction                = 'Stop'
                         Force                      = $true
                     }
                     New-BasicUnattendXML @params
 
+                    # Copy the unattend.xml into the sysprep folder within the VHDX.
                     Copy-Item -Path $using:unattendXmlFilePath -Destination ([IO.Path]::Combine($vmWinPartition.DriveLetter + ':\', 'Windows\System32\Sysprep')) -Force -ErrorAction Stop
 
+                    # Unmount the nested VM's VHDX.
                     Dismount-DiskImage -ImagePath $mountResult.ImagePath
                 }
                 GetScript = {
@@ -989,7 +994,7 @@ Configuration aksonwshost {
                     @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Running' } else { 'Not running' } }
                 }
                 DependsOn = @(
-                    "[Script]Inject unattend XML to $nestedVMName"
+                    "[Script]Inject unattend files to $nestedVMName"
                 )
             }
         }
