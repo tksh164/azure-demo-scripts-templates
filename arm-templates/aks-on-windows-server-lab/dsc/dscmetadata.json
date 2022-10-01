@@ -1,0 +1,19 @@
+{
+    "Modules": [
+        "ComputerManagementDsc",
+        "NetworkingDSC",
+        "xCredSSP",
+        "ActiveDirectoryDsc",
+        "DnsServerDsc",
+        "xHyper-v",
+        "cHyper-v",
+        "Hyper-ConvertImage",
+        "WindowsDeploymentHelper",
+        "xDhcpServer",
+        "DSCR_Shortcut",
+        "MSCatalog"
+    ],
+    "AdditionalContent": [
+        "dsc-config-for-nested-vm.ps1"
+    ]
+}
