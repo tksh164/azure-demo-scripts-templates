@@ -16,6 +16,9 @@ Configuration aksonwshost {
         [string] $CustomRdpPort = '3389',
 
         [Parameter(Mandatory = $false)]
+        [bool] $ApplyUpdatesToSandboxHost = $true,
+
+        [Parameter(Mandatory = $false)]
         [string] $VSwitchNameHost = 'InternalNAT',
 
         [Parameter(Mandatory = $false)]
@@ -79,6 +82,7 @@ Configuration aksonwshost {
     Import-DscResource -ModuleName 'ComputerManagementDsc'
     Import-DscResource -ModuleName 'NetworkingDSC'
     Import-DscResource -ModuleName 'xCredSSP'
+    Import-DscResource -ModuleName 'xWindowsUpdate'
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
     Import-DscResource -ModuleName 'DnsServerDsc'
     Import-DscResource -ModuleName 'xHyper-v'
@@ -1153,6 +1157,18 @@ Configuration aksonwshost {
                     '[Script]Create OU for cluster',
                     '[Script]Create computer object for CNO'
                 )
+            }
+        }
+
+        #### Apply Windows updates ####
+
+        if ($ApplyUpdatesToSandboxHost) {
+            xWindowsUpdateAgent 'Apply Windows updates' {
+                IsSingleInstance = 'Yes'
+                Source           = 'MicrosoftUpdate'
+                Category         = 'Security'
+                UpdateNow        = $true
+                Notifications    = 'Disabled'
             }
         }
 

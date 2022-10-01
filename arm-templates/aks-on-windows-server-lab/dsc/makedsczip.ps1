@@ -4,6 +4,7 @@ $targetFiles = @(
     'ComputerManagementDsc',
     'NetworkingDsc',
     'xCredSSP',
+    'xWindowsUpdate',
     'ActiveDirectoryDsc',
     'DnsServerDsc',
     'xHyper-V',

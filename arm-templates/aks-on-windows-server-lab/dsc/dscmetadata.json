@@ -3,6 +3,7 @@
         "ComputerManagementDsc",
         "NetworkingDSC",
         "xCredSSP",
+        "xWindowsUpdate",
         "ActiveDirectoryDsc",
         "DnsServerDsc",
         "xHyper-v",
