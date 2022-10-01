@@ -16,7 +16,7 @@ Configuration aksonwshost {
         [string] $CustomRdpPort = '3389',
 
         [Parameter(Mandatory = $false)]
-        [bool] $ApplyUpdatesToSandboxHost = $true,
+        [bool] $ApplyUpdatesToSandboxHost = $false,
 
         [Parameter(Mandatory = $false)]
         [string] $VSwitchNameHost = 'InternalNAT',
@@ -49,6 +49,7 @@ Configuration aksonwshost {
         [string] $WacFolderPath = 'C:\WAC',  # This path is related to "install-wac.ps1".
 
         [Parameter(Mandatory = $false)]
+        #[string] $IsoFileUri = 'https://aka.ms/2CNBagfhSZ8BM7jyEV8I',  # Azure Stack HCI
         #[string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US',  # Windows Server 2022 Evaluation en-US
         [string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP',  # Windows Server 2022 Evaluation ja-JP
 
@@ -127,6 +128,18 @@ Configuration aksonwshost {
             }
         }
 
+        #### Apply Windows updates ####
+
+        if ($ApplyUpdatesToSandboxHost) {
+            xWindowsUpdateAgent 'Apply Windows updates' {
+                IsSingleInstance = 'Yes'
+                Source           = 'MicrosoftUpdate'
+                Category         = 'Security', 'Important'
+                UpdateNow        = $true
+                Notifications    = 'Disabled'
+            }
+        }
+        
         #### Install Windows roles and features ####
 
         $installFeatures = @(
@@ -1157,18 +1170,6 @@ Configuration aksonwshost {
                     '[Script]Create OU for cluster',
                     '[Script]Create computer object for CNO'
                 )
-            }
-        }
-
-        #### Apply Windows updates ####
-
-        if ($ApplyUpdatesToSandboxHost) {
-            xWindowsUpdateAgent 'Apply Windows updates' {
-                IsSingleInstance = 'Yes'
-                Source           = 'MicrosoftUpdate'
-                Category         = 'Security'
-                UpdateNow        = $true
-                Notifications    = 'Disabled'
             }
         }
 
