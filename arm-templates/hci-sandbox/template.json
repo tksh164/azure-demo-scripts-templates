@@ -517,7 +517,18 @@
                                 "DomainName": "[parameters('domainName')]",
                                 "Environment": "[variables('environment')]",
                                 "EnableDHCP": "[parameters('enableDHCP')]",
-                                "CustomRdpPort": "[parameters('customRdpPort')]"
+                                "CustomRdpPort": "[parameters('customRdpPort')]",
+                                //"IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI
+                                //"IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
+                                "IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP",  // Windows Server 2022 Evaluation ja-JP
+                                // 1: Windows Server 2022 Standard Evaluation
+                                // 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
+                                // 3: Windows Server 2022 Datacenter Evaluation
+                                // 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
+                                "WimImageIndex": 4,
+                                "NumOfNestedVMs": 2,
+                                "ApplyUpdatesToSandboxHost": false,
+                                "ApplyUpdatesToNestedVM": false
                             }
                         },
                         "protectedSettings": {
