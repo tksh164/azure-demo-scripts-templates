@@ -1,4 +1,4 @@
-# TBW
+# HCI Sandbox
 
 ## Template overview
 
@@ -10,7 +10,7 @@ TBW
 
 ## Notes
 
-TBW
+- This template based on [Azure Stack HCI - Evaluation Guide](https://github.com/Azure/AzureStackHCI-EvalGuide).
 
 ## TODO
 
