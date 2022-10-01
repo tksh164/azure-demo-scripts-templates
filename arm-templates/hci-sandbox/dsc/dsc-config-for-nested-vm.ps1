@@ -35,4 +35,4 @@ Start-DscConfiguration -Path $dscConfigLocation -Wait -Verbose
 
 Stop-Transcript
 
-logoff.exe
+Stop-Computer

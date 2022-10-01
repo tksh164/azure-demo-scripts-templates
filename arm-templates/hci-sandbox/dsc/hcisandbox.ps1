@@ -7,7 +7,7 @@ Configuration hcisandbox {
         [string] $Environment = 'AD Domain',
 
         [Parameter(Mandatory = $false)]
-        [string] $DomainName = 'lab.local',
+        [string] $DomainName = 'hci.local',
 
         [Parameter(Mandatory = $false)]
         [string] $EnableDHCP = 'Disabled',
@@ -49,16 +49,10 @@ Configuration hcisandbox {
         [string] $WacFolderPath = 'C:\WAC',  # This path is related to "install-wac.ps1".
 
         [Parameter(Mandatory = $false)]
-        #[string] $IsoFileUri = 'https://aka.ms/2CNBagfhSZ8BM7jyEV8I',  # Azure Stack HCI
-        #[string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US',  # Windows Server 2022 Evaluation en-US
-        [string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP',  # Windows Server 2022 Evaluation ja-JP
+        [string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US',  # Windows Server 2022 Evaluation en-US
 
         [Parameter(Mandatory = $false)]
-        [int] $WimImageIndex = 4,
-        # 1: Windows Server 2022 Standard Evaluation
-        # 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
-        # 3: Windows Server 2022 Datacenter Evaluation
-        # 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
+        [int] $WimImageIndex = 1,
 
         [Parameter(Mandatory = $false)]
         [string] $NestedVMBaseOsDiskPath = [IO.Path]::Combine($BaseVhdFolderPath, 'nested-vm-base-os-disk.vhdx'),
@@ -367,7 +361,7 @@ Configuration hcisandbox {
             }
             SetScript = {
                 Set-DnsServerDiagnostics -All $true
-                Write-Verbose -Verbose 'Enabling DNS client diagnostics'
+                Write-Verbose -Verbose 'Enabling DNS client diagnostics.'
             }
             GetScript = {
                 @{ Result = 'Applies every time' }
@@ -1007,7 +1001,7 @@ Configuration hcisandbox {
                     (Get-VM -Name $using:nestedVMName -ErrorAction SilentlyContinue).State -eq 'Running'
                 }
                 SetScript = {
-                    Start-VM -Name $using:nestedVMName
+                    Start-VM -Name $using:nestedVMName -Verbose
                 }
                 GetScript = {
                     @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Running' } else { 'Not running' } }
@@ -1192,6 +1186,7 @@ Configuration hcisandbox {
                 New-Item -Path $using:WacFolderPath -ItemType Directory -Force
                 $wacExtensionUpdateLogFilePath = [IO.Path]::Combine($using:WacFolderPath, ('wac-extension-update-{0}.log' -f (Get-Date -Format 'yyyyMMddhhmmss')))
                 New-Item -Path $wacExtensionUpdateLogFilePath -ItemType File -Force
+                Write-Verbose -Message ('WAC extension update log: "{0}"' -f $wacExtensionUpdateLogFilePath)
 
                 # Update each non-up-to-date WAC extension.
                 Import-Module -Name $using:wacPSModulePath -Force
@@ -1241,6 +1236,50 @@ Configuration hcisandbox {
             Protocol    = 'TCP'
             Description = 'Outbound rule for Windows Admin Center'
             Enabled     = 'True'
+        }
+
+        #### Wait for ready to nested VMs ####
+
+        Script 'Wait for nested VMs configuration completion' {
+            TestScript = {
+                $false  # Applies every time.
+            }
+            SetScript = {
+                $timeoutTime = [DateTime]::Now.AddMinutes(15)  # Maximum waiting period.
+                while (($remainingRunningVMs = (Get-VM | Where-Object -Property 'State' -EQ -Value ([Microsoft.HyperV.PowerShell.VMState]::Running) | Measure-Object).Count) -gt 0) {
+                    Write-Verbose -Message ('Waiting for {0} VM(s) to complete configuration.' -f $remainingRunningVMs) -Verbose
+                    Start-Sleep -Seconds 10
+                    if ([DateTime]::Now -gt $timeoutTime) {
+                        Write-Verbose -Message ('Still {0} nested VM(s) running, but wait timed-out.' -f $remainingRunningVMs) -Verbose
+                        break
+                    }
+                }
+            }
+            GetScript = {
+                @{ Result = 'Applies every time' }
+            }
+            DependsOn = &{
+                1..$NumOfNestedVMs | ForEach-Object -Process {
+                    $nestedVMIndex = $_
+                    $nestedVMName = '{0}{1:D2}' -f $nestedVMNamePrefix, $nestedVMIndex
+                    "[Script]Start VM $nestedVMName"
+                }
+            }
+        }
+
+        Script 'Start nested VMs' {
+            TestScript = {
+                $false  # Applies every time.
+            }
+            SetScript = {
+                Get-VM | Start-VM -Verbose
+            }
+            GetScript = {
+                @{ Result = 'Applies every time' }
+            }
+            DependsOn = @(
+                '[Script]Wait for nested VMs configuration completion'
+            )
         }
     }
 }
