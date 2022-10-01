@@ -28,11 +28,14 @@ $dscConfigLocation = 'C:\Temp\NestedVMConfig'
 
 Remove-DscConfigurationDocument -Stage Current, Previous, Pending -Force
 
+# Create a DSC configuration for the nested VM.
 NestedVMConfig -OutputPath $dscConfigLocation
 
+# Apply the DSC configuration to the nested VM.
 Set-DscLocalConfigurationManager -Path $dscConfigLocation -Verbose
 Start-DscConfiguration -Path $dscConfigLocation -Wait -Verbose
 
 Stop-Transcript
 
+# Shutdown the nested VM.
 Stop-Computer
