@@ -4,7 +4,7 @@
     "parameters": {
         "virtualMachineName": {
             "type": "string",
-            "defaultValue": "aksonwshost1",
+            "defaultValue": "hcisandbox-vm1",
             "metadata": {
                 "description": "Keep the VM name to less than 15 characters."
             }
@@ -66,7 +66,7 @@
         },
         "domainName": {
             "type": "string",
-            "defaultValue": "lab.local",
+            "defaultValue": "hci.local",
             "metadata": {
                 "description": "The FQDN that will be used in the environment"
             }
@@ -291,12 +291,12 @@
         "location": "[resourceGroup().location]",
         "uniqueString": "[substring(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('virtualMachineName')), 0, 6)]",
 
-        "virtualNetworkName": "aksonws-vnet",
+        "virtualNetworkName": "hcisandbox-vnet",
         "virtualNetworkAddressPrefix": "10.0.0.0/16",
         "subnetName": "default",
         "subnetAddressPrefix": "10.0.0.0/24",
 
-        "networkSecurityGroupName": "[concat(parameters('virtualMachineName'), '-nsg')]",
+        "networkSecurityGroupName": "[concat(variables('virtualNetworkName'), '-', variables('subnetName'), '-nsg')]",
 
         "dataDisksCount": 8,
         "networkInterfaceName": "[concat(parameters('virtualMachineName'), '-nic1')]",
@@ -305,7 +305,9 @@
         "dnsNameForPublicIP": "[toLower(concat(resourceGroup().name, '-', parameters('virtualMachineName'), variables('uniqueString')))]",
         "vmLicenseType": "[if(equals(parameters('alreadyHaveAWindowsServerLicense'), 'Yes'), 'Windows_Server', 'None')]",
 
-        "artifactsLocation": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/aks-on-windows-server-lab/",
+        "artifactsLocation": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/hci-sandbox/",
+        "customScriptExtensionName": "install-wac",
+        "dscExtensionName": "configure-hcisandbox",
         "environment": "AD Domain"
     },
     "resources": [
@@ -469,7 +471,7 @@
             "resources": [
                 {
                     "type": "extensions",
-                    "name": "install-wac",
+                    "name": "[variables('customScriptExtensionName')]",
                     "apiVersion": "2021-11-01",
                     "location": "[variables('location')]",
                     "dependsOn": [
@@ -492,12 +494,12 @@
                 },
                 {
                     "type": "extensions",
-                    "name": "configure-aksonwshost",
+                    "name": "[variables('dscExtensionName')]",
                     "apiVersion": "2021-11-01",
                     "location": "[variables('location')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
-                        "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), 'install-wac')]"
+                        "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), variables('customScriptExtensionName'))]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -507,9 +509,9 @@
                         "settings": {
                             "wmfVersion": "latest",
                             "configuration": {
-                                "url": "[concat(variables('artifactsLocation'), 'dsc/aksonwshost.zip')]",
-                                "script": "aksonwshost.ps1",
-                                "function": "aksonwshost"
+                                "url": "[concat(variables('artifactsLocation'), 'dsc/hcisandbox.zip')]",
+                                "script": "hcisandbox.ps1",
+                                "function": "hcisandbox"
                             },
                             "configurationArguments": {
                                 "DomainName": "[parameters('domainName')]",
@@ -553,7 +555,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2021-04-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), 'configure-aksonwshost')]"
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), variables('dscExtensionName'))]"
             ],
             "properties": {
                 "mode": "Incremental",

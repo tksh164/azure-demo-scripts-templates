@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [string] $ResourceGroupName = 'exptl-aksonws',
+    [string] $ResourceGroupName = 'hci-sandbox1',
     [string] $ResourceGroupLocation = 'japaneast',
     [string] $TemplateFile = './template.json',
     [string] $TemplateParametersFile = './parameters.json',

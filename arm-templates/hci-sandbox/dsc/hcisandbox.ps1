@@ -1,4 +1,4 @@
-Configuration aksonwshost {
+Configuration hcisandbox {
     param (
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential] $AdminCreds,
@@ -61,10 +61,10 @@ Configuration aksonwshost {
         # 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
 
         [Parameter(Mandatory = $false)]
-        [string] $NestedVMVhdPath = [IO.Path]::Combine($BaseVhdFolderPath, 'windows-server.vhdx'),
+        [string] $NestedVMBaseOsDiskPath = [IO.Path]::Combine($BaseVhdFolderPath, 'nested-vm-base-os-disk.vhdx'),
 
         [Parameter(Mandatory = $false)]
-        [string] $LocalIsoFilePath = [IO.Path]::Combine($SourceFolderPath, 'windows-server.iso'),
+        [string] $LocalIsoFilePath = [IO.Path]::Combine($SourceFolderPath, 'nested-vm-os.iso'),
 
         [Parameter(Mandatory = $false)]
         [int] $NumOfNestedVMs = 2,
@@ -167,8 +167,8 @@ Configuration aksonwshost {
 
         #### Create a data volume ####
 
-        $storagePoolName = 'aksonwspool'
-        $volumeLabel = 'aksonws-data'
+        $storagePoolName = 'hcisandboxpool'
+        $volumeLabel = 'hcisandbox-data'
 
         Script 'Create storage pool' {
             TestScript = {
@@ -742,14 +742,14 @@ Configuration aksonwshost {
 
         Script 'Create OS base VHDX file' {
             TestScript = {
-                Test-Path -Path $using:NestedVMVhdPath -PathType Leaf
+                Test-Path -Path $using:NestedVMBaseOsDiskPath -PathType Leaf
             }
             SetScript = {
                 # Create netsted VM image from ISO.
                 $params = @{
                     SourcePath        = $using:LocalIsoFilePath
                     Edition           = $using:WimImageIndex
-                    VHDPath           = $using:NestedVMVhdPath
+                    VHDPath           = $using:NestedVMBaseOsDiskPath
                     VHDFormat         = 'VHDX'
                     VHDType           = 'Dynamic'
                     VHDPartitionStyle = 'GPT'
@@ -772,7 +772,7 @@ Configuration aksonwshost {
                     Select-Object -Property 'FullName'
 
                 if ($updatePackageFilePaths) {
-                    $mountResult = Mount-DiskImage -ImagePath $using:NestedVMVhdPath -StorageType VHDX -Access ReadWrite -ErrorAction Stop
+                    $mountResult = Mount-DiskImage -ImagePath $using:NestedVMBaseOsDiskPath -StorageType VHDX -Access ReadWrite -ErrorAction Stop
                     $vhdxWinPartition = Get-Partition -DiskNumber $mountResult.Number | Where-Object -Property 'Type' -EQ -Value 'Basic' | Select-Object -First 1
                     $updatePackageFilePaths | ForEach-Object -Process {
                         Write-Debug -Message $_.FullName
@@ -784,7 +784,7 @@ Configuration aksonwshost {
                 }
 
                 # Enable Hyper-V role on the nested VM VHD.
-                Install-WindowsFeature -Name 'Hyper-V' -Vhd $using:NestedVMVhdPath
+                Install-WindowsFeature -Name 'Hyper-V' -Vhd $using:NestedVMBaseOsDiskPath
             }
             GetScript = {
                 @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Present' } else { 'Absent' } }
@@ -804,9 +804,11 @@ Configuration aksonwshost {
             }
         }
 
+        $nestedVMNamePrefix = 'hcinode'
+
         1..$NumOfNestedVMs | ForEach-Object -Process {
             $nestedVMIndex = $_
-            $nestedVMName = 'wsfcnode{0:D2}' -f $nestedVMIndex
+            $nestedVMName = '{0}{1:D2}' -f $nestedVMNamePrefix, $nestedVMIndex
             $nestedVMStoreFolderPath = [IO.Path]::Combine($VMFolderPath, $nestedVMName)
 
             File "Create VM store folder for $nestedVMName" {
@@ -825,7 +827,7 @@ Configuration aksonwshost {
                 Path       = $nestedVMStoreFolderPath
                 Generation = 'vhdx'
                 Type       = 'Differencing'
-                ParentPath = $NestedVMVhdPath
+                ParentPath = $NestedVMBaseOsDiskPath
                 DependsOn  = @(
                     '[xVMSwitch]Create NAT vSwitch',
                     '[Script]Create OS base VHDX file',
@@ -1036,7 +1038,7 @@ Configuration aksonwshost {
                 DependsOn = '[WaitForADDomain]Wait for first boot completion of DC'
             }
 
-            $clusterOuName = 'AksHciClusters'
+            $clusterOuName = 'HciClusters'
 
             Script 'Create OU for cluster' {
                 TestScript = {
@@ -1054,7 +1056,7 @@ Configuration aksonwshost {
 
             Script 'Create computer object for cluster nodes' {
                 TestScript = {
-                    $nodeVMs = Get-VM -Name 'wsfcnode*'
+                    $nodeVMs = Get-VM -Name ('{0}*' -f $using:nestedVMNamePrefix)
                     foreach ($nodeVM in $nodeVMs) {
                         $node = Get-ADComputer -Filter ('Name -eq "{0}"' -f $nodeVM.Name)
                         if (-not ($node)) {
@@ -1073,7 +1075,7 @@ Configuration aksonwshost {
                     $ou = Get-ADOrganizationalUnit -Filter ('Name -eq "{0}"' -f $using:clusterOuName)
                     $wac = Get-ADComputer -Filter ('Name -eq "{0}"' -f $using:wacComputerName)
 
-                    $nodeVMs = Get-VM -Name 'wsfcnode*'
+                    $nodeVMs = Get-VM -Name ('{0}*' -f $using:nestedVMNamePrefix)
                     foreach ($nodeVM in $nodeVMs) {
                         $node = Get-ADComputer -Filter ('Name -eq "{0}"' -f $nodeVM.Name)
                         if ($node) {
@@ -1099,7 +1101,7 @@ Configuration aksonwshost {
                 )
             }
 
-            $clusterName = 'akshciclus'
+            $clusterName = 'hciclus'
 
             Script 'Create computer object for CNO' {
                 TestScript = {

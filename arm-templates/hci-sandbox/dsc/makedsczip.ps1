@@ -1,5 +1,5 @@
 $targetFiles = @(
-    'aksonwshost.ps1',
+    'hcisandbox.ps1',
     'dscmetadata.json',
     'ComputerManagementDsc',
     'NetworkingDsc',
@@ -17,7 +17,7 @@ $targetFiles = @(
     'dsc-config-for-nested-vm.ps1'
 )
 
-$destinationFile = 'aksonwshost.zip'
+$destinationFile = 'hcisandbox.zip'
 
 $targetFiles |
     ForEach-Object -Process { Join-Path -Path $PSScriptRoot -ChildPath $_ } |
