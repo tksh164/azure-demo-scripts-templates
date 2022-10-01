@@ -69,9 +69,12 @@ Configuration aksonwshost {
         [int] $NumOfNestedVMDataDisks = 4,
 
         [Parameter(Mandatory = $false)]
-        [long] $NestedVMDataDiskSize = 250GB
+        [long] $NestedVMDataDiskSize = 250GB,
+
+        [Parameter(Mandatory = $false)]
+        [bool] $ApplyUpdatesToNestedVM = $false
     )
-    
+
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
     Import-DscResource -ModuleName 'ComputerManagementDsc'
     Import-DscResource -ModuleName 'NetworkingDSC'
@@ -106,7 +109,7 @@ Configuration aksonwshost {
                 ValueData = $CustomRdpPort
                 ValueType = 'Dword'
             }
-        
+
             Firewall 'Create csutom RDP port firewall rule' {
                 Ensure      = 'Present'
                 Name        = 'RemoteDesktop-CustomPort-In-TCP'
@@ -149,7 +152,7 @@ Configuration aksonwshost {
 
         $storagePoolName = 'aksonwspool'
         $volumeLabel = 'aksonws-data'
-    
+
         Script 'Create storage pool' {
             TestScript = {
                 (Get-StoragePool -FriendlyName $using:storagePoolName -ErrorAction SilentlyContinue).OperationalStatus -eq 'OK'
@@ -234,7 +237,7 @@ Configuration aksonwshost {
                 (Get-MpPreference).ExclusionPath -contains $using:exclusionPath
             }
             SetScript = {
-                Add-MpPreference -ExclusionPath $using:exclusionPath      
+                Add-MpPreference -ExclusionPath $using:exclusionPath
             }
             GetScript = {
                 @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Present' } else { 'Absent' } }
@@ -297,7 +300,7 @@ Configuration aksonwshost {
                 ValueType = 'Dword'
                 ValueData = '1'
             }
-    
+
             Registry 'SetWorkgroupDomain' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters'
@@ -305,7 +308,7 @@ Configuration aksonwshost {
                 ValueType = 'String'
                 ValueData = $DomainName
             }
-    
+
             Registry 'SetWorkgroupNVDomain' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters'
@@ -313,13 +316,13 @@ Configuration aksonwshost {
                 ValueType = 'String'
                 ValueData = $DomainName
             }
-    
+
             Registry 'NewCredSSPKey' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowFreshCredentialsWhenNTLMOnly'
                 ValueName = ''
             }
-    
+
             Registry 'NewCredSSPKey2' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation'
@@ -328,7 +331,7 @@ Configuration aksonwshost {
                 ValueData = '1'
                 DependsOn = '[Registry]NewCredSSPKey'
             }
-    
+
             Registry 'NewCredSSPKey3' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowFreshCredentialsWhenNTLMOnly'
@@ -345,7 +348,7 @@ Configuration aksonwshost {
             TestScript = {
                 $false  # Applies every time.
             }
-            SetScript = { 
+            SetScript = {
                 Set-DnsServerDiagnostics -All $true
                 Write-Verbose -Verbose 'Enabling DNS client diagnostics'
             }
@@ -436,7 +439,7 @@ Configuration aksonwshost {
         }
 
         NetIPInterface 'Enable IP forwarding on NAT network interface'
-        {   
+        {
             AddressFamily  = 'IPv4'
             InterfaceAlias = $natInterfaceName
             Forwarding     = 'Enabled'
@@ -451,8 +454,8 @@ Configuration aksonwshost {
         }
 
         DnsServerAddress 'Set DNS server address for NAT network interface'
-        { 
-            Address        = '127.0.0.1' 
+        {
+            Address        = '127.0.0.1'
             InterfaceAlias = $natInterfaceName
             AddressFamily  = 'IPv4'
             DependsOn      = '[IPAddress]Assign IP address for NAT network interface'
@@ -484,10 +487,10 @@ Configuration aksonwshost {
 
         #### Configure DHCP server ####
 
-        xDhcpServerScope 'Create DHCP scope' { 
+        xDhcpServerScope 'Create DHCP scope' {
             Ensure        = 'Present'
             IPStartRange  = '192.168.0.10'
-            IPEndRange    = '192.168.0.149' 
+            IPEndRange    = '192.168.0.149'
             ScopeId       = '192.168.0.0'
             Name          = 'Lab Range'
             SubnetMask    = '255.255.0.0'
@@ -501,7 +504,7 @@ Configuration aksonwshost {
         }
 
         DhcpScopeOptionValue 'Set DHCP scope option - Router' {
-            Ensure        = 'Present' 
+            Ensure        = 'Present'
             AddressFamily = 'IPv4'
             ScopeId       = '192.168.0.0'
             OptionId      = 3  # Router
@@ -512,7 +515,7 @@ Configuration aksonwshost {
         }
 
         DhcpScopeOptionValue 'Set DHCP scope option - DNS Servers' {
-            Ensure        = 'Present' 
+            Ensure        = 'Present'
             AddressFamily = 'IPv4'
             ScopeId       = '192.168.0.0'
             OptionId      = 6  # DNS Servers
@@ -523,7 +526,7 @@ Configuration aksonwshost {
         }
 
         DhcpScopeOptionValue 'Set DHCP scope option - DNS Domain Name' {
-            Ensure        = 'Present' 
+            Ensure        = 'Present'
             AddressFamily = 'IPv4'
             ScopeId       = '192.168.0.0'
             OptionId      = 15  # DNS Domain Name
@@ -563,7 +566,7 @@ Configuration aksonwshost {
                 DynamicUpdate = 'NonSecureAndSecure'
                 DependsOn     = '[Script]Create network NAT'
             }
-    
+
             DnsServerPrimaryZone 'Set reverse lookup zone' {
                 Ensure        = 'Present'
                 Name          = '0.168.192.in-addr.arpa'
@@ -596,7 +599,7 @@ Configuration aksonwshost {
                 ConnectionSpecificSuffix = $DomainName
                 DependsOn                = '[DnsServerPrimaryZone]Set primary DNS zone'
             }
-    
+
             DnsConnectionSuffix 'Add specific suffix to NAT network interface' {
                 InterfaceAlias           = $natInterfaceName
                 ConnectionSpecificSuffix = $DomainName
@@ -653,69 +656,70 @@ Configuration aksonwshost {
             DependsOn = '[File]Create Source folder'
         }
 
-        # TODO: Not yet released SSU for WS2022.
-        # https://msrc.microsoft.com/update-guide/vulnerability/ADV990001
-        <#
-        Script 'Download Servicing Stack Update' {
-            TestScript = {
-                Test-Path -Path (Join-Path -Path $using:SsuFolderPath -ChildPath '*') -Include '*.msu'
-            }
-            SetScript = {
-                $ssuSearchString = 'Servicing Stack Update for Azure Stack HCI, version ' + $using:AzSHciVersion + ' for x64-based Systems'
-                $product = 'Azure Stack HCI'
-                $ssuUpdate = Get-MSCatalogUpdate -Search $ssuSearchString -SortBy LastUpdated -Descending |
-                    Where-Object -Property 'Products' -eq $product |
-                    Select-Object -First 1
-                $ssuUpdate | Save-MSCatalogUpdate -Destination $using:SsuFolderPath
-            }
-            GetScript = {
-                $result = [scriptblock]::Create($TestScript).Invoke()
-                @{
-                    'Result' = if ($result) {
-                        'The Servicing Stack Update has been downloaded to "{0}".' -f $using:SsuFolderPath
-                    }
-                    else {
-                        'The Servicing Stack Update has not been downloaded.'
+        if ($ApplyUpdatesToNestedVM) {
+            # TODO: Not yet released SSU for WS2022.
+            # https://msrc.microsoft.com/update-guide/vulnerability/ADV990001
+            <#
+            Script 'Download Servicing Stack Update' {
+                TestScript = {
+                    Test-Path -Path (Join-Path -Path $using:SsuFolderPath -ChildPath '*') -Include '*.msu'
+                }
+                SetScript = {
+                    $ssuSearchString = 'Servicing Stack Update for Azure Stack HCI, version ' + $using:AzSHciVersion + ' for x64-based Systems'
+                    $product = 'Azure Stack HCI'
+                    $ssuUpdate = Get-MSCatalogUpdate -Search $ssuSearchString -SortBy LastUpdated -Descending |
+                        Where-Object -Property 'Products' -eq $product |
+                        Select-Object -First 1
+                    $ssuUpdate | Save-MSCatalogUpdate -Destination $using:SsuFolderPath
+                }
+                GetScript = {
+                    $result = [scriptblock]::Create($TestScript).Invoke()
+                    @{
+                        'Result' = if ($result) {
+                            'The Servicing Stack Update has been downloaded to "{0}".' -f $using:SsuFolderPath
+                        }
+                        else {
+                            'The Servicing Stack Update has not been downloaded.'
+                        }
                     }
                 }
+                DependsOn = '[File]Create SSU folder'
             }
-            DependsOn = '[File]Create SSU folder'
-        }
-        #>
+            #>
 
-        Script 'Download Cumulative Update' {
-            TestScript = {
-                Test-Path -Path (Join-Path -Path $using:CuFolderPath -ChildPath '*') -Include '*.msu'
-            }
-            SetScript = {
-                # For Azure Stack HCI 20H2
-                #$cuSearchString = 'Cumulative Update for Azure Stack HCI, version 20H2 for x64-based Systems'
-                #$product = 'Azure Stack HCI'
+            Script 'Download Cumulative Update' {
+                TestScript = {
+                    Test-Path -Path (Join-Path -Path $using:CuFolderPath -ChildPath '*') -Include '*.msu'
+                }
+                SetScript = {
+                    # For Azure Stack HCI 20H2
+                    #$cuSearchString = 'Cumulative Update for Azure Stack HCI, version 20H2 for x64-based Systems'
+                    #$product = 'Azure Stack HCI'
 
-                # For Windows Server 2022
-                $cuSearchString = 'Cumulative Update Microsoft server operating system version 21H2 for x64-based Systems'
-                $product = 'Microsoft Server operating system-21H2'
+                    # For Windows Server 2022
+                    $cuSearchString = 'Cumulative Update Microsoft server operating system version 21H2 for x64-based Systems'
+                    $product = 'Microsoft Server operating system-21H2'
 
-                $cuUpdate = Get-MSCatalogUpdate -Search $cuSearchString -SortBy LastUpdated -Descending |
-                    Where-Object -Property 'Title' -NotLike '*Preview*' |
-                    Where-Object -Property 'Products' -eq $product |
-                    Select-Object -First 1
-                Save-MSCatalogUpdate -Update $cuUpdate[0] -Destination $using:CuFolderPath
-            }
-            GetScript = {
-                $result = [scriptblock]::Create($TestScript).Invoke()
-                @{
-                    'Result' = if ($result) {
-                        'The Cumulative Update has been downloaded to "{0}".' -f $using:CuFolderPath
-                    }
-                    else {
-                        'The Cumulative Update has not been downloaded.'
+                    $cuUpdate = Get-MSCatalogUpdate -Search $cuSearchString -SortBy LastUpdated -Descending |
+                        Where-Object -Property 'Title' -NotLike '*Preview*' |
+                        Where-Object -Property 'Products' -eq $product |
+                        Select-Object -First 1
+                    Save-MSCatalogUpdate -Update $cuUpdate[0] -Destination $using:CuFolderPath
+                }
+                GetScript = {
+                    $result = [scriptblock]::Create($TestScript).Invoke()
+                    @{
+                        'Result' = if ($result) {
+                            'The Cumulative Update has been downloaded to "{0}".' -f $using:CuFolderPath
+                        }
+                        else {
+                            'The Cumulative Update has not been downloaded.'
+                        }
                     }
                 }
+                DependsOn = '[File]Create CU folder'
             }
-            DependsOn = '[File]Create CU folder'
         }
-        #>
 
         #### Create nested VMs ####
 
@@ -768,12 +772,19 @@ Configuration aksonwshost {
             GetScript = {
                 @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Present' } else { 'Absent' } }
             }
-            DependsOn = @(
-                '[File]Create Base VHD folder',
-                '[Script]Download ISO file'#,
-                #'[Script]Download Servicing Stack Update',
-                '[Script]Download Cumulative Update'
-            )
+            DependsOn = &{
+                $dependencies = @(
+                    '[File]Create Base VHD folder',
+                    '[Script]Download ISO file'
+                )
+                if ($ApplyUpdatesToNestedVM) {
+                    $dependencies += @(
+                        #'[Script]Download Servicing Stack Update',
+                        '[Script]Download Cumulative Update'
+                    )
+                }
+                $dependencies
+            }
         }
 
         1..$NumOfNestedVMs | ForEach-Object -Process {
@@ -787,7 +798,7 @@ Configuration aksonwshost {
                 Type            = 'Directory'
                 DependsOn       = '[File]Create VM folder'
             }
-            
+
             $osDiskFileName = '{0}-osdisk.vhdx' -f $nestedVMName
             $osDiskFilePath = [IO.Path]::Combine($nestedVMStoreFolderPath, $osDiskFileName)
 
@@ -836,7 +847,7 @@ Configuration aksonwshost {
                     MaximumSizeBytes = $NestedVMDataDiskSize
                     DependsOn        = "[xVMHyperV]Create VM $nestedVMName"
                 }
-            
+
                 xVMHardDiskDrive "Add data disk $dataDiskFileName to $nestedVMName" {
                     Ensure             = 'Present'
                     VMName             = $nestedVMName
@@ -853,7 +864,7 @@ Configuration aksonwshost {
                 }
                 SetScript = {
                     $networkAdapter = Get-VMNetworkAdapter -VMName $using:nestedVMName -Name 'Network Adapter'
-                    Remove-VMNetworkAdapter -VMName $networkAdapter.VMName -Name $networkAdapter.Name                 
+                    Remove-VMNetworkAdapter -VMName $networkAdapter.VMName -Name $networkAdapter.Name
                 }
                 GetScript = {
                     @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Removed as expected' } else { 'Exists against expectation' } }
@@ -909,7 +920,7 @@ Configuration aksonwshost {
                     }
                     DependsOn      = "[xVMHyperV]Create VM $nestedVMName"
                 }
-                
+
                 cVMNetworkAdapterSettings "Enable MAC address spoofing and Teaming on $convergedNetAdapterName of $nestedVMName" {
                     VMName             = $nestedVMName
                     SwitchName         = $VSwitchNameHost
@@ -920,7 +931,7 @@ Configuration aksonwshost {
                     DependsOn          = "[xVMNetworkAdapter]Add network adapter $convergedNetAdapterName to $nestedVMName"
                 }
             }
-            
+
             # unattend.xml for nested VM.
             $unattendXmlFilePath = [IO.Path]::Combine($nestedVMStoreFolderPath, 'unattend.xml')
 
@@ -1181,7 +1192,7 @@ Configuration aksonwshost {
             Arguments = 'https://{0}' -f $env:ComputerName
             Icon      = 'shell32.dll,34'
         }
-        
+
         #### Create custom firewall for WAC ####
 
         Firewall 'WAC inbound firewall rule' {
