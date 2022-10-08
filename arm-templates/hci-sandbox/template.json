@@ -289,7 +289,7 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "uniqueString": "[substring(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('virtualMachineName')), 0, 6)]",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('virtualMachineName')), 0, 6)]",
 
         "virtualNetworkName": "hcisandbox-vnet",
         "virtualNetworkAddressPrefix": "10.0.0.0/16",
