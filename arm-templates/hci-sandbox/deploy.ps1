@@ -46,11 +46,12 @@ if ($ValidateOnly) {
 else {
     $params = @{
         ResourceGroupName = $ResourceGroupName
-        Name              = ('{0}-{1}'-f (Get-Item -LiteralPath $templateFilePath).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
-        TemplateFile      = $templateFilePath
-        WhatIf            = $WhatIf
-        Force             = $true
-        Verbose           = $true
+        Name                    = ('{0}-{1}'-f (Get-Item -LiteralPath $templateFilePath).BaseName, (Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmm'))
+        TemplateFile            = $templateFilePath
+        DeploymentDebugLogLevel = 'All'
+        WhatIf                  = $WhatIf
+        Force                   = $true
+        Verbose                 = $true
     }
 
     if (Test-Path -LiteralPath $templateParametersFilePath -PathType Leaf) {
@@ -65,6 +66,7 @@ else {
     }
     catch {
         $error[0]
+        Get-AzResourceGroupDeploymentOperation -DeploymentName $params.Name -ResourceGroupName $params.ResourceGroupName
         'If get error before deployment starts, run this deployment script with -ValidateOnly parameter to get error details.' | Write-Host -ForegroundColor Cyan
     }
 }
