@@ -5,7 +5,6 @@ param (
     [string] $ResourceGroupLocation = 'japaneast',
     [string] $TemplateFile = './template.json',
     [string] $TemplateParametersFile = './parameters.json',
-    [HashTable] $ResourceGroupTag = @{ 'purpose' = 'experimental' },
     [switch] $WhatIf,
     [switch] $ValidateOnly
 )
@@ -17,8 +16,6 @@ $templateFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $Te
 $templateParametersFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
 
 Get-AzContext
-
-New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -Tag $ResourceGroupTag -Verbose -Force
 
 if ($ValidateOnly) {
     $params = @{
