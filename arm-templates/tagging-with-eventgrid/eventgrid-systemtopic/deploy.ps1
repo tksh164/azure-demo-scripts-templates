@@ -4,7 +4,7 @@ param (
     [string] $ResourceGroupLocation = 'japaneast',
     [string] $TemplateFile = './template.json',
     [string] $TemplateParametersFile = './parameters.json',
-    [HashTable] $ResourceGroupTag = @{ 'purpose' = 'experimental' },
+    [HashTable] $ResourceGroupTag = @{ 'usage' = 'experimental' },
     [switch] $WhatIf,
     [switch] $ValidateOnly
 )
