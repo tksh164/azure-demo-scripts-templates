@@ -18,7 +18,7 @@
         },
         "functionAppZipPackageUri": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/tagging-with-eventgrid/templates/function-app/funcapp.zip",
+            "defaultValue": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/tagging-with-eventgrid/function-app/funcapp.zip",
             "metadata": {
                 "description": "The URI of the zip package file for ZipDeploy."
             }
