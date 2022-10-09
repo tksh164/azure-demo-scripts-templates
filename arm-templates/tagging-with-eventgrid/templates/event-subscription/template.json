@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "systemTopicId": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "eventSubscriptionName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "defaultValue": "resource-auto-tagging",
+            "metadata": {
+                "description": "The name of event subscription for auto resource tagging."
+            }
+        },
+        "functionAppFunctionId": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "variables": {
+        "systemTopicName": "[last(split(parameters('systemTopicId'), '/'))]",
+        "eventSubscriptionName": "[concat(variables('systemTopicName'), '/', parameters('eventSubscriptionName'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('eventSubscriptionName')]",
+            "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+            "apiVersion": "2021-12-01",
+            "properties": {
+                "eventDeliverySchema": "EventGridSchema",
+                "topic": "[parameters('systemTopicId')]",
+                "destination": {
+                    "endpointType": "AzureFunction",
+                    "properties": {
+                        "resourceId": "[parameters('functionAppFunctionId')]",
+                        "maxEventsPerBatch": 1,
+                        "preferredBatchSizeInKilobytes": 64
+                    }
+                },
+                "filter": {
+                    "includedEventTypes": [
+                        "Microsoft.Resources.ResourceWriteSuccess"
+                    ],
+                    "enableAdvancedFilteringOnArrays": true,
+                    "advancedFilters": [
+                        {
+                            "key": "data.operationName",
+                            "operatorType": "StringNotIn",
+                            "values": [
+                                "Microsoft.Resources/deployments/write",
+                                "Microsoft.Resources/tags/write"
+                            ]
+                        }
+                    ]
+                },
+                "retryPolicy": {
+                    "maxDeliveryAttempts": 30,
+                    "eventTimeToLiveInMinutes": 1440
+                },
+                "labels": []
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "systemTopicName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "defaultValue": "azure-subscription-evgst",
+            "metadata": {
+                "description": "The name of Event Grid System Topic resource. Only one resource that has the subscription source can be created per subscription."
+            }
+        }//,
+        // "eventSubscriptionName": {
+        //     "type": "string",
+        //     "minLength": 3,
+        //     "maxLength": 64,
+        //     "defaultValue": "resource-auto-tagging",
+        //     "metadata": {
+        //         "description": "The name of event subscription for auto resource tagging."
+        //     }
+        // }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('systemTopicName')]",
+            "type": "Microsoft.EventGrid/systemTopics",
+            "apiVersion": "2021-12-01",
+            "location": "Global",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "topicType": "Microsoft.Resources.Subscriptions",
+                "source": "[subscription().id]"
+            }
+        }//,
+        // {
+        //     "name": "[concat(parameters('systemTopicName'), '/', parameters('eventSubscriptionName'))]",
+        //     "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+        //     "apiVersion": "2021-12-01",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.EventGrid/systemTopics', parameters('systemTopicName'))]"
+        //     ],
+        //     "properties": {
+        //         "eventDeliverySchema": "EventGridSchema",
+        //         "topic": "[resourceId('Microsoft.EventGrid/systemTopics', parameters('systemTopicName'))]",
+        //         "destination": {
+        //             "endpointType": "AzureFunction",
+        //             "properties": {
+        //                 "resourceId": "/subscriptions/2a06f5f4-2868-4009-a84b-596f7a97a2e3/resourceGroups/resource-tagging-app/providers/Microsoft.Web/sites/autotagtest0l77-func/functions/EventGridTrigger1",
+        //                 "maxEventsPerBatch": 1,
+        //                 "preferredBatchSizeInKilobytes": 64
+        //             }
+        //         },
+        //         "filter": {
+        //             "includedEventTypes": [
+        //                 "Microsoft.Resources.ResourceWriteSuccess"
+        //             ],
+        //             "enableAdvancedFilteringOnArrays": true,
+        //             "advancedFilters": [
+        //                 {
+        //                     "key": "data.operationName",
+        //                     "operatorType": "StringNotIn",
+        //                     "values": [
+        //                         "Microsoft.Resources/deployments/write",
+        //                         "Microsoft.Resources/tags/write"
+        //                     ]
+        //                 }
+        //             ]
+        //         },
+        //         "retryPolicy": {
+        //             "maxDeliveryAttempts": 30,
+        //             "eventTimeToLiveInMinutes": 1440
+        //         },
+        //         "labels": []
+        //     }
+        // }
+    ],
+    "outputs": {
+        "systemTopicId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.EventGrid/systemTopics', parameters('systemTopicName'))]"
+        }
+    }
+}
