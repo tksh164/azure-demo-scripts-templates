@@ -369,7 +369,7 @@
         }
     ],
     "outputs": {
-        "output1": {
+        "functionAppFunctionId": {
             "type": "string",
             "value": "[concat(reference(resourceId(subscription().subscriptionId, parameters('resourceGroup'), 'Microsoft.Resources/deployments', variables('functionAppDeploymentName'))).outputs.functionAppResourceId.value, '/functions/', parameters('resourceTaggingFunctionName'))]"
         }
