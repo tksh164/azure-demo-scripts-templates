@@ -770,7 +770,7 @@ Configuration hcisandbox {
                     $vhdxWinPartition = Get-Partition -DiskNumber $mountResult.Number | Where-Object -Property 'Type' -EQ -Value 'Basic' | Select-Object -First 1
                     $updatePackageFilePaths | ForEach-Object -Process {
                         Write-Debug -Message $_.FullName
-                        $command = 'dism.exe /image:"{0}:\" /Add-Package /PackagePath:"{1}"' -f $vhdxWinPartition.DriveLetter, $_.FullName
+                        $command = 'dism.exe /Image:"{0}:\" /Add-Package /PackagePath:"{1}"' -f $vhdxWinPartition.DriveLetter, $_.FullName
                         Write-Debug -Message $command
                         Invoke-Expression -Command $command
                     }
