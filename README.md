@@ -1,6 +1,6 @@
 # azure-demo-scripts-templates
 
-## ⚖ License
+## License
 
 Copyright (c) 2018-present Takeshi Katano. All rights reserved. This software is released under the [MIT License](https://github.com/tksh164/azure-demo-scripts-templates/blob/master/LICENSE).
 
