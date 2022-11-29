@@ -119,7 +119,7 @@
                                 "minAddressPrefixSize": "/29"
                             },
                             "subnets": {
-                                "addsSubnet": {
+                                "defaultSubnet": {
                                     "label": "Subnet",
                                     "defaultValue": {
                                         "name": "default",
@@ -267,8 +267,8 @@
                 "vnetResourceGroupName": "[steps('basics').vnet.resourceGroup]",
                 "vnetName": "[steps('basics').vnet.name]",
                 "vnetAddressPrefix": "[steps('basics').vnet.addressPrefix]",
-                "subnetName": "[steps('basics').vnet.subnets.addsSubnet.name]",
-                "subnetAddressPrefix": "[steps('basics').vnet.subnets.addsSubnet.addressPrefix]",
+                "subnetName": "[steps('basics').vnet.subnets.defaultSubnet.name]",
+                "subnetAddressPrefix": "[steps('basics').vnet.subnets.defaultSubnet.addressPrefix]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPublicKey": "[steps('basics').adminAccountSection.adminCredentials.sshPublicKey]",
                 "computerName": "[steps('details').proxyServerVMSection.computerName]",
