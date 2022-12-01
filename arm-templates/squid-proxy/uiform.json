@@ -38,7 +38,7 @@
                                 ]
                             },
                             "placeholder": "e.g. squidproxy-vm1",
-                            "defaultValue": ""
+                            "defaultValue": "squidproxy-vm1"
                         },
                         {
                             "name": "vmIamge",
