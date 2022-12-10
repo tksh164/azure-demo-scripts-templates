@@ -353,22 +353,6 @@ Configuration hcisandbox {
             }
         }
 
-        #### DNS server related settings ####
-
-        Script 'Enable DNS diags' {
-            TestScript = {
-                $false  # Applies every time.
-            }
-            SetScript = {
-                Set-DnsServerDiagnostics -All $true
-                Write-Verbose -Verbose 'Enabling DNS client diagnostics.'
-            }
-            GetScript = {
-                @{ Result = 'Applies every time' }
-            }
-            DependsOn = '[WindowsFeatureSet]Install roles and features'
-        }
-
         #### Create a first domain controller ####
 
         if ($environment -eq 'AD Domain') {
@@ -392,6 +376,22 @@ Configuration hcisandbox {
                 RestartCount            = 3
                 WaitForValidCredentials = $true
                 DependsOn               = '[ADDomain]Create first DC'
+            }
+
+            #### DNS server related settings ####
+
+            Script 'Enable DNS diags' {
+                TestScript = {
+                    $false  # Applies every time.
+                }
+                SetScript = {
+                    Set-DnsServerDiagnostics -All $true
+                    Write-Verbose -Verbose 'Enabling DNS client diagnostics.'
+                }
+                GetScript = {
+                    @{ Result = 'Applies every time' }
+                }
+                DependsOn = '[WaitForADDomain]Wait for first boot completion of DC'
             }
         }
 
