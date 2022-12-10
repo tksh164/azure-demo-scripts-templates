@@ -105,37 +105,31 @@
         "adminPassword": {
             "type": "securestring"
         },
-        "enableDHCP": {
-            "type": "string",
-            "defaultValue": "Disabled",
-            "allowedValues": [
-                "Enabled",
-                "Disabled"
-            ],
+        "isDhcpEnabled": {
+            "type": "bool",
+            "defaultValue": false,
             "metadata": {
                 "description": "Choose whether you wish to enable DHCP in the environment. If you choose Disabled, it can be enabled after deployment."
             }
         },
         "customRdpPort": {
-            "type": "string",
-            "defaultValue": "3389",
+            "type": "int",
+            "defaultValue": 3389,
+            "minValue": 1024,
+            "maxValue": 65535,
             "metadata": {
-                "description": "If you wish to use a different port to RDP into the VM (between 0 and 65535), change it here, otherwise, leave the default."
+                "description": "If you wish to use a different port to RDP into the VM (between 1024 and 65535), change it here, otherwise, leave the default."
             }
         },
-        "autoShutdownStatus": {
-            "type": "string",
-            "defaultValue": "Disabled",
-            "allowedValues": [
-                "Enabled",
-                "Disabled"
-            ]
+        "isEnableAutoshutdown": {
+            "type": "bool",
+            "defaultValue": false
         },
-        "autoShutdownTime": {
+        "autoshutdownTime": {
             "type": "string",
             "defaultValue": "22:00"
         },
-        "autoShutdownTimeZone": {
+        "autoshutdownTimeZone": {
             "type": "string",
             "defaultValue": "UTC",
             "allowedValues": [
@@ -517,7 +511,7 @@
                             "configurationArguments": {
                                 "DomainName": "[parameters('domainName')]",
                                 "Environment": "[variables('environment')]",
-                                "EnableDHCP": "[parameters('enableDHCP')]",
+                                "EnableDHCP": "[parameters('isDhcpEnabled')]",
                                 "CustomRdpPort": "[parameters('customRdpPort')]",
                                 //"IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI
                                 "IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
@@ -553,12 +547,12 @@
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
             ],
             "properties": {
-                "status": "[parameters('autoShutdownStatus')]",
+                "status": "[if(parameters('isEnableAutoshutdown'), 'Enabled', 'Disabled')]",
                 "taskType": "ComputeVmShutdownTask",
                 "dailyRecurrence": {
-                    "time": "[parameters('autoShutdownTime')]"
+                    "time": "[parameters('autoshutdownTime')]"
                 },
-                "timeZoneId": "[parameters('autoShutdownTimeZone')]",
+                "timeZoneId": "[parameters('autoshutdownTimeZone')]",
                 "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
             }
         },
@@ -653,7 +647,7 @@
             "value": "[parameters('adminUsername')]"
         },
         "rdpPort": {
-            "type": "string",
+            "type": "int",
             "value": "[parameters('customRdpPort')]"
         },
         "fqdn": {
