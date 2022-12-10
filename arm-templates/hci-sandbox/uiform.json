@@ -1260,7 +1260,7 @@
                 "virtualMachineName": "[steps('basics').vmName]",
                 "virtualMachineSize": "[steps('basics').vmSize]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
-                "adminPassword": "[steps('basics').adminAccountSection.adminPassword]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
                 "isHaveEligibleWindowsServerLicense": "[steps('basics').azureHybridBenefitSection.isHaveEligibleWindowsServerLicense]",
                 "osDiskStorageType": "[steps('sandboxVMDetails').diskSection.osDiskStorageType]",
                 "dataDiskType": "[steps('sandboxVMDetails').diskSection.dataDiskStorageType]",
