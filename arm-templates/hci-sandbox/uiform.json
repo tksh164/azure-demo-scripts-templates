@@ -241,7 +241,7 @@
                             "label": "Disk configuration",
                             "elements": [
                                 {
-                                    "name": "osDiskStorageType",
+                                    "name": "osDiskType",
                                     "type": "Microsoft.Common.DropDown",
                                     "visible": true,
                                     "multiselect": false,
@@ -1085,7 +1085,7 @@
                     "description": "TODO",
                     "elements": [
                         {
-                            "name": "hciSandboxSection",
+                            "name": "hciEnvironmentSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
                             "label": "HCI operating system",
@@ -1262,15 +1262,20 @@
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
                 "isHaveEligibleWindowsServerLicense": "[steps('basics').azureHybridBenefitSection.isHaveEligibleWindowsServerLicense]",
-                "osDiskStorageType": "[steps('sandboxVMDetails').diskSection.osDiskStorageType]",
+                "osDiskType": "[steps('sandboxVMDetails').diskSection.osDiskType]",
                 "dataDiskType": "[steps('sandboxVMDetails').diskSection.dataDiskStorageType]",
                 "dataDiskSize": "[steps('sandboxVMDetails').diskSection.dataDiskSize]",
+                "isApplyUpdatesToSandboxVM": "[steps('sandboxVMDetails').updatesSection.isApplyUpdatesToSandboxVM]",
                 "customRdpPort": "[steps('sandboxVMDetails').rdpSection.rdpPort]",
                 "isEnableAutoshutdown": "[steps('sandboxVMDetails').autoshutdownSection.isEnableAutoshutdown]",
                 "autoshutdownTime": "[steps('sandboxVMDetails').autoshutdownSection.shutdownTime]",
                 "autoshutdownTimeZone": "[steps('sandboxVMDetails').autoshutdownSection.shutdownTimeZone]",
+                "hciOperatingSystemIsoFileUri": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.IsoFileUri]",
+                "hciOperatingSystemImageIndex": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.WimImageIndex]",
+                "isApplyUpdatesToNestedVM": "[steps('hciEnvironmentDetails').hciEnvironmentSection.isApplyUpdatesToNestedVM]",
                 "domainName": "[steps('hciEnvironmentDetails').configurationSection.domainName]",
-                "isEnableDhcp": "[steps('hciEnvironmentDetails').configurationSection.isEnableDhcp]"
+                "isEnableDhcp": "[steps('hciEnvironmentDetails').configurationSection.isEnableDhcp]",
+                "hciNodeCount": "[steps('hciEnvironmentDetails').configurationSection.hciNodeCount]"
             }
         }
     }

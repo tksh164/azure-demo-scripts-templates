@@ -65,19 +65,38 @@
                 "Standard_E64-32ds_v4"
             ]
         },
-        "domainName": {
+        "adminUsername": {
             "type": "string",
-            "defaultValue": "hci.local",
+            "defaultValue": "AzureUser"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "isHaveEligibleWindowsServerLicense": {
+            "type": "bool",
+            "defaultValue": false,
             "metadata": {
-                "description": "The FQDN that will be used in the environment"
+                "description": "By selecting Yes, you confirm you have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit. You can read more about compliance here: http://go.microsoft.com/fwlink/?LinkId=859786"
+            }
+        },
+        "osDiskType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "The Storage type of the VM data disk. If your VM contains an 's' in the VM size, you can select Premium_LRS storage for increased performance, but at a higher cost."
             }
         },
         "dataDiskType": {
             "type": "string",
             "defaultValue": "StandardSSD_LRS",
             "allowedValues": [
-                "StandardSSD_LRS",
-                "Premium_LRS"
+                "Premium_LRS",
+                "StandardSSD_LRS"
             ],
             "metadata": {
                 "description": "The Storage type of the VM data disk. If your VM contains an 's' in the VM size, you can select Premium_LRS storage for increased performance, but at a higher cost."
@@ -98,18 +117,11 @@
                 "description": "The size of the individual data disks in GiB. 8 of these will be provisioned therefore 32GiB is the recommended default."
             }
         },
-        "adminUsername": {
-            "type": "string",
-            "defaultValue": "AzureUser"
-        },
-        "adminPassword": {
-            "type": "securestring"
-        },
-        "isEnableDhcp": {
+        "isApplyUpdatesToSandboxVM": {
             "type": "bool",
             "defaultValue": false,
             "metadata": {
-                "description": "Choose whether you wish to enable DHCP in the environment. If you choose Disabled, it can be enabled after deployment."
+                "description": "TODO"
             }
         },
         "customRdpPort": {
@@ -270,11 +282,52 @@
                 "Yakutsk Standard Time"
             ]
         },
-        "isHaveEligibleWindowsServerLicense": {
+        "hciOperatingSystemIsoFileUri": {
+            "type": "string",
+            "defaultValue": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI latest release - en-US
+            "metadata": {
+                "description": "TODO"
+            }
+        },
+        "hciOperatingSystemImageIndex": {
+            "type": "int",
+            "defaultValue": 4,
+            // 1: Windows Server 2022 Standard Evaluation
+            // 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
+            // 3: Windows Server 2022 Datacenter Evaluation
+            // 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
+            "metadata": {
+                "description": "TODO"
+            }
+        },
+        "isApplyUpdatesToNestedVM": {
             "type": "bool",
             "defaultValue": false,
             "metadata": {
-                "description": "By selecting Yes, you confirm you have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit. You can read more about compliance here: http://go.microsoft.com/fwlink/?LinkId=859786"
+                "description": "TODO"
+            }
+        },
+        "domainName": {
+            "type": "string",
+            "defaultValue": "hci.local",
+            "metadata": {
+                "description": "The FQDN that will be used in the environment."
+            }
+        },
+        "isEnableDhcp": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Choose whether you wish to enable DHCP in the environment. If you choose Disabled, it can be enabled after deployment."
+            }
+        },
+        "hciNodeCount": {
+            "type": "int",
+            "defaultValue": 2,
+            "minValue": 2,
+            "maxValue": 8,
+            "metadata": {
+                "description": "TODO"
             }
         }
     },
@@ -307,21 +360,7 @@
             "apiVersion": "2020-11-01",
             "location": "[variables('location')]",
             "properties": {
-                "securityRules": [
-                    // {
-                    //     "name": "rdp",
-                    //     "properties": {
-                    //         "priority": 1000,
-                    //         "protocol": "Tcp",
-                    //         "access": "Allow",
-                    //         "direction": "Inbound",
-                    //         "sourceAddressPrefix": "*",
-                    //         "sourcePortRange": "*",
-                    //         "destinationAddressPrefix": "*",
-                    //         "destinationPortRange": "[parameters('customRdpPort')]"
-                    //     }
-                    // }
-                ]
+                "securityRules": []
             }
         },
         {
@@ -418,7 +457,7 @@
                         "name": "[concat(parameters('virtualMachineName'), '-osdisk')]",
                         "createOption": "FromImage",
                         "managedDisk": {
-                            "storageAccountType": "Standard_LRS"
+                            "storageAccountType": "[parameters('osDiskType')]"
                         }
                     },
                     "imageReference": {
@@ -508,17 +547,18 @@
                                 "Environment": "[variables('environment')]",
                                 "EnableDHCP": "[parameters('isEnableDhcp')]",
                                 "CustomRdpPort": "[parameters('customRdpPort')]",
+                                "IsoFileUri": "[parameters('hciOperatingSystemIsoFileUri')]",
                                 //"IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI
-                                "IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
+                                //"IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
                                 //"IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP",  // Windows Server 2022 Evaluation ja-JP
                                 // 1: Windows Server 2022 Standard Evaluation
                                 // 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
                                 // 3: Windows Server 2022 Datacenter Evaluation
                                 // 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
-                                "WimImageIndex": 4,
-                                "NumOfNestedVMs": 2,
-                                "ApplyUpdatesToSandboxVM": false,
-                                "ApplyUpdatesToNestedVM": false
+                                "WimImageIndex": "[parameters('hciOperatingSystemImageIndex')]",
+                                "NumOfNestedVMs": "[parameters('hciNodeCount')]",
+                                "ApplyUpdatesToSandboxVM": "[parameters('isApplyUpdatesToSandboxVM')]",
+                                "ApplyUpdatesToNestedVM": "[parameters('isApplyUpdatesToNestedVM')]"
                             }
                         },
                         "protectedSettings": {
