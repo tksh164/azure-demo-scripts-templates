@@ -270,13 +270,9 @@
                 "Yakutsk Standard Time"
             ]
         },
-        "alreadyHaveAWindowsServerLicense": {
-            "type": "string",
-            "defaultValue": "No",
-            "allowedValues": [
-                "Yes",
-                "No"
-            ],
+        "isHaveEligibleWindowsServerLicense": {
+            "type": "bool",
+            "defaultValue": false,
             "metadata": {
                 "description": "By selecting Yes, you confirm you have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit. You can read more about compliance here: http://go.microsoft.com/fwlink/?LinkId=859786"
             }
@@ -298,7 +294,6 @@
         "privateIPAddress": "10.0.0.4",
         "publicIpAddressName": "[concat(parameters('virtualMachineName'), '-ip1')]",
         "dnsNameForPublicIP": "[toLower(concat(resourceGroup().name, '-', parameters('virtualMachineName'), variables('uniqueString')))]",
-        "vmLicenseType": "[if(equals(parameters('alreadyHaveAWindowsServerLicense'), 'Yes'), 'Windows_Server', 'None')]",
 
         "artifactsLocation": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/hci-sandbox/",
         "customScriptExtensionName": "install-wac",
@@ -461,7 +456,7 @@
                         "enabled": true
                     }
                 },
-                "licenseType": "[variables('vmLicenseType')]"
+                "licenseType": "[if(parameters('isHaveEligibleWindowsServerLicense'), 'Windows_Server', 'None')]"
             },
             "resources": [
                 {
