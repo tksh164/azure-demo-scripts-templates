@@ -10,7 +10,7 @@ Configuration hcisandbox {
         [string] $DomainName = 'hci.local',
 
         [Parameter(Mandatory = $false)]
-        [string] $EnableDHCP = 'Disabled',
+        [bool] $EnableDhcp = $false,
 
         [Parameter(Mandatory = $false)]
         [string] $CustomRdpPort = '3389',
@@ -506,7 +506,7 @@ Configuration hcisandbox {
             Name          = 'Lab Range'
             SubnetMask    = '255.255.0.0'
             LeaseDuration = '01.00:00:00'
-            State         = if ($EnableDHCP -eq 'Enabled') { 'Active' } else { 'Inactive' }
+            State         = if ($EnableDhcp) { 'Active' } else { 'Inactive' }
             AddressFamily = 'IPv4'
             DependsOn     = @(
                 '[WindowsFeatureSet]Install roles and features',
