@@ -13,7 +13,7 @@ Configuration hcisandbox {
         [bool] $EnableDhcp = $false,
 
         [Parameter(Mandatory = $false)]
-        [string] $CustomRdpPort = '3389',
+        [int] $CustomRdpPort = 3389,
 
         [Parameter(Mandatory = $false)]
         [bool] $ApplyUpdatesToSandboxHost = $false,
@@ -100,12 +100,12 @@ Configuration hcisandbox {
 
         #### Enable custom RDP port ####
 
-        if ($CustomRdpPort -ne '3389') {
+        if ($CustomRdpPort -ne 3389) {
             Registry 'Set custom RDP port' {
                 Ensure    = 'Present'
                 Key       = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
                 ValueName = 'PortNumber'
-                ValueData = $CustomRdpPort
+                ValueData = $CustomRdpPort.ToString()
                 ValueType = 'Dword'
             }
 
@@ -115,7 +115,7 @@ Configuration hcisandbox {
                 DisplayName = 'Remote Desktop with csutom port (TCP-In)'
                 Profile     = 'Any'
                 Direction   = 'Inbound'
-                LocalPort   = $CustomRdpPort
+                LocalPort   = $CustomRdpPort.ToString()
                 Protocol    = 'TCP'
                 Description = 'Firewall Rule for Custom RDP Port'
                 Enabled     = 'True'
