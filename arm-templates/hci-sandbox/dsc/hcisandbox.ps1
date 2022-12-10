@@ -369,13 +369,6 @@ Configuration hcisandbox {
             DependsOn = '[WindowsFeatureSet]Install roles and features'
         }
 
-        # DnsServerAddress "DnsServerAddress for $interfaceAlias" {
-        #     Address        = '127.0.0.1'
-        #     InterfaceAlias = $interfaceAlias
-        #     AddressFamily  = 'IPv4'
-        #     DependsOn      = '[WindowsFeatureSet]Install roles and features'
-        # }
-
         #### Create a first domain controller ####
 
         if ($environment -eq 'AD Domain') {
