@@ -105,7 +105,7 @@
         "adminPassword": {
             "type": "securestring"
         },
-        "isDhcpEnabled": {
+        "isEnableDhcp": {
             "type": "bool",
             "defaultValue": false,
             "metadata": {
@@ -506,7 +506,7 @@
                             "configurationArguments": {
                                 "DomainName": "[parameters('domainName')]",
                                 "Environment": "[variables('environment')]",
-                                "EnableDHCP": "[parameters('isDhcpEnabled')]",
+                                "EnableDHCP": "[parameters('isEnableDhcp')]",
                                 "CustomRdpPort": "[parameters('customRdpPort')]",
                                 //"IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI
                                 "IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
