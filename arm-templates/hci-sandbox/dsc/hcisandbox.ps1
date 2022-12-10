@@ -16,7 +16,7 @@ Configuration hcisandbox {
         [int] $CustomRdpPort = 3389,
 
         [Parameter(Mandatory = $false)]
-        [bool] $ApplyUpdatesToSandboxHost = $false,
+        [bool] $ApplyUpdatesToSandboxVM = $false,
 
         [Parameter(Mandatory = $false)]
         [string] $VSwitchNameHost = 'InternalNAT',
@@ -124,7 +124,7 @@ Configuration hcisandbox {
 
         #### Apply Windows updates ####
 
-        if ($ApplyUpdatesToSandboxHost) {
+        if ($ApplyUpdatesToSandboxVM) {
             xWindowsUpdateAgent 'Apply Windows updates' {
                 IsSingleInstance = 'Yes'
                 Source           = 'MicrosoftUpdate'

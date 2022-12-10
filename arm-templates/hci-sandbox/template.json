@@ -517,7 +517,7 @@
                                 // 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
                                 "WimImageIndex": 4,
                                 "NumOfNestedVMs": 2,
-                                "ApplyUpdatesToSandboxHost": false,
+                                "ApplyUpdatesToSandboxVM": false,
                                 "ApplyUpdatesToNestedVM": false
                             }
                         },
