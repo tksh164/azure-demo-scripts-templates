@@ -1000,6 +1000,7 @@ Configuration hcisandbox {
                     @{ Result = if ([scriptblock]::Create($TestScript).Invoke()) { 'Running' } else { 'Not running' } }
                 }
                 DependsOn = @(
+                    "[WaitForADDomain]Wait for first boot completion of DC",
                     "[Script]Inject unattend files to $nestedVMName"
                 )
             }
