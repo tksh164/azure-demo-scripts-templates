@@ -65,9 +65,9 @@
                 "Standard_E64-32ds_v4"
             ]
         },
-        "adminUsername": {
-            "type": "string"//,
-            //"defaultValue": "AzureUser"
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "AzureUser"
         },
         "adminPassword": {
             "type": "securestring"
@@ -443,7 +443,7 @@
             "properties": {
                 "osProfile": {
                     "computerName": "[parameters('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminUsername": "[parameters('adminUserName')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
                         "provisionVmAgent": true
@@ -564,7 +564,7 @@
                         "protectedSettings": {
                             "configurationArguments": {
                                 "AdminCreds": {
-                                    "UserName": "[parameters('adminUsername')]",
+                                    "UserName": "[parameters('adminUserName')]",
                                     "Password": "[parameters('adminPassword')]"
                                 }
                             }
@@ -677,9 +677,9 @@
         }
     ],
     "outputs": {
-        "adminUsername": {
+        "adminUserName": {
             "type": "string",
-            "value": "[parameters('adminUsername')]"
+            "value": "[parameters('adminUserName')]"
         },
         "rdpPort": {
             "type": "int",
