@@ -128,7 +128,7 @@ Configuration hcisandbox {
             xWindowsUpdateAgent 'Apply Windows updates' {
                 IsSingleInstance = 'Yes'
                 Source           = 'MicrosoftUpdate'
-                Category         = 'Security', 'Important'
+                Category         = 'Security', 'Important', 'Optional'
                 UpdateNow        = $true
                 Notifications    = 'Disabled'
             }
