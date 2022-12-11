@@ -1118,64 +1118,81 @@
                                                 "label": "Azure Stack HCI latest release - en-US",
                                                 "description": "Azure Stack HCI latest release. The installation language is English.",
                                                 "value": {
-                                                    "IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Microsoft Server Operating System-22H2"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 22H2 - en-US",
                                                 "description": "Azure Stack HCI, version 22H2. The installation language is English.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66751/20349.1129.221007-2120.fe_release_hciv3_svc_refresh_SERVERAZURESTACKHCICOR_OEMRET_x64FRE_en-us.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66751/20349.1129.221007-2120.fe_release_hciv3_svc_refresh_SERVERAZURESTACKHCICOR_OEMRET_x64FRE_en-us.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Microsoft Server Operating System-22H2"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 22H2 - ja-JP",
                                                 "description": "Azure Stack HCI, version 22H2. The installation language is Japanese.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66751/20349.1129.221007-2120.fe_release_hciv3_svc_refresh_SERVERAZURESTACKHCICOR_OEMRET_x64FRE_ja-jp.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66751/20349.1129.221007-2120.fe_release_hciv3_svc_refresh_SERVERAZURESTACKHCICOR_OEMRET_x64FRE_ja-jp.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Microsoft Server Operating System-22H2"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 21H2 - en-US",
                                                 "description": "Azure Stack HCI, version 21H2. The installation language is English.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_20348.288_en-us.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_20348.288_en-us.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Microsoft Server operating system-21H2"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 21H2 - ja-JP",
                                                 "description": "Azure Stack HCI, version 21H2. The installation language is Japanese.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_20348.288_ja-jp.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_20348.288_ja-jp.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Microsoft Server operating system-21H2"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 20H2 - en-US",
                                                 "description": "Azure Stack HCI, version 20H2. The installation language is English.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_17784.1408_en-us.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_17784.1408_en-us.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Azure Stack HCI"
                                                 }
                                             },
                                             {
                                                 "label": "Azure Stack HCI, version 20H2 - ja-JP",
                                                 "description": "Azure Stack HCI, version 20H2. The installation language is Japanese.",
                                                 "value": {
-                                                    "IsoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_17784.1408_ja-jp.iso",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://software-download.microsoft.com/download/sg/AzureStackHCI_17784.1408_ja-jp.iso",
+                                                    "wimImageIndex": 1,
+                                                    "updateProduct": "Azure Stack HCI"
+                                                }
+                                            },
+                                            {
+                                                "label": "Windows Server 2022 Datacenter Evaluation (Desktop Experience) - en-US",
+                                                "description": "Windows Server 2022 Datacenter Evaluation with Desktop Experience. The installation language is English.",
+                                                "value": {
+                                                    "isoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",
+                                                    "wimImageIndex": 4,
+                                                    "updateProduct": "Microsoft Server operating system-21H2"
                                                 }
                                             },
                                             {
                                                 "label": "Windows Server 2022 Datacenter Evaluation (Desktop Experience) - ja-JP",
                                                 "description": "Windows Server 2022 Datacenter Evaluation with Desktop Experience. The installation language is Japanese.",
                                                 "value": {
-                                                    "IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP",
-                                                    "WimImageIndex": 4
+                                                    "isoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP",
+                                                    "wimImageIndex": 4,
+                                                    "updateProduct": "Microsoft Server operating system-21H2"
                                                 }
                                             }
                                         ]
@@ -1269,9 +1286,10 @@
                 "isEnableAutoshutdown": "[steps('sandboxVMDetails').autoshutdownSection.isEnableAutoshutdown]",
                 "autoshutdownTime": "[steps('sandboxVMDetails').autoshutdownSection.shutdownTime]",
                 "autoshutdownTimeZone": "[steps('sandboxVMDetails').autoshutdownSection.shutdownTimeZone]",
-                "hciOperatingSystemIsoFileUri": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.IsoFileUri]",
-                "hciOperatingSystemImageIndex": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.WimImageIndex]",
+                "hciOperatingSystemIsoFileUri": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.isoFileUri]",
+                "hciOperatingSystemImageIndex": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.wimImageIndex]",
                 "isApplyUpdatesToNestedVM": "[steps('hciEnvironmentDetails').hciEnvironmentSection.isApplyUpdatesToNestedVM]",
+                "updateProductForNestedVM": "[steps('hciEnvironmentDetails').hciEnvironmentSection.nestedVMOperatingSystem.updateProduct]",
                 "domainName": "[steps('hciEnvironmentDetails').configurationSection.domainName]",
                 "isEnableDhcp": "[steps('hciEnvironmentDetails').configurationSection.isEnableDhcp]",
                 "hciNodeCount": "[steps('hciEnvironmentDetails').configurationSection.hciNodeCount]"
