@@ -696,6 +696,7 @@ Configuration hcisandbox {
                     Test-Path -Path (Join-Path -Path $using:CuFolderPath -ChildPath '*') -Include '*.msu'
                 }
                 SetScript = {
+                    <#
                     # For Azure Stack HCI 20H2
                     #$cuSearchString = 'Cumulative Update for Azure Stack HCI, version 20H2 for x64-based Systems'
                     #$product = 'Azure Stack HCI'
@@ -709,6 +710,27 @@ Configuration hcisandbox {
                         Where-Object -Property 'Products' -eq $product |
                         Select-Object -First 1
                     Save-MSCatalogUpdate -Update $cuUpdate[0] -Destination $using:CuFolderPath
+                    #>
+
+
+                    $cuSearchString = ('{0} Cumulative Update x64') -f [datetime]::Now.ToString('yyyy')
+                    $product = 'Microsoft Server operating system-21H2'
+                    $cuUpdate = Get-MSCatalogUpdate -Search $cuSearchString -AllPages -ExcludePreview |
+                        Where-Object -Property 'Products' -eq $product |
+                        Group-Object -Property { $_.LastUpdated.ToString('yyyMM') } |
+                        Sort-Object -Property 'Name' -Descending |
+                        Select-Object -First 1 -ExpandProperty 'Group'
+
+                    Write-Verbose -Message ('CU search string: "{0}"' -f $cuSearchString)
+                    Write-Verbose -Message ('CU product: "{0}"' -f $product)
+                    Write-Verbose -Message ('CU count: {0}' -f $cuUpdate.Length)
+                    $cuUpdate | ForEach-Object -Process {
+                        Write-Verbose -Message ('Found CU: "{0}"' -f $_.Title)
+                    }
+
+                    $cuUpdate | ForEach-Object -Process {
+                        Save-MSCatalogUpdate -Update $_ -Destination $using:CuFolderPath -AcceptMultiFileUpdates -UseBits
+                    }
                 }
                 GetScript = {
                     $result = [scriptblock]::Create($TestScript).Invoke()
