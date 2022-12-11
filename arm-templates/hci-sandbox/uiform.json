@@ -148,7 +148,6 @@
                                     "label": "Username",
                                     "toolTip": "Specify the administrator username.",
                                     "osPlatform": "Windows",
-                                    "defaultValue": "vmadmin",
                                     "constraints": {
                                         "required": true
                                     }
