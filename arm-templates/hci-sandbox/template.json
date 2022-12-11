@@ -66,8 +66,8 @@
             ]
         },
         "adminUsername": {
-            "type": "string",
-            "defaultValue": "AzureUser"
+            "type": "string"//,
+            //"defaultValue": "AzureUser"
         },
         "adminPassword": {
             "type": "securestring"
