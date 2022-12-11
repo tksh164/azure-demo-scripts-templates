@@ -291,7 +291,8 @@
         },
         "hciOperatingSystemImageIndex": {
             "type": "int",
-            "defaultValue": 4,
+            "defaultValue": 1,
+            // 1: Azure Stack HCI
             // 1: Windows Server 2022 Standard Evaluation
             // 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
             // 3: Windows Server 2022 Datacenter Evaluation
@@ -303,6 +304,13 @@
         "isApplyUpdatesToNestedVM": {
             "type": "bool",
             "defaultValue": false,
+            "metadata": {
+                "description": "TODO"
+            }
+        },
+        "updateProductForNestedVM": {
+            "type": "string",
+            "defaultValue": "Microsoft Server operating system-21H2",
             "metadata": {
                 "description": "TODO"
             }
@@ -548,17 +556,11 @@
                                 "EnableDHCP": "[parameters('isEnableDhcp')]",
                                 "CustomRdpPort": "[parameters('customRdpPort')]",
                                 "IsoFileUri": "[parameters('hciOperatingSystemIsoFileUri')]",
-                                //"IsoFileUri": "https://aka.ms/2CNBagfhSZ8BM7jyEV8I",  // Azure Stack HCI
-                                //"IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",  // Windows Server 2022 Evaluation en-US
-                                //"IsoFileUri": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x411&culture=ja-jp&country=JP",  // Windows Server 2022 Evaluation ja-JP
-                                // 1: Windows Server 2022 Standard Evaluation
-                                // 2: Windows Server 2022 Standard Evaluation (Desktop Experience)
-                                // 3: Windows Server 2022 Datacenter Evaluation
-                                // 4: Windows Server 2022 Datacenter Evaluation (Desktop Experience)
                                 "WimImageIndex": "[parameters('hciOperatingSystemImageIndex')]",
                                 "NumOfNestedVMs": "[parameters('hciNodeCount')]",
                                 "ApplyUpdatesToSandboxVM": "[parameters('isApplyUpdatesToSandboxVM')]",
-                                "ApplyUpdatesToNestedVM": "[parameters('isApplyUpdatesToNestedVM')]"
+                                "ApplyUpdatesToNestedVM": "[parameters('isApplyUpdatesToNestedVM')]",
+                                "UpdateProductForNestedVM": "[parameters('updateProductForNestedVM')]"
                             }
                         },
                         "protectedSettings": {

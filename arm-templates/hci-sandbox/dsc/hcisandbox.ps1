@@ -70,7 +70,10 @@ Configuration hcisandbox {
         [long] $NestedVMDataDiskSize = 250GB,
 
         [Parameter(Mandatory = $false)]
-        [bool] $ApplyUpdatesToNestedVM = $false
+        [bool] $ApplyUpdatesToNestedVM = $false,
+
+        [Parameter(Mandatory = $false)]
+        [string] $UpdateProductForNestedVM = 'Microsoft Server operating system-21H2'
     )
 
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
@@ -714,7 +717,7 @@ Configuration hcisandbox {
 
 
                     $cuSearchString = ('{0} Cumulative Update x64') -f [datetime]::Now.ToString('yyyy')
-                    $product = 'Microsoft Server operating system-21H2'
+                    $product = $using:UpdateProductForNestedVM
                     $cuUpdate = Get-MSCatalogUpdate -Search $cuSearchString -AllPages -ExcludePreview |
                         Where-Object -Property 'Products' -eq $product |
                         Group-Object -Property { $_.LastUpdated.ToString('yyyMM') } |
