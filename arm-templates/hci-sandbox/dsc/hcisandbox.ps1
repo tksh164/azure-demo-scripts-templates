@@ -49,7 +49,7 @@ Configuration hcisandbox {
         [string] $WacFolderPath = 'C:\WAC',  # This path is related to "install-wac.ps1".
 
         [Parameter(Mandatory = $false)]
-        [string] $IsoFileUri = 'https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US',  # Windows Server 2022 Evaluation en-US
+        [string] $IsoFileUri = 'https://aka.ms/2CNBagfhSZ8BM7jyEV8I',  # Azure Stack HCI latest release
 
         [Parameter(Mandatory = $false)]
         [int] $WimImageIndex = 1,
