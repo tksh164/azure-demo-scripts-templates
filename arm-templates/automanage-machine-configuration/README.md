@@ -2,7 +2,7 @@
 
 ## Template overview
 
-TBW
+This template deploy an Azure VM with Automanage Machine Configuration.
 
 ### Deployment
 
