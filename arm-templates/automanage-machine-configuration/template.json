@@ -1,0 +1,215 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachineName": {
+            "type": "string",
+            "defaultValue": "mconfig-vm1",
+            "metadata": {
+                "description": "Keep the VM name to less than 15 characters."
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "vmadmin"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('virtualMachineName')), 0, 6)]",
+
+        "virtualNetworkName": "mconfig-vnet",
+        "virtualNetworkAddressPrefix": "10.0.0.0/16",
+        "subnetName": "default",
+        "subnetAddressPrefix": "10.0.0.0/24",
+
+        "networkSecurityGroupName": "[concat(variables('virtualNetworkName'), '-', variables('subnetName'), '-nsg')]",
+
+        "networkInterfaceName": "[concat(parameters('virtualMachineName'), '-nic1')]",
+        "privateIPAddress": "10.0.0.4",
+        "publicIpAddressName": "[concat(parameters('virtualMachineName'), '-ip1')]",
+        "dnsNameForPublicIP": "[toLower(concat(resourceGroup().name, '-', parameters('virtualMachineName'), variables('uniqueString')))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('virtualNetworkAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('privateIPAddress')]",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[concat(parameters('virtualMachineName'), '-osdisk')]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-azure-edition-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "name": "[format('{0}/{1}', parameters('virtualMachineName'), 'CustomGuestConfiguration')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2022-08-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.GuestConfiguration",
+                "type": "ConfigurationforWindows",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "enableAutomaticUpgrade": true
+            }
+        },
+        {
+            "name": "[format('{0}/Microsoft.GuestConfiguration/{1}', parameters('virtualMachineName'), 'mconfig')]",
+            "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+            "apiVersion": "2022-01-25",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), 'CustomGuestConfiguration')]"
+            ],
+            "properties": {
+                "guestConfiguration": {
+                    "name": "mconfig",
+                    "version": "1.0.0.0",
+                    "kind": "DSC",
+                    "contentUri": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/automanage-machine-configuration/guestconfig/mconfig.zip",
+                    "contentHash": "30BDD6FF06BEE26DDB6805128262454DBC48AF9D1AE520CB9276CCD0DA776D9A",
+                    "assignmentType": "ApplyAndMonitor",
+                    "configurationParameter": [],
+                    "configurationProtectedParameter": []
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "fqdn": {
+            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]",
+            "type": "string"
+        }
+    }
+}
