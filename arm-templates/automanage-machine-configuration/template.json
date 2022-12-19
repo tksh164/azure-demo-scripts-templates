@@ -194,9 +194,14 @@
                     "version": "1.0.0.0",
                     "kind": "DSC",
                     "contentUri": "https://github.com/tksh164/azure-demo-scripts-templates/raw/master/arm-templates/automanage-machine-configuration/guestconfig/mconfig.zip",
-                    "contentHash": "30BDD6FF06BEE26DDB6805128262454DBC48AF9D1AE520CB9276CCD0DA776D9A",
+                    "contentHash": "74453334661D731B41A78B23723E483C01B210364391D39C52AE30CAAEFCF6C8",
                     "assignmentType": "ApplyAndMonitor",
-                    "configurationParameter": [],
+                    "configurationParameter": [
+                        {
+                            "name": "[Environment]CreatePathEnvironmentVariable;Value",
+                            "value": "abc123"
+                        }
+                    ],
                     "configurationProtectedParameter": []
                 }
             }
