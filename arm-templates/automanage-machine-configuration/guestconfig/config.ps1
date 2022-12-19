@@ -1,7 +1,5 @@
-Configuration EnvironmentVariableConfig
+Configuration mconfig
 {
-    param ()
-
     Import-DscResource -ModuleName 'PSDscResources'
 
     Node localhost
@@ -9,12 +7,10 @@ Configuration EnvironmentVariableConfig
         Environment CreatePathEnvironmentVariable
         {
             Name   = 'TestPathEnvironmentVariable'
-            Value  = 'TestValue'
+            Value  = 'DefaultValue'
             Ensure = 'Present'
             Path   = $true
             Target = @( 'Process', 'Machine' )
         }
     }
 }
-
-EnvironmentVariableConfig
