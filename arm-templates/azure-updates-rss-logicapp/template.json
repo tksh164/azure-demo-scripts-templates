@@ -1,0 +1,321 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "initialFillLogicAppName": {
+            "type": "string",
+            "defaultValue": "azupdates-rss-initial-logic",
+            "metadata": {
+                "description": "The Logic app name for initial filling of Azure updates."
+            }
+        },
+        "appendLogicAppName": {
+            "type": "string",
+            "defaultValue": "azupdates-rss-append-logic",
+            "metadata": {
+                "description": "The Logic app name for continues appending of Azure updates."
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "rssConnectionName": "rss",
+        "excelOnlineBusinessConnectionName": "excelonlinebusiness"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('rssConnectionName')]",
+            "location": "[variables('location')]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "RSS",
+                "customParameterValues": {},
+                "nonSecretParameterValues": {},
+                "api": {
+                    "type": "Microsoft.Web/locations/managedApis",
+                    "name": "[variables('rssConnectionName')]",
+                    "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', variables('location'), variables('rssConnectionName'))]",
+                    "displayName": "RSS",
+                    "description": "RSS is a popular web syndication format used to publish frequently updated content - like blog entries and news headlines.  Many content publishers provide an RSS feed to allow users to subscribe to it.  Use the RSS connector to retrieve feed information and trigger flows when new items are published in an RSS feed.",
+                    "brandColor": "#ff9900",
+                    "iconUri": "[concat('https://connectoricons-prod.azureedge.net/releases/v1.0.1590/1.0.1590.2954/', variables('rssConnectionName'), '/icon.png')]"
+                },
+                "testLinks": []
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('excelOnlineBusinessConnectionName')]",
+            "location": "[variables('location')]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "Excel Online Business connection",
+                "customParameterValues": {},
+                "nonSecretParameterValues": {},
+                "api": {
+                    "type": "Microsoft.Web/locations/managedApis",
+                    "name": "[variables('excelOnlineBusinessConnectionName')]",
+                    "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', variables('location'), variables('excelOnlineBusinessConnectionName'))]",
+                    "displayName": "Excel Online (Business)",
+                    "description": "Excel Online (Business) connector lets you work with Excel files in document libraries supported by Microsoft Graph (OneDrive for Business, SharePoint Sites, and Office 365 Groups).",
+                    "brandColor": "#107C41",
+                    "iconUri": "[concat('https://connectoricons-prod.azureedge.net/releases/v1.0.1600/1.0.1600.3026/', variables('excelOnlineBusinessConnectionName'), '/icon.png')]"
+                },
+                "testLinks": [
+                    {
+                        "requestUri": "[concat('https://management.azure.com:443/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/connections/', variables('excelOnlineBusinessConnectionName'), '/extensions/proxy/testconnection?api-version=2016-06-01')]",
+                        "method": "get"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('initialFillLogicAppName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('rssConnectionName'))]",
+                "[resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "type": "Object",
+                            "defaultValue": {}
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "type": "Recurrence",
+                            "recurrence": {
+                                "frequency": "Month",
+                                "interval": 1
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Month",
+                                "interval": 1
+                            }
+                        }
+                    },
+                    "actions": {
+                        "List_all_RSS_feed_items": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['rss']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/ListFeedItems",
+                                "queries": {
+                                    "feedUrl": "https://azurecomcdn.azureedge.net/en-us/updates/feed/",
+                                    "sinceProperty": "PublishDate"
+                                }
+                            },
+                            "runAfter": {}
+                        },
+                        "For_each": {
+                            "type": "Foreach",
+                            "foreach": "@body('List_all_RSS_feed_items')",
+                            "actions": {
+                                "Parse_JSON": {
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@items('For_each')",
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "categories": {
+                                                    "type": "array"
+                                                },
+                                                "copyright": {
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "primaryLink": {
+                                                    "type": "string"
+                                                },
+                                                "publishDate": {
+                                                    "type": "string"
+                                                },
+                                                "summary": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "updatedOn": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {}
+                                },
+                                "Add_a_row_into_a_table": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['excelonlinebusiness']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/codeless/v1.2/drives/@{encodeURIComponent('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')}/items/@{encodeURIComponent(encodeURIComponent('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))}/workbook/tables/@{encodeURIComponent('{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}')}/rows",
+                                        "queries": {
+                                            "source": "me"
+                                        },
+                                        "body": {
+                                            "Publish Date": "@{convertTimeZone(body('Parse_JSON')?['publishDate'], 'UTC', 'UTC', 'yyyy-MM-dd HH:mm:ss')}",
+                                            "Title": "@{trim(body('Parse_JSON')?['title'])}",
+                                            "Description": "@{trim(body('Parse_JSON')?['summary'])}",
+                                            "Category": "@{join(body('Parse_JSON')?['categories'], ', ')}",
+                                            "Link": "@{trim(body('Parse_JSON')?['primaryLink'])}",
+                                            "Guid": "@{trim(body('Parse_JSON')?['id'])}"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Parse_JSON": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "metadata": {}
+                                }
+                            },
+                            "runAfter": {
+                                "List_all_RSS_feed_items": [
+                                    "Succeeded"
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "rss": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('rssConnectionName'))]",
+                                "connectionName": "[variables('rssConnectionName')]",
+                                "id": "[reference(resourceId('Microsoft.Web/connections', variables('rssConnectionName'))).api.id]"
+                            },
+                            "excelonlinebusiness": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))]",
+                                "connectionName": "excelonlinebusiness",
+                                "id": "[reference(resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))).api.id]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('appendLogicAppName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('rssConnectionName'))]",
+                "[resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "type": "Object",
+                            "defaultValue": {}
+                        }
+                    },
+                    "triggers": {
+                        "When_a_feed_item_is_published": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['rss']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/OnNewFeed",
+                                "queries": {
+                                    "feedUrl": "https://azurecomcdn.azureedge.net/en-us/updates/feed/",
+                                    "sinceProperty": "PublishDate"
+                                }
+                            },
+                            "recurrence": {
+                                "frequency": "Day",
+                                "interval": 1
+                            },
+                            "splitOn": "@triggerBody()?['value']"
+                        }
+                    },
+                    "actions": {
+                        "Add_a_row_into_a_table": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['excelonlinebusiness']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/codeless/v1.2/drives/@{encodeURIComponent('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')}/items/@{encodeURIComponent(encodeURIComponent('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))}/workbook/tables/@{encodeURIComponent('{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}')}/rows",
+                                "queries": {
+                                    "source": "me"
+                                },
+                                "body": {
+                                    "Category": "@{join(triggerBody()?['categories'], ', ')}",
+                                    "Description": "@{trim(triggerBody()?['summary'])}",
+                                    "Guid": "@{trim(triggerBody()?['id'])}",
+                                    "Link": "@{trim(triggerBody()?['primaryLink'])}",
+                                    "Publish Date": "@{convertTimeZone(triggerBody()?['publishDate'], 'UTC', 'UTC', 'yyyy-MM-dd HH:mm:ss')}",
+                                    "Title": "@{trim(triggerBody()?['title'])}"
+                                }
+                            },
+                            "runAfter": {},
+                            "metadata": {}
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "rss": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('rssConnectionName'))]",
+                                "connectionName": "[variables('rssConnectionName')]",
+                                "id": "[reference(resourceId('Microsoft.Web/connections', variables('rssConnectionName'))).api.id]"
+                            },
+                            "excelonlinebusiness": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))]",
+                                "connectionName": "excelonlinebusiness",
+                                "id": "[reference(resourceId('Microsoft.Web/connections', variables('excelOnlineBusinessConnectionName'))).api.id]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
