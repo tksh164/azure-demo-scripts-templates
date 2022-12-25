@@ -6,6 +6,8 @@ This template deploys two Logic apps to collect [Azure updates](https://azure.mi
 
 ## Deployment
 
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fazure-updates-rss-logicapp%2Ftemplate.json)
+
 - azupdates-rss-initial-logic (Logic app)
 - azupdates-rss-append-logic (Logic app)
 - rss (API connection)
