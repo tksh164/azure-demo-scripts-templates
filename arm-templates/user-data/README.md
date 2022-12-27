@@ -11,6 +11,9 @@ This template deploys a VM with user data. The user data can be retrieve from wi
 Sample user data.
 
 ```json
+/*
+Sample user data
+*/
 {
     "id": "Value",
     "switch": true,
@@ -26,8 +29,12 @@ Sample user data.
         },
         {
             "id": 2,
-            "value": ""
-        }
+            "value": ""  // Can be set empty string
+        }//,
+        // {
+        //     "id": 3,
+        //     "value": "C:\\work"
+        // }
     ]
 }
 ```
@@ -36,5 +43,5 @@ Retrieve the user data from within the VM.
 
 ```powershell
 $encodedUserData = Invoke-RestMethod -UseBasicParsing -Method Get -Headers @{ Metadata = 'true' } -Uri 'http://169.254.169.254/metadata/instance/compute/userData?api-version=2021-12-13&format=text'
-$userData = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encodedUserData)) | ConvertFrom-Json
+$userData = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encodedUserData)) -replace '(?m)(?<=^([^"]|"[^"]*")*)//.*' -replace '(?ms)/\*.*?\*/' | ConvertFrom-Json
 ```
