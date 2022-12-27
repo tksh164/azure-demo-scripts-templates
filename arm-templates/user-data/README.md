@@ -12,23 +12,23 @@ This template deploys a VM with user data. The user data can be retrieve from wi
 
     ```json
     {
-    "id": "Value",
-    "switch": true,
-    "number": 123,
-    "items": [
-        {
-        "id": 0,
-        "value": "C:\\temp"
-        },
-        {
-        "id": 1,
-        "value": "V:\\data\\file"
-        },
-        {
-        "id": 2,
-        "value": ""
-        }
-    ]
+        "id": "Value",
+        "switch": true,
+        "number": 123,
+        "items": [
+            {
+                "id": 0,
+                "value": "C:\\temp"
+            },
+            {
+                "id": 1,
+                "value": "V:\\data\\file"
+            },
+            {
+                "id": 2,
+                "value": ""
+            }
+        ]
     }
     ```
 
