@@ -1,0 +1,211 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "AzureUser",
+            "minLength": 1,
+            "maxLength": 20,
+            "metadata": {
+                "description": "The administrator user name."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The administrator password. The password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character. And the password must be between 12 and 123 characters long."
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id), 0, 6)]",
+
+        "vmName": "userdata-vm1",
+
+        "virtualNetworkName": "userdata-vnet",
+        "virtualNetworkNameAddressPrefix": "10.0.0.0/16",
+        "subnetName": "default",
+        "subnetAddressPrefix": "10.0.0.0/24",
+        "subnetNetworkSecurityGroupName": "[format('{0}-{1}-nsg', variables('virtualNetworkName'), variables('subnetName'))]",
+
+        "networkInterfaceName": "[format('{0}-nic1', variables('vmName'))]",
+        "privateIPAddress": "10.0.0.4",
+        "publicIpAddressName": "[format('{0}-ip1', variables('vmName'))]",
+        "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, variables('vmName'), variables('uniqueString')))]",
+
+        /* Sample user data */
+        "userData": {
+            "id": "Value",
+            "switch": true,
+            "number": 123,
+            "items": [
+                {
+                    "id": 0,
+                    "value": "C:\\temp"
+                },
+                {
+                    "id": 1,
+                    "value": "V:\\data\\file"
+                },
+                {
+                    "id": 2,
+                    "value": ""  // Can be set empty string
+                }//,
+                // {
+                //     "id": 3,
+                //     "value": "C:\\work"
+                // }
+            ]
+        }
+    },
+    "resources": [
+        // Network security group for the subnet.
+
+        {
+            "name": "[variables('subnetNetworkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []
+            }
+        },
+
+        // Virtual network.
+
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subnetNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('virtualNetworkNameAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetAddressPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subnetNetworkSecurityGroupName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+
+        // Virtual machine.
+
+        {
+            "name": "[variables('publicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                            },
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('privateIPAddress')]",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": true
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[format('{0}-osdisk', variables('vmName'))]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-azure-edition-smalldisk",
+                        "version": "latest"
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                },
+                "userData": "[base64(string(variables('userData')))]"
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "fqdn": {
+            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]",
+            "type": "string"
+        }
+    }
+}
