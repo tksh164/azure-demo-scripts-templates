@@ -10,7 +10,7 @@ This template deploys a VM with user data. The user data can be retrieve from wi
 
 Sample user data.
 
-```json
+```jsonc
 /*
 Sample user data
 */
