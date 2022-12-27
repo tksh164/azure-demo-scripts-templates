@@ -8,33 +8,33 @@ This template deploys a VM with user data. The user data can be retrieve from wi
 
 ## Use user data
 
-- User data sample
+Sample user data.
 
-    ```json
-    {
-        "id": "Value",
-        "switch": true,
-        "number": 123,
-        "items": [
-            {
-                "id": 0,
-                "value": "C:\\temp"
-            },
-            {
-                "id": 1,
-                "value": "V:\\data\\file"
-            },
-            {
-                "id": 2,
-                "value": ""
-            }
-        ]
-    }
-    ```
+```json
+{
+    "id": "Value",
+    "switch": true,
+    "number": 123,
+    "items": [
+        {
+            "id": 0,
+            "value": "C:\\temp"
+        },
+        {
+            "id": 1,
+            "value": "V:\\data\\file"
+        },
+        {
+            "id": 2,
+            "value": ""
+        }
+    ]
+}
+```
 
-- Retrieve the user data from within the VM
+Retrieve the user data from within the VM.
 
-    ```powershell
-    $encodedUserData = Invoke-RestMethod -UseBasicParsing -Method Get -Headers @{ Metadata = 'true' } -Uri 'http://169.254.169.254/metadata/instance/compute/userData?api-version=2021-12-13&format=text'
-    $userData = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encodedUserData)) | ConvertFrom-Json
-    ```
+```powershell
+$encodedUserData = Invoke-RestMethod -UseBasicParsing -Method Get -Headers @{ Metadata = 'true' } -Uri 'http://169.254.169.254/metadata/instance/compute/userData?api-version=2021-12-13&format=text'
+$userData = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encodedUserData)) | ConvertFrom-Json
+```
