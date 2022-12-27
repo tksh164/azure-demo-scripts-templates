@@ -30,7 +30,7 @@
 
         "vmName": "userdata-vm1",
 
-        "virtualNetworkName": "hcilab-vnet",
+        "virtualNetworkName": "userdata-vnet",
         "virtualNetworkNameAddressPrefix": "10.0.0.0/16",
         "subnetName": "default",
         "subnetAddressPrefix": "10.0.0.0/24",
