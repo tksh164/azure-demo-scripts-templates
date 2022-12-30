@@ -4,7 +4,7 @@
 
 ## Template overview
 
-This template deploys a VM and Key Vault. Also, store to Key Vault the VM's admin password as a secret.
+This template deploys a VM and a Key Vault. Also, store to Key Vault the VM's admin password as a secret.
 
 ## Use the secret
 
