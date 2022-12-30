@@ -1,0 +1,383 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "AzureUser",
+            "minLength": 1,
+            "maxLength": 20,
+            "metadata": {
+                "description": "The administrator user name."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The administrator password. The password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character. And the password must be between 12 and 123 characters long."
+            }
+        },
+        "salt": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "The value for generate unique values."
+            }
+        }
+    },
+    "variables": {
+        // General
+
+        "location": "[resourceGroup().location]",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('salt')), 0, 6)]",
+
+        // Vitual machine
+
+        "vmDeploymentName": "deploy-vm",
+
+        // Key Vault
+
+        "keyVaultName": "[format('kvmid-kv1-{0}', toLower(variables('uniqueString')))]",
+        "secretName": "vmAdminPassword"
+    },
+    "resources": [
+        {
+            "name": "[variables('vmDeploymentName')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('adminUserName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "uniqueString": {
+                        "value": "[variables('uniqueString')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "Location for the virtual network."
+                            }
+                        },
+                        "adminUserName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The administrator user name."
+                            }
+                        },
+                        "adminPassword": {
+                            "type": "securestring",
+                            "metadata": {
+                                "description": "The administrator password. The password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character. And the password must be between 12 and 123 characters long."
+                            }
+                        },
+                        "uniqueString": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The value for uniqueness."
+                            }
+                        }
+                    },
+                    "variables": {
+                        // Virtual network
+
+                        "virtualNetworkName": "kvmid-vnet",
+                        "virtualNetworkNameAddressPrefix": "10.0.0.0/16",
+                        "subnetName": "default",
+                        "subnetAddressPrefix": "10.0.0.0/24",
+                        "subnetNetworkSecurityGroupName": "[format('{0}-{1}-nsg', variables('virtualNetworkName'), variables('subnetName'))]",
+
+                        // Virtual machine
+
+                        "vmName": "kvmid-vm1",
+                        "networkInterfaceName": "[format('{0}-nic1', variables('vmName'))]",
+                        "privateIPAddress": "10.0.0.4",
+                        "publicIpAddressName": "[format('{0}-ip1', variables('vmName'))]",
+                        "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, variables('vmName'), toLower(parameters('uniqueString'))))]"
+                    },
+                    "resources": [
+                        // Network security group for the subnet.
+
+                        {
+                            "name": "[variables('subnetNetworkSecurityGroupName')]",
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2020-11-01",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": []
+                            }
+                        },
+
+                        // Virtual network
+
+                        {
+                            "name": "[variables('virtualNetworkName')]",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2020-11-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subnetNetworkSecurityGroupName'))]"
+                            ],
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "[variables('virtualNetworkNameAddressPrefix')]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "[variables('subnetName')]",
+                                        "properties": {
+                                            "addressPrefix": "[variables('subnetAddressPrefix')]",
+                                            "networkSecurityGroup": {
+                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('subnetNetworkSecurityGroupName'))]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+
+                        // Virtual machine
+
+                        {
+                            "name": "[variables('publicIpAddressName')]",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "apiVersion": "2020-11-01",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static",
+                                "dnsSettings": {
+                                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                                }
+                            }
+                        },
+                        {
+                            "name": "[variables('networkInterfaceName')]",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2020-11-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+                                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                                            },
+                                            "privateIPAllocationMethod": "Static",
+                                            "privateIPAddress": "[variables('privateIPAddress')]",
+                                            "publicIpAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "[variables('vmName')]",
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2022-03-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "Standard_B2ms"
+                                },
+                                "osProfile": {
+                                    "computerName": "[variables('vmName')]",
+                                    "adminUsername": "[parameters('adminUserName')]",
+                                    "adminPassword": "[parameters('adminPassword')]",
+                                    "windowsConfiguration": {
+                                        "provisionVmAgent": true
+                                    }
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                                        }
+                                    ]
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "name": "[format('{0}-osdisk', variables('vmName'))]",
+                                        "createOption": "FromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "StandardSSD_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "MicrosoftWindowsServer",
+                                        "offer": "WindowsServer",
+                                        "sku": "2022-datacenter-azure-edition-smalldisk",
+                                        "version": "latest"
+                                    }
+                                },
+                                "diagnosticsProfile": {
+                                    "bootDiagnostics": {
+                                        "enabled": true
+                                    }
+                                }
+                            },
+                            "identity": {
+                                "type": "SystemAssigned"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "publicIpFqdn": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]"
+                        },
+                        "principalId": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines', variables('vmName')), '2022-03-01', 'Full').identity.principalId]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Key Vault
+
+        {
+            "name": "[variables('keyVaultName')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2022-07-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "sku": {
+                    "name": "Standard",
+                    "family": "A"
+                },
+                "tenantId": "[tenant().tenantId]",
+                "enableSoftDelete": false,
+                "enabledForDeployment": false,
+                "enabledForTemplateDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enableRbacAuthorization": true,
+                "accessPolicies": [],
+                "publicNetworkAccess": "Enabled",
+                "networkAcls": {
+                    "defaultAction": "allow",
+                    "bypass": "AzureServices"
+                }
+            }
+        },
+        {
+            "name": "[format('{0}/{1}', variables('keyVaultName'), variables('secretName'))]",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2022-07-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('adminPassword')]"
+            }
+        },
+
+        // Role assignment
+
+        {
+            "name": "key-vault-role-assignment",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', variables('vmDeploymentName'))]",
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "keyVaultName": {
+                        "value": "[variables('keyVaultName')]"
+                    },
+                    "principalId": {
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('vmDeploymentName'))).outputs.principalId.value]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "keyVaultName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The Key Vault resource name."
+                            }
+                        },
+                        "principalId": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The principal ID of the virtual machine's managed identity."
+                            }
+                        }
+                    },
+                    "variables": {
+                        "roleAssignmentName": "[guid(parameters('principalId'))]"
+                    },
+                    "resources": [
+                        {
+                            "name": "[variables('roleAssignmentName')]",
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyVaultName'))]",
+                            "properties": {
+                                "principalType": "ServicePrincipal",
+                                "principalId": "[parameters('principalId')]",
+                                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"  // Key Vault Secrets User
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUserName": {
+            "type": "string",
+            "value": "[parameters('adminUserName')]"
+        },
+        "vmPublicIpFqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('vmDeploymentName'))).outputs.publicIpFqdn.value]"
+        },
+        "vmPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('vmDeploymentName'))).outputs.principalId.value]"
+        },
+        "secretName": {
+            "type": "string",
+            "value": "[variables('secretName')]"
+        }
+    }
+}
