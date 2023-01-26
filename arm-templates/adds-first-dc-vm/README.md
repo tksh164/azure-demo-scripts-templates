@@ -10,12 +10,9 @@ Deploy a first domain controller virtual machine of Active Directory domain serv
 
 - The domain controller virtual machine is configured as domain controller through template deployment.
 - The private IP address assignment of the DC virtual machine has set as **Dynamic**. Change to **Static** if you needed.
-- The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
-
 
 ## TODO
 
-- [ ] Update README
 - [ ] Add Public IP address option
 - [ ] Add NSG resource assosiation
 - [ ] Add Availability Set / Availability Zone option
