@@ -438,6 +438,7 @@ function Install-LanguagePack
     Write-Verbose -Message ('Downloading the language pack "{0}" for "{1}".' -f $Language, $OSVersion)
 
     $params = @{
+        langPackIsoUri           = $languageConstants[$OSVersion].langPackIsoUri
         OffsetToCabFileInIsoFile = $languageConstants[$OSVersion][$Language].LanguagePack.OffsetToCabFileInIsoFile
         CabFileSize              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileSize
         CabFileHash              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileHash
@@ -461,6 +462,10 @@ function Invoke-LanguagePackCabFileDownload
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $langPackIsoUri,
+
+        [Parameter(Mandatory = $true)]
         [long] $OffsetToCabFileInIsoFile,
 
         [Parameter(Mandatory = $true)]
@@ -475,28 +480,26 @@ function Invoke-LanguagePackCabFileDownload
         [string] $DestinationFilePath
     )
 
-    # Reference:
-    # - Cannot configure a language pack for Windows Server 2019 Desktop Experience
-    #   https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
-    $langPackIsoUri = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
+    Write-Verbose -Message ('Downloading the language pack from "{0}".' -f $langPackIsoUri)
+
     $request = [System.Net.HttpWebRequest]::Create($langPackIsoUri)
     $request.Method = 'GET'
 
     # Set the language pack CAB file data range.
     $request.AddRange('bytes', $OffsetToCabFileInIsoFile, $OffsetToCabFileInIsoFile + $CabFileSize - 1)
 
-    # Donwload the lang pack CAB file.
+    # Donwload the language pack CAB file.
     $response = $request.GetResponse()
     $reader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList $response.GetResponseStream()
-    $contents = $reader.ReadBytes($response.ContentLength)
-    $reader.Dispose()
-
-    # Save the lang pack CAB file.
     $fileStream = [System.IO.File]::Create($DestinationFilePath)
+    $contents = $reader.ReadBytes($response.ContentLength)
     $fileStream.Write($contents, 0, $contents.Length)
     $fileStream.Dispose()
+    $reader.Dispose()
+    $response.Close()
+    $response.Dispose()
 
-    # Verify integrity to the downloaded lang pack CAB file.
+    # Verify integrity of the downloaded language pack CAB file.
     $fileHash = Get-FileHash -Algorithm SHA1 -LiteralPath $DestinationFilePath
     if ($fileHash.Hash -ne $CabFileHash) {
         throw ('The file hash of the language pack CAB file "{0}" is not match to expected value. The download was may failed.') -f $DestinationFilePath

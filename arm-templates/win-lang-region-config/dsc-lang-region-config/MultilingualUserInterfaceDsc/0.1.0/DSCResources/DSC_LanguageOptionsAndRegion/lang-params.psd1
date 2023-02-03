@@ -5,6 +5,13 @@
 @{
     # Windows Server 2022
     '10.0.20348' = @{
+
+        # Reference:
+        # - Evaluation Center
+        #   https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2022
+        'langPackIsoUri' = 'https://software-static.download.prss.microsoft.com/pr/download/20348.1.210507-1500.fe_release_amd64fre_SERVER_LOF_PACKAGES_OEM.iso'
+
+        # Languages
         'ja-JP' = @{
             LanguagePack = @{
                 PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.20348.*'
@@ -32,6 +39,13 @@
 
     # Windows Server 2019
     '10.0.17763' = @{
+
+        # Reference:
+        # - Cannot configure a language pack for Windows Server 2019 Desktop Experience
+        #   https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
+        'langPackIsoUri' = 'https://software-static.download.prss.microsoft.com/pr/download/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'
+
+        # Languages
         'en-US' = @{
             LanguagePack = @{
                 PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.*'
