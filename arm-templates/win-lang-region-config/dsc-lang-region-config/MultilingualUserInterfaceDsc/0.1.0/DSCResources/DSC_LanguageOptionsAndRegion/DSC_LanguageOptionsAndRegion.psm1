@@ -122,7 +122,6 @@ function Test-TargetResource
 
     # Language
     $subResult = ($PreferredLanguage -eq $currentConfig.PreferredLanguage)
-    $result = $result -and $subResult
     if ($subResult)
     {
         Write-Verbose -Message ('The preferred language is already set to "{0}".' -f $PreferredLanguage)
@@ -131,6 +130,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentConfig.PreferredLanguage, $PreferredLanguage)
     }
+    $result = $result -and $subResult
 
     # CopySettingsToDefaultUserAccount
     if ($CopySettingsToDefaultUserAccount)
