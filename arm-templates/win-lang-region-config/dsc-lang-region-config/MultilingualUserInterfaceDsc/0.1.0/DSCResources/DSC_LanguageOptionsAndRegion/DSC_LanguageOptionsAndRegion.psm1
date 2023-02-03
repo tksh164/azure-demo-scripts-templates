@@ -140,7 +140,6 @@ function Test-TargetResource
         }
         if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
         $subResult = (Test-DefaultUserAccountSettings @params)
-        $result = $subResult -and $result
         if ($subResult)
         {
             Write-Verbose -Message ('The default user account settings are already set to the required configuration.')
@@ -149,6 +148,7 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The default user account settings are not set to the required configuration.')
         }
+        $result = $result -and $subResult
     }
 
     # LocationGeoId
@@ -284,6 +284,7 @@ FullyQualifiedErrorId: {3}
 function Test-DefaultUserAccountSettings
 {
     [CmdletBinding()]
+    [OutputType([bool])]
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -295,8 +296,9 @@ function Test-DefaultUserAccountSettings
 
     Write-Verbose -Message 'Testing the default user account settings.'
 
-    $reuslt = $true
+    $result = $true
 
+    # PreferredUILanguages
     $preferredUILanguages = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\Desktop').GetValue('PreferredUILanguages')
     if (($preferredUILanguages -eq $null) -or ($preferredUILanguages.Length -eq 0))
     {
@@ -309,6 +311,7 @@ function Test-DefaultUserAccountSettings
         Write-Verbose -Message ('The default user account''s PreferredUILanguages is "{0}" but should be "{1}". Change required.' -f $preferredUILanguages[0], $PreferredLanguage)
     }
 
+    # LocaleName
     $localeName = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\International').GetValue('LocaleName')
     if ($localeName -ne $PreferredLanguage)
     {
@@ -316,6 +319,7 @@ function Test-DefaultUserAccountSettings
         Write-Verbose -Message ('The default user account''s LocaleName is "{0}" but should be "{1}". Change required.' -f $localeName, $PreferredLanguage)
     }
 
+    # LocationGeoId
     if ($PSBoundParameters.ContainsKey('LocationGeoId'))
     {
         $nation = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\International\Geo').GetValue('Nation')
