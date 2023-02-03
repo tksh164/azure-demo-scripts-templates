@@ -409,7 +409,7 @@ function Set-TargetResource
     # Set special account settings.
     $params = @{
         PreferredLanguage                = $PreferredLanguage
-        InputLanguageID                  = $languageConstants[$PreferredLanguage].InputLanguageID
+        InputLanguageID                  = $languageConstants[$osVersion][$PreferredLanguage].InputLanguageID
         CopySettingsToDefaultUserAccount = $CopySettingsToDefaultUserAccount
     }
     if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
@@ -599,6 +599,7 @@ function Set-LanguageOptions
     $procStartInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Minimized
     $proc = [System.Diagnostics.Process]::Start($procStartInfo)
     $proc.WaitForExit()
+    $proc.Dispose()
 
     # Delete the XML file.
     Remove-Item -LiteralPath $xmlFileFilePath -Force
