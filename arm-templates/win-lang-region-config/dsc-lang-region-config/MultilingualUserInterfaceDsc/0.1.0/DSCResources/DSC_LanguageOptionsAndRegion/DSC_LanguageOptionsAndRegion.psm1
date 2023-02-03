@@ -220,7 +220,7 @@ function Test-LanguagePackInstallation
     Write-Verbose -Message 'Testing the language pack installation.'
 
     $languagePackPackageName = $languageConstants[$Language].LanguagePack.PackageName
-    $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -EQ -Value $languagePackPackageName
+    $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -Like -Value $languagePackPackageName
     $result = ($package -ne $null) -and ($package.PackageState -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed)
     $stateText = if ($result) { 'installed' } else { 'not installed' }
     Write-Verbose -Message ('The language pack for "{0}" is {1}.' -f $Language, $stateText)

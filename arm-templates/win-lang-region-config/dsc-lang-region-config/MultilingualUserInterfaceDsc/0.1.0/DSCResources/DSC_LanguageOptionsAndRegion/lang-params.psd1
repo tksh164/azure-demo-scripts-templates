@@ -35,7 +35,7 @@
     'ws2019' = @{
         'en-US' = @{
             LanguagePack = @{
-                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.1'
+                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.*'
                 CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_en-us.cab'
                 OffsetToCabFileInIsoFile = 0x1780D000
                 CabFileSize              = 41441411
@@ -56,7 +56,7 @@
         }
         'ja-JP' = @{
             LanguagePack = @{
-                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.1'
+                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.*'
                 CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
                 OffsetToCabFileInIsoFile = 0x3BD26800
                 CabFileSize              = 62015873
@@ -79,7 +79,7 @@
         }
         'fr-FR' = @{
             LanguagePack = @{
-                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~fr-FR~10.0.17763.1'
+                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~fr-FR~10.0.17763.*'
                 CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_fr-fr.cab'
                 OffsetToCabFileInIsoFile = 0x2ADB2000
                 CabFileSize              = 60331188
@@ -100,7 +100,7 @@
         }
         'ko-KR' = @{
             LanguagePack = @{
-                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ko-KR~10.0.17763.1'
+                PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ko-KR~10.0.17763.*'
                 CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ko-kr.cab'
                 OffsetToCabFileInIsoFile = 0x3F84B800
                 CabFileSize              = 62974463 
