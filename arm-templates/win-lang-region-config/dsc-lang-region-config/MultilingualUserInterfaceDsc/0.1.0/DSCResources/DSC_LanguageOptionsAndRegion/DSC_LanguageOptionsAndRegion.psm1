@@ -157,8 +157,7 @@ function Test-TargetResource
         Write-Verbose -Message 'Testing the location geo ID.'
 
         $geoId = (Get-WinHomeLocation).GeoId
-        $subResult = ($LocationGeoId -eq $geoId) -and $result
-        $result = $subResult -and $result
+        $subResult = $LocationGeoId -eq $geoId
         if ($subResult)
         {
             Write-Verbose -Message ('The location geo ID is already set to "{0}".' -f $LocationGeoId)
@@ -167,6 +166,7 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The location geo ID is "{0}" but should be "{1}". Change required.' -f $geoId, $LocationGeoId)
         }
+        $result = $result -and $subResult
     }
 
     # SystemLocale
