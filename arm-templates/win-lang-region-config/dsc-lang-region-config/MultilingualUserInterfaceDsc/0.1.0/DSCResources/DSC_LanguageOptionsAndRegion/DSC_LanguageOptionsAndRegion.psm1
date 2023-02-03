@@ -81,16 +81,18 @@ function Test-TargetResource
     )
 
     $result = $true
+    $osVersion = Get-OSVersion
 
-    if (-not (Test-SupportedWindowsVersion))
+    if (-not (Test-SupportedWindowsVersion -OSVersion $osVersion))
     {
         Write-Verbose -Message 'Current system''s Windows version is not supported.'
         return $result
     }
 
-    if (-not (Test-SupportedLanguage -Language $PreferredLanguage))
+    if (-not (Test-SupportedLanguage -OSVersion $osVersion -Language $PreferredLanguage))
     {
-        New-InvalidArgumentException -Message ('The preferred language "{0}" is not supported.' -f $PreferredLanguage) -ArgumentName 'PreferredLanguage'
+        Write-Verbose -Message ('The preferred language "{0}" is not supported in OS version "{1}".' -f $PreferredLanguage, $osVersion)
+        return $result
     }
 
     # Language pack package installation.
@@ -193,15 +195,28 @@ function Test-TargetResource
     $result
 }
 
+function Get-OSVersion
+{
+    [CmdletBinding()]
+    [OutputType([string])]
+    param ()
+
+    $osVersion = (Get-CimInstance -ClassName 'Win32_OperatingSystem' -Verbose:$false).Version
+    Write-Verbose -Message ('Current system''s Windows version is "{0}".' -f $osVersion)
+    $osVersion
+}
+
 function Test-SupportedWindowsVersion
 {
     [CmdletBinding()]
     [OutputType([bool])]
-    param ()
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OSVersion
+    )
 
-    $currentOSVersion = (Get-CimInstance -ClassName 'Win32_OperatingSystem' -Verbose:$false).Version
-    Write-Verbose -Message ('Current system''s Windows version is "{0}".' -f $currentOSVersion)
-    $currentOSVersion -in $languageConstants.SupportedWindowsVersion
+    $languageConstants.ContainsKey($OSVersion)
 }
 
 function Test-LanguagePackInstallation
@@ -337,11 +352,6 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [string] $SystemLocale
     )
-
-    if (-not (Test-SupportedLanguage -Language $PreferredLanguage))
-    {
-        New-InvalidArgumentException -Message ('The preferred language "{0}" is not supported.' -f $PreferredLanguage) -ArgumentName 'PreferredLanguage'
-    }
 
     # Install the language pack.
     if (-not (Test-LanguagePackInstallation -Language $PreferredLanguage -Verbose:$false))
@@ -568,10 +578,14 @@ function Test-SupportedLanguage
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
-    (Test-CultureValue -CultureName $Language) -and ($languageConstants.ContainsKey($Language))
+    (Test-CultureValue -CultureName $Language) -and ($languageConstants[$OSVersion].ContainsKey($Language))
 }
 
 function Test-CultureValue
