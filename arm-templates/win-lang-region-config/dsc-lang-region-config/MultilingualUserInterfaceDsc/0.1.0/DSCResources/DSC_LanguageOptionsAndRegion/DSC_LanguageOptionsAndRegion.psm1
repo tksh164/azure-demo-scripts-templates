@@ -284,7 +284,7 @@ function Test-LanguageCapabilityInstallation
             $capability = Get-WindowsCapability -Online -Name $capabilityName -Verbose:$false
             $subResult = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
             $stateText = if ($subResult) { 'installed' } else { 'not installed' }
-            Write-Verbose -Message ('The "{0}" capability is {1}.' -f $capabilityName, $stateText)
+            Write-Verbose -Message ('The capability "{0}" is {1}.' -f $capabilityName, $stateText)
             $result = $result -and $subResult
         }
         catch
