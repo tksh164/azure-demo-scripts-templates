@@ -388,7 +388,7 @@ function Set-TargetResource
     # Install the language pack.
     if (-not (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage -Verbose:$false))
     {
-        Install-LanguagePack -Language $PreferredLanguage
+        Install-LanguagePack -OSVersion $osVersion -Language $PreferredLanguage
         $global:DSCMachineStatus = 1
     }
 
@@ -424,30 +424,34 @@ function Install-LanguagePack
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
-    # Get the anguage pack CAB file name.
-    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$Language].LanguagePack.CabFileName
+    # Get the language pack CAB file name.
+    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$OSVersion][$Language].LanguagePack.CabFileName
 
     # Download the lanchage pack.
-    Write-Verbose -Message ('Downloading the language pack for "{0}".' -f $Language)
+    Write-Verbose -Message ('Downloading the language pack "{0}" for "{1}".' -f $Language, $OSVersion)
 
     $params = @{
-        OffsetToCabFileInIsoFile = $languageConstants[$Language].LanguagePack.OffsetToCabFileInIsoFile
-        CabFileSize              = $languageConstants[$Language].LanguagePack.CabFileSize
-        CabFileHash              = $languageConstants[$Language].LanguagePack.CabFileHash
+        OffsetToCabFileInIsoFile = $languageConstants[$OSVersion][$Language].LanguagePack.OffsetToCabFileInIsoFile
+        CabFileSize              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileSize
+        CabFileHash              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileHash
         DestinationFilePath      = $langPackFilePath
     }
     Invoke-LanguagePackCabFileDownload @params
-    Write-Verbose -Message ('The language pack for "{0}" has been downloaded.' -f $Language)
+    Write-Verbose -Message ('The language pack "{0}" for "{1}" has been downloaded.' -f $Language, $OSVersion)
 
     # Install the language pack.
-    Write-Verbose -Message ('Installing the language pack for "{0}".' -f $Language)
+    Write-Verbose -Message ('Installing the language pack "{0}".' -f $Language)
     Add-WindowsPackage -Online -NoRestart -PackagePath $langPackFilePath -Verbose:$false
-    Write-Verbose -Message ('The language pack for "{0}" has been installed.' -f $Language)
+    Write-Verbose -Message ('The language pack "{0}" has been installed.' -f $Language)
 
-    # Delete the lang pack CAB file.
+    # Delete the language pack CAB file.
     Remove-Item -LiteralPath $langPackFilePath -Force
     Write-Verbose -Message 'The temporary files for the language pack are deleted.'
 }
