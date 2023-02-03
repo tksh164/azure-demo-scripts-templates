@@ -514,14 +514,15 @@ function Install-LanguageCapability
         [string[]] $LanguageCapabilityNames
     )
 
-    $LanguageCapabilityNames | ForEach-Object -Process {
-        $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
+    foreach ($capabilityName in $LanguageCapabilityNames)
+    {
+        $capability = Get-WindowsCapability -Online -Name $capabilityName -Verbose:$false
         $capabilityState = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
         if (-not $capabilityState)
         {
-            Write-Verbose -Message ('Installing the "{0}" capability.' -f $_)
+            Write-Verbose -Message ('Installing the capability "{0}".' -f $capabilityName)
             Add-WindowsCapability -Online -Name $_ -Verbose:$false
-            Write-Verbose -Message ('The capability "{0}" has been installed.' -f $_)
+            Write-Verbose -Message ('The capability "{0}" has been installed.' -f $capabilityName)
         }
     }
 }
