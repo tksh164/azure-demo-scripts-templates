@@ -169,7 +169,7 @@ function Test-TargetResource
 
         if (-not (Test-CultureValue -CultureName $SystemLocale))
         {
-            New-InvalidArgumentException -Message ('The system locale "{0}" is invalid.' -f $SystemLocale) -ArgumentName 'SystemLocale'
+            throw ('The system locale "{0}" is invalid.' -f $SystemLocale)
         }
 
         $locale = (Get-WinSystemLocale).Name
@@ -631,29 +631,6 @@ function Test-CultureValue
 
     $validCultures = [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::AllCultures).Name
     $CultureName -in $validCultures
-}
-
-function New-InvalidArgumentException
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Message,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $ArgumentName
-    )
-
-    $argumentException = New-Object -TypeName 'ArgumentException' -ArgumentList $Message, $ArgumentName
-
-    $params = @{
-        TypeName     = 'System.Management.Automation.ErrorRecord'
-        ArgumentList = $argumentException, $ArgumentName, 'InvalidArgument', $null
-    }
-    $errorRecord = New-Object @params
-    throw $errorRecord
 }
 
 Export-ModuleMember -Function *-TargetResource
