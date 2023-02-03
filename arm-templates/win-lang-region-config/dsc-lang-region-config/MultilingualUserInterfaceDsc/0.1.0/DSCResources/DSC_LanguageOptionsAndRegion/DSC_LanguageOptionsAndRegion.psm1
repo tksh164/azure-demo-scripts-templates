@@ -101,13 +101,13 @@ function Test-TargetResource
     # Language capability installation.
     $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
     {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum
+        $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Minimum
     }
     else
     {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$PreferredLanguage].CapabilityNames.Additional
+        $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Additional
     }
-    $result = (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames) -and $result
+    $result = $result -and (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames)
 
     # Get the current settings.
     $params = @{
@@ -255,15 +255,15 @@ function Test-LanguageCapabilityInstallation
     Write-Verbose -Message 'Testing the language capability installation.'
 
     $result = $true
-
-    $LanguageCapabilityNames | ForEach-Object -Process {
+    foreach ($capabilityName in $LanguageCapabilityNames)
+    {
         try
         {
-            $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
+            $capability = Get-WindowsCapability -Online -Name $capabilityName -Verbose:$false
             $subResult = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
-            $result = $subResult -and $result
             $stateText = if ($subResult) { 'installed' } else { 'not installed' }
-            Write-Verbose -Message ('The "{0}" capability is {1}.' -f $_, $stateText)
+            Write-Verbose -Message ('The "{0}" capability is {1}.' -f $capabilityName, $stateText)
+            $result = $result -and $subResult
         }
         catch
         {
