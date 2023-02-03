@@ -521,7 +521,7 @@ function Install-LanguageCapability
         if (-not $capabilityState)
         {
             Write-Verbose -Message ('Installing the capability "{0}".' -f $capabilityName)
-            Add-WindowsCapability -Online -Name $_ -Verbose:$false
+            Add-WindowsCapability -Online -Name $capabilityName -Verbose:$false
             Write-Verbose -Message ('The capability "{0}" has been installed.' -f $capabilityName)
         }
     }
