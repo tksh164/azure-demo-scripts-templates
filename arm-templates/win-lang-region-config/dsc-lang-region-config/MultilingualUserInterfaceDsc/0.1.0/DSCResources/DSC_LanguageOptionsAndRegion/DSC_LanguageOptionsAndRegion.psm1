@@ -29,7 +29,7 @@ function Get-TargetResource
         [string] $SystemLocale
     )
 
-    Write-Verbose -Message 'Getting the special account MUI settings.'
+    Write-Verbose -Message 'Getting the special account MUI configuration.'
 
     $result = @{
         IsSingleInstance                 = $IsSingleInstance
@@ -109,7 +109,7 @@ function Test-TargetResource
     }
     $result = $result -and (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames)
 
-    # Get the current settings.
+    # Get the current configuration.
     $params = @{
         IsSingleInstance                 = $IsSingleInstance
         PreferredLanguage                = $PreferredLanguage
@@ -118,18 +118,18 @@ function Test-TargetResource
     }
     if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
     if ($PSBoundParameters.ContainsKey('SystemLocale')) { $params.SystemLocale = $SystemLocale }
-    $currentSettings = Get-TargetResource @params -Verbose:$false
+    $currentConfig = Get-TargetResource @params -Verbose:$false
 
     # Language
-    $subResult = ($PreferredLanguage -eq $currentSettings.PreferredLanguage)
-    $result = $subResult -and $result
+    $subResult = ($PreferredLanguage -eq $currentConfig.PreferredLanguage)
+    $result = $result -and $subResult
     if ($subResult)
     {
         Write-Verbose -Message ('The preferred language is already set to "{0}".' -f $PreferredLanguage)
     }
     else
     {
-        Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentSettings.PreferredLanguage, $PreferredLanguage)
+        Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentConfig.PreferredLanguage, $PreferredLanguage)
     }
 
     # CopySettingsToDefaultUserAccount
