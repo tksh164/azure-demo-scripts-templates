@@ -99,14 +99,7 @@ function Test-TargetResource
     $result = $result -and (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage)
 
     # Language capability installation.
-    $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
-    {
-        $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Minimum
-    }
-    else
-    {
-        $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$osVersion][$PreferredLanguage].CapabilityNames.Additional
-    }
+    $languageCapabilityNames = Get-LanguageCapabilityNames -OSVersion $osVersion -Language $PreferredLanguage -CapabilityLevel $LanguageCapabilities
     $result = $result -and (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames)
 
     # Get the current configuration.
@@ -243,6 +236,35 @@ function Test-LanguagePackInstallation
     $result
 }
 
+function Get-LanguageCapabilityNames
+{
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Language,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet('Minimum', 'All')]
+        [string] $CapabilityLevel
+    )
+
+    if ($CapabilityLevel -eq 'Minimum')
+    {
+        $languageConstants[$OSVersion][$Language].CapabilityNames.Minimum
+    }
+    else
+    {
+        $languageConstants[$OSVersion][$Language].CapabilityNames.Minimum + $languageConstants[$OSVersion][$Language].CapabilityNames.Additional
+    }
+}
+
 function Test-LanguageCapabilityInstallation
 {
     [CmdletBinding()]
@@ -371,14 +393,7 @@ function Set-TargetResource
     }
 
     # Install the language capabilities.
-    $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum
-    }
-    else
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$PreferredLanguage].CapabilityNames.Additional
-    }
+    $languageCapabilityNames = Get-LanguageCapabilityNames -OSVersion $osVersion -Language $PreferredLanguage -CapabilityLevel $LanguageCapabilities
     if (-not (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames -Verbose:$false))
     {
         Install-LanguageCapability -LanguageCapabilityNames $languageCapabilityNames
