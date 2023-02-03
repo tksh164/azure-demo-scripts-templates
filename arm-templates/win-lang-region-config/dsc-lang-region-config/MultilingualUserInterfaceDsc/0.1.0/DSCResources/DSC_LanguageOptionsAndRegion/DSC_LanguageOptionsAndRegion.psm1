@@ -96,7 +96,7 @@ function Test-TargetResource
     }
 
     # Language pack package installation.
-    $result = (Test-LanguagePackInstallation -Language $PreferredLanguage) -and $result
+    $result = $result -and (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage)
 
     # Language capability installation.
     $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
@@ -226,12 +226,16 @@ function Test-LanguagePackInstallation
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
     Write-Verbose -Message 'Testing the language pack installation.'
 
-    $languagePackPackageName = $languageConstants[$Language].LanguagePack.PackageName
+    $languagePackPackageName = $languageConstants[$OSVersion][$Language].LanguagePack.PackageName
     $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -Like -Value $languagePackPackageName
     $result = ($package -ne $null) -and ($package.PackageState -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed)
     $stateText = if ($result) { 'installed' } else { 'not installed' }
@@ -353,8 +357,10 @@ function Set-TargetResource
         [string] $SystemLocale
     )
 
+    $osVersion = Get-OSVersion
+
     # Install the language pack.
-    if (-not (Test-LanguagePackInstallation -Language $PreferredLanguage -Verbose:$false))
+    if (-not (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage -Verbose:$false))
     {
         Install-LanguagePack -Language $PreferredLanguage
         $global:DSCMachineStatus = 1
