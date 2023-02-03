@@ -180,8 +180,7 @@ function Test-TargetResource
         }
 
         $locale = (Get-WinSystemLocale).Name
-        $subResult = ($SystemLocale -eq $locale) -and $result
-        $result = $subResult -and $result
+        $subResult = $SystemLocale -eq $locale
         if ($subResult)
         {
             Write-Verbose -Message ('The system locale is already set to "{0}".' -f $SystemLocale)
@@ -190,6 +189,7 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The system locale is "{0}" but should be "{1}". Change required.' -f $locale, $SystemLocale)
         }
+        $result = $result -and $subResult
     }
 
     $result
