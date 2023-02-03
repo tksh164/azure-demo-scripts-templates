@@ -3,11 +3,8 @@
 #   https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
 
 @{
-    'SupportedWindowsVersion' = @(
-        '10.0.20348',  # Windows Server 2022
-        '10.0.17763'   # Windows Server 2019
-    )
-    'ws2022' = @{
+    # Windows Server 2022
+    '10.0.20348' = @{
         'ja-JP' = @{
             LanguagePack = @{
                 PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.20348.*'
@@ -32,7 +29,9 @@
             InputLanguageID = '0411:{03B5835F-F03C-411B-9CE2-AA23E1171E36}{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}'
         }
     }
-    'ws2019' = @{
+
+    # Windows Server 2019
+    '10.0.17763' = @{
         'en-US' = @{
             LanguagePack = @{
                 PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.*'
