@@ -438,7 +438,7 @@ function Install-LanguagePack
     Write-Verbose -Message ('Downloading the language pack "{0}" for "{1}".' -f $Language, $OSVersion)
 
     $params = @{
-        langPackIsoUri           = $languageConstants[$OSVersion].langPackIsoUri
+        LangPackIsoUri           = $languageConstants[$OSVersion].LangPackIsoUri
         OffsetToCabFileInIsoFile = $languageConstants[$OSVersion][$Language].LanguagePack.OffsetToCabFileInIsoFile
         CabFileSize              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileSize
         CabFileHash              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileHash
@@ -463,7 +463,7 @@ function Invoke-LanguagePackCabFileDownload
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $langPackIsoUri,
+        [string] $LangPackIsoUri,
 
         [Parameter(Mandatory = $true)]
         [long] $OffsetToCabFileInIsoFile,
@@ -480,9 +480,9 @@ function Invoke-LanguagePackCabFileDownload
         [string] $DestinationFilePath
     )
 
-    Write-Verbose -Message ('Downloading the language pack from "{0}".' -f $langPackIsoUri)
+    Write-Verbose -Message ('Downloading the language pack from "{0}".' -f $LangPackIsoUri)
 
-    $request = [System.Net.HttpWebRequest]::Create($langPackIsoUri)
+    $request = [System.Net.HttpWebRequest]::Create($LangPackIsoUri)
     $request.Method = 'GET'
 
     # Set the language pack CAB file data range.
