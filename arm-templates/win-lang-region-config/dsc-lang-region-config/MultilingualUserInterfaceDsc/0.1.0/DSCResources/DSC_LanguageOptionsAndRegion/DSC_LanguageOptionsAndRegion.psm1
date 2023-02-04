@@ -1,94 +1,4 @@
-# Reference:
-# - Default Input Profiles (Input Locales) in Windows
-#   https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
-$languageConstants = @{
-    'en-US' = @{
-        LanguagePack = @{
-            PackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.1'
-            CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_en-us.cab'
-            OffsetToCabFileInIsoFile = 0x1780D000
-            CabFileSize              = 41441411
-            CabFileHash              = 'B10C36225B9AFB503383FEA94A0D16FE4191CA37'
-        }
-        CapabilityNames = @{
-            Minimum = @(
-                'Language.Basic~~~en-US~0.0.1.0',
-                'Language.OCR~~~en-US~0.0.1.0'
-            )
-            Additional = @(
-                'Language.Handwriting~~~en-US~0.0.1.0',
-                'Language.Speech~~~en-US~0.0.1.0',
-                'Language.TextToSpeech~~~en-US~0.0.1.0'
-            )
-        }
-        InputLanguageID = '0409:00000409'
-    }
-    'ja-JP' = @{
-        LanguagePack = @{
-            PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.1'
-            CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
-            OffsetToCabFileInIsoFile = 0x3BD26800
-            CabFileSize              = 62015873
-            CabFileHash              = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
-        
-        }
-        CapabilityNames = @{
-            Minimum = @(
-                'Language.Basic~~~ja-JP~0.0.1.0',
-                'Language.Fonts.Jpan~~~und-JPAN~0.0.1.0',
-                'Language.OCR~~~ja-JP~0.0.1.0'
-            )
-            Additional = @(
-                'Language.Handwriting~~~ja-JP~0.0.1.0',
-                'Language.Speech~~~ja-JP~0.0.1.0',
-                'Language.TextToSpeech~~~ja-JP~0.0.1.0'
-            )
-        }
-        InputLanguageID = '0411:{03B5835F-F03C-411B-9CE2-AA23E1171E36}{A76C93D9-5523-4E90-AAFA-4DB112F9AC76}'
-    }
-    'fr-FR' = @{
-        LanguagePack = @{
-            PackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~fr-FR~10.0.17763.1'
-            CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_fr-fr.cab'
-            OffsetToCabFileInIsoFile = 0x2ADB2000
-            CabFileSize              = 60331188
-            CabFileHash              = '02CBE6DC0302F15AFBBC9159E5A1AE81AAC86804'
-        }
-        CapabilityNames = @{
-            Minimum = @(
-                'Language.Basic~~~fr-FR~0.0.1.0'
-                'Language.OCR~~~fr-FR~0.0.1.0'
-            )
-            Additional = @(
-                'Language.Handwriting~~~fr-FR~0.0.1.0',
-                'Language.Speech~~~fr-FR~0.0.1.0',
-                'Language.TextToSpeech~~~fr-FR~0.0.1.0'
-            )
-        }
-        InputLanguageID = '040c:0000040c'
-    }
-    'ko-KR' = @{
-        LanguagePack = @{
-            PackageName = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ko-KR~10.0.17763.1'
-            CabFileName = 'Microsoft-Windows-Server-Language-Pack_x64_ko-kr.cab'
-            OffsetToCabFileInIsoFile = 0x3F84B800
-            CabFileSize              = 62974463 
-            CabFileHash              = '1370BBE78210CDF6D8156D9125C0D17C05607D82'
-        }
-        CapabilityNames = @{
-            Minimum = @(
-                'Language.Basic~~~ko-KR~0.0.1.0',
-                'Language.Fonts.Kore~~~und-KORE~0.0.1.0',
-                'Language.OCR~~~ko-KR~0.0.1.0'
-            )
-            Additional = @(
-                'Language.Handwriting~~~ko-KR~0.0.1.0',
-                'Language.TextToSpeech~~~ko-KR~0.0.1.0'
-            )
-        }
-        InputLanguageID = '0412:{A028AE76-01B1-46C2-99C4-ACD9858AE02F}{B5FE1F02-D5F2-4445-9C03-C568F23C99A1}'
-    }
-}
+$languageConstants = Import-PowerShellDataFile -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath 'lang-params.psd1')
 
 function Get-TargetResource
 {
@@ -119,7 +29,7 @@ function Get-TargetResource
         [string] $SystemLocale
     )
 
-    Write-Verbose -Message 'Getting the special account MUI settings.'
+    Write-Verbose -Message 'Getting the special account MUI configuration.'
 
     $result = @{
         IsSingleInstance                 = $IsSingleInstance
@@ -171,33 +81,28 @@ function Test-TargetResource
     )
 
     $result = $true
+    $osVersion = Get-OSVersion
 
-    if (-not (Test-SupportedWindowsVersion -Version '10.0.17763'))
+    if (-not (Test-SupportedWindowsVersion -OSVersion $osVersion))
     {
         Write-Verbose -Message 'Current system''s Windows version is not supported.'
         return $result
     }
 
-    if (-not (Test-SupportedLanguage -Language $PreferredLanguage))
+    if (-not (Test-SupportedLanguage -OSVersion $osVersion -Language $PreferredLanguage))
     {
-        New-InvalidArgumentException -Message ('The preferred language "{0}" is not supported.' -f $PreferredLanguage) -ArgumentName 'PreferredLanguage'
+        Write-Verbose -Message ('The preferred language "{0}" is not supported in OS version "{1}".' -f $PreferredLanguage, $osVersion)
+        return $result
     }
 
     # Language pack package installation.
-    $result = (Test-LanguagePackInstallation -Language $PreferredLanguage) -and $result
+    $result = $result -and (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage)
 
     # Language capability installation.
-    $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum
-    }
-    else
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$PreferredLanguage].CapabilityNames.Additional
-    }
-    $result = (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames) -and $result
+    $languageCapabilityNames = Get-LanguageCapabilityNames -OSVersion $osVersion -Language $PreferredLanguage -CapabilityLevel $LanguageCapabilities
+    $result = $result -and (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames)
 
-    # Get the current settings.
+    # Get the current configuration.
     $params = @{
         IsSingleInstance                 = $IsSingleInstance
         PreferredLanguage                = $PreferredLanguage
@@ -206,19 +111,19 @@ function Test-TargetResource
     }
     if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
     if ($PSBoundParameters.ContainsKey('SystemLocale')) { $params.SystemLocale = $SystemLocale }
-    $currentSettings = Get-TargetResource @params -Verbose:$false
+    $currentConfig = Get-TargetResource @params -Verbose:$false
 
     # Language
-    $subResult = ($PreferredLanguage -eq $currentSettings.PreferredLanguage)
-    $result = $subResult -and $result
+    $subResult = ($PreferredLanguage -eq $currentConfig.PreferredLanguage)
     if ($subResult)
     {
         Write-Verbose -Message ('The preferred language is already set to "{0}".' -f $PreferredLanguage)
     }
     else
     {
-        Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentSettings.PreferredLanguage, $PreferredLanguage)
+        Write-Verbose -Message ('The preferred language is "{0}" but should be "{1}". Change required.' -f $currentConfig.PreferredLanguage, $PreferredLanguage)
     }
+    $result = $result -and $subResult
 
     # CopySettingsToDefaultUserAccount
     if ($CopySettingsToDefaultUserAccount)
@@ -228,7 +133,6 @@ function Test-TargetResource
         }
         if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
         $subResult = (Test-DefaultUserAccountSettings @params)
-        $result = $subResult -and $result
         if ($subResult)
         {
             Write-Verbose -Message ('The default user account settings are already set to the required configuration.')
@@ -237,6 +141,7 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The default user account settings are not set to the required configuration.')
         }
+        $result = $result -and $subResult
     }
 
     # LocationGeoId
@@ -245,8 +150,7 @@ function Test-TargetResource
         Write-Verbose -Message 'Testing the location geo ID.'
 
         $geoId = (Get-WinHomeLocation).GeoId
-        $subResult = ($LocationGeoId -eq $geoId) -and $result
-        $result = $subResult -and $result
+        $subResult = $LocationGeoId -eq $geoId
         if ($subResult)
         {
             Write-Verbose -Message ('The location geo ID is already set to "{0}".' -f $LocationGeoId)
@@ -255,6 +159,7 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The location geo ID is "{0}" but should be "{1}". Change required.' -f $geoId, $LocationGeoId)
         }
+        $result = $result -and $subResult
     }
 
     # SystemLocale
@@ -264,12 +169,11 @@ function Test-TargetResource
 
         if (-not (Test-CultureValue -CultureName $SystemLocale))
         {
-            New-InvalidArgumentException -Message ('The system locale "{0}" is invalid.' -f $SystemLocale) -ArgumentName 'SystemLocale'
+            throw ('The system locale "{0}" is invalid.' -f $SystemLocale)
         }
 
         $locale = (Get-WinSystemLocale).Name
-        $subResult = ($SystemLocale -eq $locale) -and $result
-        $result = $subResult -and $result
+        $subResult = $SystemLocale -eq $locale
         if ($subResult)
         {
             Write-Verbose -Message ('The system locale is already set to "{0}".' -f $SystemLocale)
@@ -278,9 +182,21 @@ function Test-TargetResource
         {
             Write-Verbose -Message ('The system locale is "{0}" but should be "{1}". Change required.' -f $locale, $SystemLocale)
         }
+        $result = $result -and $subResult
     }
 
     $result
+}
+
+function Get-OSVersion
+{
+    [CmdletBinding()]
+    [OutputType([string])]
+    param ()
+
+    $osVersion = (Get-CimInstance -ClassName 'Win32_OperatingSystem' -Verbose:$false).Version
+    Write-Verbose -Message ('Current system''s Windows version is "{0}".' -f $osVersion)
+    $osVersion
 }
 
 function Test-SupportedWindowsVersion
@@ -289,12 +205,11 @@ function Test-SupportedWindowsVersion
     [OutputType([bool])]
     param (
         [Parameter(Mandatory = $true)]
-        [string[]] $Version
+        [ValidateNotNullOrEmpty()]
+        [string] $OSVersion
     )
 
-    $currentOSVersion = (Get-CimInstance -ClassName 'Win32_OperatingSystem' -Verbose:$false).Version
-    Write-Verbose -Message ('Current system''s Windows version is "{0}".' -f $currentOSVersion)
-    $currentOSVersion -in $Version
+    $languageConstants.ContainsKey($OSVersion)
 }
 
 function Test-LanguagePackInstallation
@@ -304,17 +219,50 @@ function Test-LanguagePackInstallation
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
     Write-Verbose -Message 'Testing the language pack installation.'
 
-    $languagePackPackageName = $languageConstants[$Language].LanguagePack.PackageName
-    $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -EQ -Value $languagePackPackageName
+    $languagePackPackageName = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.PackageName
+    $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -Like -Value $languagePackPackageName
     $result = ($package -ne $null) -and ($package.PackageState -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed)
     $stateText = if ($result) { 'installed' } else { 'not installed' }
     Write-Verbose -Message ('The language pack for "{0}" is {1}.' -f $Language, $stateText)
     $result
+}
+
+function Get-LanguageCapabilityNames
+{
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Language,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet('Minimum', 'All')]
+        [string] $CapabilityLevel
+    )
+
+    if ($CapabilityLevel -eq 'Minimum')
+    {
+        $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Minimum
+    }
+    else
+    {
+        $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Minimum + $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Additional
+    }
 }
 
 function Test-LanguageCapabilityInstallation
@@ -329,15 +277,15 @@ function Test-LanguageCapabilityInstallation
     Write-Verbose -Message 'Testing the language capability installation.'
 
     $result = $true
-
-    $LanguageCapabilityNames | ForEach-Object -Process {
+    foreach ($capabilityName in $LanguageCapabilityNames)
+    {
         try
         {
-            $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
+            $capability = Get-WindowsCapability -Online -Name $capabilityName -Verbose:$false
             $subResult = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
-            $result = $subResult -and $result
             $stateText = if ($subResult) { 'installed' } else { 'not installed' }
-            Write-Verbose -Message ('The "{0}" capability is {1}.' -f $_, $stateText)
+            Write-Verbose -Message ('The capability "{0}" is {1}.' -f $capabilityName, $stateText)
+            $result = $result -and $subResult
         }
         catch
         {
@@ -358,6 +306,7 @@ FullyQualifiedErrorId: {3}
 function Test-DefaultUserAccountSettings
 {
     [CmdletBinding()]
+    [OutputType([bool])]
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -369,8 +318,9 @@ function Test-DefaultUserAccountSettings
 
     Write-Verbose -Message 'Testing the default user account settings.'
 
-    $reuslt = $true
+    $result = $true
 
+    # PreferredUILanguages
     $preferredUILanguages = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\Desktop').GetValue('PreferredUILanguages')
     if (($preferredUILanguages -eq $null) -or ($preferredUILanguages.Length -eq 0))
     {
@@ -383,6 +333,7 @@ function Test-DefaultUserAccountSettings
         Write-Verbose -Message ('The default user account''s PreferredUILanguages is "{0}" but should be "{1}". Change required.' -f $preferredUILanguages[0], $PreferredLanguage)
     }
 
+    # LocaleName
     $localeName = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\International').GetValue('LocaleName')
     if ($localeName -ne $PreferredLanguage)
     {
@@ -390,6 +341,7 @@ function Test-DefaultUserAccountSettings
         Write-Verbose -Message ('The default user account''s LocaleName is "{0}" but should be "{1}". Change required.' -f $localeName, $PreferredLanguage)
     }
 
+    # LocationGeoId
     if ($PSBoundParameters.ContainsKey('LocationGeoId'))
     {
         $nation = (Get-Item -LiteralPath 'Registry::HKEY_USERS\.DEFAULT\Control Panel\International\Geo').GetValue('Nation')
@@ -431,27 +383,17 @@ function Set-TargetResource
         [string] $SystemLocale
     )
 
-    if (-not (Test-SupportedLanguage -Language $PreferredLanguage))
-    {
-        New-InvalidArgumentException -Message ('The preferred language "{0}" is not supported.' -f $PreferredLanguage) -ArgumentName 'PreferredLanguage'
-    }
+    $osVersion = Get-OSVersion
 
     # Install the language pack.
-    if (-not (Test-LanguagePackInstallation -Language $PreferredLanguage -Verbose:$false))
+    if (-not (Test-LanguagePackInstallation -OSVersion $osVersion -Language $PreferredLanguage -Verbose:$false))
     {
-        Install-LanguagePack -Language $PreferredLanguage
+        Install-LanguagePack -OSVersion $osVersion -Language $PreferredLanguage
         $global:DSCMachineStatus = 1
     }
 
     # Install the language capabilities.
-    $languageCapabilityNames = if ($LanguageCapabilities -eq 'Minimum')
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum
-    }
-    else
-    {
-        $languageConstants[$PreferredLanguage].CapabilityNames.Minimum + $languageConstants[$PreferredLanguage].CapabilityNames.Additional
-    }
+    $languageCapabilityNames = Get-LanguageCapabilityNames -OSVersion $osVersion -Language $PreferredLanguage -CapabilityLevel $LanguageCapabilities
     if (-not (Test-LanguageCapabilityInstallation -LanguageCapabilityNames $languageCapabilityNames -Verbose:$false))
     {
         Install-LanguageCapability -LanguageCapabilityNames $languageCapabilityNames
@@ -467,7 +409,7 @@ function Set-TargetResource
     # Set special account settings.
     $params = @{
         PreferredLanguage                = $PreferredLanguage
-        InputLanguageID                  = $languageConstants[$PreferredLanguage].InputLanguageID
+        InputLanguageID                  = $languageConstants[$osVersion].Languages[$PreferredLanguage].InputLanguageID
         CopySettingsToDefaultUserAccount = $CopySettingsToDefaultUserAccount
     }
     if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
@@ -482,30 +424,35 @@ function Install-LanguagePack
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
-    # Get the anguage pack CAB file name.
-    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$Language].LanguagePack.CabFileName
+    # Get the language pack CAB file name.
+    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileName
 
     # Download the lanchage pack.
-    Write-Verbose -Message ('Downloading the language pack for "{0}".' -f $Language)
+    Write-Verbose -Message ('Downloading the language pack "{0}" for "{1}".' -f $Language, $OSVersion)
 
     $params = @{
-        OffsetToCabFileInIsoFile = $languageConstants[$Language].LanguagePack.OffsetToCabFileInIsoFile
-        CabFileSize              = $languageConstants[$Language].LanguagePack.CabFileSize
-        CabFileHash              = $languageConstants[$Language].LanguagePack.CabFileHash
+        LangPackIsoUri           = $languageConstants[$OSVersion].LangPackIsoUri
+        OffsetToCabFileInIsoFile = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.OffsetToCabFileInIsoFile
+        CabFileSize              = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileSize
+        CabFileHash              = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileHash
         DestinationFilePath      = $langPackFilePath
     }
     Invoke-LanguagePackCabFileDownload @params
-    Write-Verbose -Message ('The language pack for "{0}" has been downloaded.' -f $Language)
+    Write-Verbose -Message ('The language pack "{0}" for "{1}" has been downloaded.' -f $Language, $OSVersion)
 
     # Install the language pack.
-    Write-Verbose -Message ('Installing the language pack for "{0}".' -f $Language)
+    Write-Verbose -Message ('Installing the language pack "{0}".' -f $Language)
     Add-WindowsPackage -Online -NoRestart -PackagePath $langPackFilePath -Verbose:$false
-    Write-Verbose -Message ('The language pack for "{0}" has been installed.' -f $Language)
+    Write-Verbose -Message ('The language pack "{0}" has been installed.' -f $Language)
 
-    # Delete the lang pack CAB file.
+    # Delete the language pack CAB file.
     Remove-Item -LiteralPath $langPackFilePath -Force
     Write-Verbose -Message 'The temporary files for the language pack are deleted.'
 }
@@ -514,6 +461,10 @@ function Invoke-LanguagePackCabFileDownload
 {
     [CmdletBinding()]
     param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $LangPackIsoUri,
+
         [Parameter(Mandatory = $true)]
         [long] $OffsetToCabFileInIsoFile,
 
@@ -529,28 +480,26 @@ function Invoke-LanguagePackCabFileDownload
         [string] $DestinationFilePath
     )
 
-    # Reference:
-    # - Cannot configure a language pack for Windows Server 2019 Desktop Experience
-    #   https://docs.microsoft.com/en-us/troubleshoot/windows-server/shell-experience/cannot-configure-language-pack-windows-server-desktop-experience
-    $langPackIsoUri = 'https://software-download.microsoft.com/download/pr/17763.1.180914-1434.rs5_release_SERVERLANGPACKDVD_OEM_MULTI.iso'  # WS2019
-    $request = [System.Net.HttpWebRequest]::Create($langPackIsoUri)
+    Write-Verbose -Message ('Downloading the language pack from "{0}".' -f $LangPackIsoUri)
+
+    $request = [System.Net.HttpWebRequest]::Create($LangPackIsoUri)
     $request.Method = 'GET'
 
     # Set the language pack CAB file data range.
     $request.AddRange('bytes', $OffsetToCabFileInIsoFile, $OffsetToCabFileInIsoFile + $CabFileSize - 1)
 
-    # Donwload the lang pack CAB file.
+    # Donwload the language pack CAB file.
     $response = $request.GetResponse()
     $reader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList $response.GetResponseStream()
-    $contents = $reader.ReadBytes($response.ContentLength)
-    $reader.Dispose()
-
-    # Save the lang pack CAB file.
     $fileStream = [System.IO.File]::Create($DestinationFilePath)
+    $contents = $reader.ReadBytes($response.ContentLength)
     $fileStream.Write($contents, 0, $contents.Length)
     $fileStream.Dispose()
+    $reader.Dispose()
+    $response.Close()
+    $response.Dispose()
 
-    # Verify integrity to the downloaded lang pack CAB file.
+    # Verify integrity of the downloaded language pack CAB file.
     $fileHash = Get-FileHash -Algorithm SHA1 -LiteralPath $DestinationFilePath
     if ($fileHash.Hash -ne $CabFileHash) {
         throw ('The file hash of the language pack CAB file "{0}" is not match to expected value. The download was may failed.') -f $DestinationFilePath
@@ -565,14 +514,15 @@ function Install-LanguageCapability
         [string[]] $LanguageCapabilityNames
     )
 
-    $LanguageCapabilityNames | ForEach-Object -Process {
-        $capability = Get-WindowsCapability -Online -Name $_ -Verbose:$false
+    foreach ($capabilityName in $LanguageCapabilityNames)
+    {
+        $capability = Get-WindowsCapability -Online -Name $capabilityName -Verbose:$false
         $capabilityState = $capability.State -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed
         if (-not $capabilityState)
         {
-            Write-Verbose -Message ('Installing the "{0}" capability.' -f $_)
-            Add-WindowsCapability -Online -Name $_ -Verbose:$false
-            Write-Verbose -Message ('The capability "{0}" has been installed.' -f $_)
+            Write-Verbose -Message ('Installing the capability "{0}".' -f $capabilityName)
+            Add-WindowsCapability -Online -Name $capabilityName -Verbose:$false
+            Write-Verbose -Message ('The capability "{0}" has been installed.' -f $capabilityName)
         }
     }
 }
@@ -649,6 +599,7 @@ function Set-LanguageOptions
     $procStartInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Minimized
     $proc = [System.Diagnostics.Process]::Start($procStartInfo)
     $proc.WaitForExit()
+    $proc.Dispose()
 
     # Delete the XML file.
     Remove-Item -LiteralPath $xmlFileFilePath -Force
@@ -661,10 +612,14 @@ function Test-SupportedLanguage
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [string] $OSVersion,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Language
     )
 
-    (Test-CultureValue -CultureName $Language) -and ($languageConstants.ContainsKey($Language))
+    (Test-CultureValue -CultureName $Language) -and ($languageConstants[$OSVersion].Languages.ContainsKey($Language))
 }
 
 function Test-CultureValue
@@ -678,29 +633,6 @@ function Test-CultureValue
 
     $validCultures = [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::AllCultures).Name
     $CultureName -in $validCultures
-}
-
-function New-InvalidArgumentException
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Message,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $ArgumentName
-    )
-
-    $argumentException = New-Object -TypeName 'ArgumentException' -ArgumentList $Message, $ArgumentName
-
-    $params = @{
-        TypeName     = 'System.Management.Automation.ErrorRecord'
-        ArgumentList = $argumentException, $ArgumentName, 'InvalidArgument', $null
-    }
-    $errorRecord = New-Object @params
-    throw $errorRecord
 }
 
 Export-ModuleMember -Function *-TargetResource

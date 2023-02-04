@@ -33,13 +33,13 @@ configuration language-options-and-region
             RebootNodeIfNeeded = $true
         }
 
-        TimeZone time-zone
+        TimeZone 'Time zone'
         {
             IsSingleInstance = 'Yes'
             TimeZone         = $TimeZone
         }
 
-        LanguageOptionsAndRegion lang-and-region
+        LanguageOptionsAndRegion 'Language and region'
         {
             IsSingleInstance                 = 'Yes'
             PreferredLanguage                = $PreferredLanguage

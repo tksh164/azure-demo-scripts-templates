@@ -25,7 +25,7 @@ All the above names are the default value.
 
 ## Notes
 
-- Currently supported only Windows Server 2019.
+- Currently supported operating systems are Windows Server 2022 and Windows Server 2019.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
 
 ## Deploy to Azure
