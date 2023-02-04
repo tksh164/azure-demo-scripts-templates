@@ -15,7 +15,7 @@
                 LanguagePack = @{
                     PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.20348.*'
                     CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
-                    OffsetToCabFileInIsoFile = 0x107D35800
+                    OffsetToCabFileInIsoFile = 0x107D35800L
                     CabFileSize              = 54130307
                     CabFileHash              = '298667B848087EA1377F483DC15597FD5F38A492'
                 
@@ -49,7 +49,7 @@
                 LanguagePack = @{
                     PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~en-US~10.0.17763.*'
                     CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_en-us.cab'
-                    OffsetToCabFileInIsoFile = 0x1780D000
+                    OffsetToCabFileInIsoFile = 0x1780D000L
                     CabFileSize              = 41441411
                     CabFileHash              = 'B10C36225B9AFB503383FEA94A0D16FE4191CA37'
                 }
@@ -70,7 +70,7 @@
                 LanguagePack = @{
                     PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ja-JP~10.0.17763.*'
                     CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ja-jp.cab'
-                    OffsetToCabFileInIsoFile = 0x3BD26800
+                    OffsetToCabFileInIsoFile = 0x3BD26800L
                     CabFileSize              = 62015873
                     CabFileHash              = 'B562ECD51AFD32DB6E07CB9089691168C354A646'
                 
@@ -93,7 +93,7 @@
                 LanguagePack = @{
                     PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~fr-FR~10.0.17763.*'
                     CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_fr-fr.cab'
-                    OffsetToCabFileInIsoFile = 0x2ADB2000
+                    OffsetToCabFileInIsoFile = 0x2ADB2000L
                     CabFileSize              = 60331188
                     CabFileHash              = '02CBE6DC0302F15AFBBC9159E5A1AE81AAC86804'
                 }
@@ -114,8 +114,8 @@
                 LanguagePack = @{
                     PackageName              = 'Microsoft-Windows-Server-LanguagePack-Package~31bf3856ad364e35~amd64~ko-KR~10.0.17763.*'
                     CabFileName              = 'Microsoft-Windows-Server-Language-Pack_x64_ko-kr.cab'
-                    OffsetToCabFileInIsoFile = 0x3F84B800
-                    CabFileSize              = 62974463 
+                    OffsetToCabFileInIsoFile = 0x3F84B800L
+                    CabFileSize              = 62974463
                     CabFileHash              = '1370BBE78210CDF6D8156D9125C0D17C05607D82'
                 }
                 CapabilityNames = @{
