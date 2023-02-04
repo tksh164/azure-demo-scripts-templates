@@ -228,7 +228,7 @@ function Test-LanguagePackInstallation
 
     Write-Verbose -Message 'Testing the language pack installation.'
 
-    $languagePackPackageName = $languageConstants[$OSVersion][$Language].LanguagePack.PackageName
+    $languagePackPackageName = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.PackageName
     $package = Get-WindowsPackage -Online -Verbose:$false | Where-Object -Property 'PackageName' -Like -Value $languagePackPackageName
     $result = ($package -ne $null) -and ($package.PackageState -eq [Microsoft.Dism.Commands.PackageFeatureState]::Installed)
     $stateText = if ($result) { 'installed' } else { 'not installed' }
@@ -257,11 +257,11 @@ function Get-LanguageCapabilityNames
 
     if ($CapabilityLevel -eq 'Minimum')
     {
-        $languageConstants[$OSVersion][$Language].CapabilityNames.Minimum
+        $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Minimum
     }
     else
     {
-        $languageConstants[$OSVersion][$Language].CapabilityNames.Minimum + $languageConstants[$OSVersion][$Language].CapabilityNames.Additional
+        $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Minimum + $languageConstants[$OSVersion].Languages[$Language].CapabilityNames.Additional
     }
 }
 
@@ -409,7 +409,7 @@ function Set-TargetResource
     # Set special account settings.
     $params = @{
         PreferredLanguage                = $PreferredLanguage
-        InputLanguageID                  = $languageConstants[$osVersion][$PreferredLanguage].InputLanguageID
+        InputLanguageID                  = $languageConstants[$osVersion].Languages[$PreferredLanguage].InputLanguageID
         CopySettingsToDefaultUserAccount = $CopySettingsToDefaultUserAccount
     }
     if ($PSBoundParameters.ContainsKey('LocationGeoId')) { $params.LocationGeoId = $LocationGeoId }
@@ -432,16 +432,16 @@ function Install-LanguagePack
     )
 
     # Get the language pack CAB file name.
-    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$OSVersion][$Language].LanguagePack.CabFileName
+    $langPackFilePath = Join-Path -Path $env:TEMP -ChildPath $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileName
 
     # Download the lanchage pack.
     Write-Verbose -Message ('Downloading the language pack "{0}" for "{1}".' -f $Language, $OSVersion)
 
     $params = @{
         LangPackIsoUri           = $languageConstants[$OSVersion].LangPackIsoUri
-        OffsetToCabFileInIsoFile = $languageConstants[$OSVersion][$Language].LanguagePack.OffsetToCabFileInIsoFile
-        CabFileSize              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileSize
-        CabFileHash              = $languageConstants[$OSVersion][$Language].LanguagePack.CabFileHash
+        OffsetToCabFileInIsoFile = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.OffsetToCabFileInIsoFile
+        CabFileSize              = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileSize
+        CabFileHash              = $languageConstants[$OSVersion].Languages[$Language].LanguagePack.CabFileHash
         DestinationFilePath      = $langPackFilePath
     }
     Invoke-LanguagePackCabFileDownload @params
@@ -619,7 +619,7 @@ function Test-SupportedLanguage
         [string] $Language
     )
 
-    (Test-CultureValue -CultureName $Language) -and ($languageConstants[$OSVersion].ContainsKey($Language))
+    (Test-CultureValue -CultureName $Language) -and ($languageConstants[$OSVersion].Languages.ContainsKey($Language))
 }
 
 function Test-CultureValue
