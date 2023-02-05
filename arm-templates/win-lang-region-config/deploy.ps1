@@ -12,54 +12,61 @@ param (
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
 Set-StrictMode -Version 3
 
-$TemplateFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateFile))
-$TemplateParametersFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
+$templateFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateFile))
+$templateParametersFilePath = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, $TemplateParametersFile))
 
 Get-AzContext
 
 New-AzResourceGroup -Name $ResourceGroupName -Location $ResourceGroupLocation -Tag $ResourceGroupTag -Verbose -Force
 
-if ($ValidateOnly)
-{
+if ($ValidateOnly) {
     $params = @{
         ResourceGroupName = $ResourceGroupName
-        TemplateFile      = $TemplateFilePath
+        TemplateFile      = $templateFilePath
     }
 
-    if (Test-Path -LiteralPath $TemplateParametersFilePath -PathType Leaf)
-    {
-        $params.TemplateParameterFile = $TemplateParametersFilePath
+    if (Test-Path -LiteralPath $templateParametersFilePath -PathType Leaf) {
+        $params.TemplateParameterFile = $templateParametersFilePath
     }
 
     $result = Test-AzResourceGroupDeployment @params
-    if ($result.Count -eq 0)
-    {
-        Write-Output -InputObject '', 'Template is valid.'
+    if ($result.Count -eq 0) {
+        ''
+        'Template is valid.' | Write-Host -ForegroundColor Cyan
     }
-    else
-    {
-        $result    
+    else {
+        $result
+        $details = $result.Details
+        while ($details -ne $null) {
+            $details
+            $details = $details.Details
+        }
     }
 }
-else
-{
+else {
     $params = @{
         ResourceGroupName = $ResourceGroupName
-        TemplateFile      = $TemplateFilePath
-        WhatIf            = $WhatIf
+        Name                    = ('{0}-{1}'-f (Get-Item -LiteralPath $templateFilePath).BaseName, (Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmm'))
+        TemplateFile            = $templateFilePath
+        DeploymentDebugLogLevel = 'All'
+        WhatIf                  = $WhatIf
+        Force                   = $true
+        Verbose                 = $true
     }
 
-    if (Test-Path -LiteralPath $TemplateParametersFilePath -PathType Leaf)
-    {
-        $params.TemplateParameterFile = $TemplateParametersFilePath
+    if (Test-Path -LiteralPath $templateParametersFilePath -PathType Leaf) {
+        $params.TemplateParameterFile = $templateParametersFilePath
     }
 
-    if (-not $WhatIf)
-    {
-        $params.Name    = ('{0}-{1}'-f (Get-Item -LiteralPath $TemplateFilePath).BaseName, (Get-Date).ToUniversalTime().ToString('MMdd-HHmm'))
-        $params.Force   = $true
-        $params.Verbose = $true
-    }
+    'Deployment name: ' | Write-Host -ForegroundColor Green -NoNewline
+    $params.Name | Write-Host
 
-    New-AzResourceGroupDeployment @params
+    try {
+        New-AzResourceGroupDeployment @params
+    }
+    catch {
+        $error[0]
+        Get-AzResourceGroupDeploymentOperation -DeploymentName $params.Name -ResourceGroupName $params.ResourceGroupName -ErrorAction Continue
+        'If get error before deployment starts, run this deployment script with -ValidateOnly parameter to get error details.' | Write-Host -ForegroundColor Cyan
+    }
 }
