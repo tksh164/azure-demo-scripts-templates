@@ -6,34 +6,11 @@ You can use non-English language options and region settings since first login e
 
 Simple PowerShell script version is [here](https://github.com/tksh164/change-windows-language-regional-settings).
 
-## Deployment
+## Deploy to Azure
 
-- Resource group: `exptl-langregion`
-- Virtual network: `langregion-vnet`
-    - IPv4 address space: `10.0.0.0/16`
-    - Subnet: `default`
-        - Address prefix: `10.0.0.0/24`
-        - Virtual machine: `langregion-vm1`
-            - For RDP connection from Internet.
-            - OS disk: `langregion-vm1-osdisk`
-            - Network interface: `langregion-vm1-nic`
-                - Private IP address: `10.0.0.5`, Static
-            - Public IP address: `langregion-vm1-ip`
-            - Network security group: `langregion-vm1-nsg`
-
-All the above names are the default value.
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#view/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwin-lang-region-config%2Ftemplate.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwin-lang-region-config%2Fuiform.json)
 
 ## Notes
 
 - Currently supported operating systems are Windows Server 2022 and Windows Server 2019.
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
-
-## Deploy to Azure
-
-- With new VNet
-
-    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwin-lang-region-config%2Ftemplate.json)
-
-- For existing VNet
-
-    [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fwin-lang-region-config%2Ftemplate-existing-vnet.json)
