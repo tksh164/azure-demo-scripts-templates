@@ -54,7 +54,7 @@
                             "type": "Microsoft.Common.DropDown",
                             "visible": true,
                             "label": "Image",
-                            "toolTip": "Choose the base operating system for the virtual machine.",
+                            "toolTip": "Choose the operating system for the virtual machine.",
                             "multiselect": false,
                             "selectAll": false,
                             "multiLine": false,
