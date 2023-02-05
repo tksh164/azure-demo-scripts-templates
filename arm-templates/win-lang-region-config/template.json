@@ -2,24 +2,184 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        // Virtual network
+
+        "vnetNewOrExisting": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target virtual network existence by 'new' or 'existing'."
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the resource group name that contains the target virtual network."
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target virtual network name that to deploy the virtual machine."
+            }
+        },
+        "vnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target subnet name that to deploy the virtual machine."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target subnet."
+            }
+        },
+
+        // Virtual machine
+
+        "vmName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 15,
+            "metadata": {
+                "description": "Specify the virtual machine name. It's used for the computer name too."
+            }
+        },
+        "vmImageSku": {
+            "type": "string",
+            "defaultValue": "2022-datacenter-smalldisk-g2",
+            "allowedValues": [
+                "2022-datacenter",
+                "2022-datacenter-g2",
+                "2022-datacenter-smalldisk",
+                "2022-datacenter-smalldisk-g2",
+                "2022-datacenter-azure-edition",
+                "2022-datacenter-azure-edition-smalldisk",
+                "2019-datacenter",
+                "2019-datacenter-gensecond",
+                "2019-datacenter-smalldisk",
+                "2019-datacenter-smalldisk-g2"
+            ],
+            "metadata": {
+                "description": "Specify the operating system image for the virtual machine."
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "metadata": {
+                "description": "Specify the virtual machine size."
+            }
+        },
+        "osDiskType": {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "metadata": {
+                "description": "Specify the OS disk type for the virtual machine."
+            }
+        },
+        "deleteOsDiskWithVm": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "If set to true, delete the OS disk when the virtual machine deleted."
+            }
+        },
         "adminUserName": {
             "type": "string",
             "defaultValue": "vmadmin",
             "metadata": {
-                "description": "The admin user name for VMs."
+                "description": "The admin user name for the virtual machine."
             }
         },
         "adminPassword": {
             "type": "secureString",
             "metadata": {
-                "description": "The admin user password for VMs."
+                "description": "The admin user password for the virtual machine."
             }
         },
-        "uniqueSuffixSeed": {
-            "type": "string",
-            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+        "usePublicIpAddress": {
+            "type": "bool",
+            "defaultValue": false,
             "metadata": {
-                "description": "The seed for the unique suffix. Do not need set this value when deployment."
+                "description": "If set to true, deploy a public IP address and associate it to the virtual machine."
+            }
+        },
+        "deleteNetworkInterfaceWithVm": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "If set to true, delete the network interface when the virtual machine deleted."
+            }
+        },
+        "deletePublicIpAddressWithVm": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "If set to true, delete the public IP address when the virtual machine deleted."
+            }
+        },
+
+        // DSC extension for Windows language & reginon configuration
+
+        "preferredLanguage": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the preferred language for the OS. e.g. en-US, ja-JP."
+            }
+        },
+        "languageCapability": {
+            "type": "string",
+            "defaultValue": "Minimum",
+            "allowedValues": [
+                "Minimum",
+                "All"
+            ],
+            "metadata": {
+                "description": "Specify the range of the language capability packages to be installed."
+            }
+        },
+        "geoLocationId": {
+            "type": "int",
+            "metadata": {
+                "description": "Specify the geo location ID."
+            }
+        },
+        "copyToDefaultUserAccount": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "If set to true, copy the current user account's (system account's) language & region settings to the default user account."
+            }
+        },
+        "timeZone": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the time zone."
+            }
+        },
+        "systemLocale": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the system locale."
+            }
+        },
+        "salt": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "The value for generate unique values."
             }
         }
     },
@@ -28,87 +188,142 @@
         // Common
 
         "location": "[resourceGroup().location]",
-        "uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
-        "prefix": "langregion",
+        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('salt')), 0, 6)]",
+
+        // Network security group
+
+        "nsgName": "[if(equals(parameters('vnetNewOrExisting'), 'new'), concat(parameters('vnetName'), '-nsg'), concat(parameters('vmName'), '-nsg'))]",
+        "networkSecurityGroupAssociation": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        },
 
         // Virtual network
 
-        "vnetName": "[concat(variables('prefix'), '-vnet')]",
-        "vnetSubnetName": "default",
+        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
+
+        // Public IP address
+
+        "publicIpName": "[concat(parameters('vmName'), '-ip')]",
+        "domainNameLabel": "[concat(parameters('vmName'), '-', variables('uniqueString'))]",
 
         // Virtual machine
 
         "vm": {
-            "vmName": "[concat(variables('prefix'), '-vm1')]",
-            "computerName": "vm1",
-            "osDiskName": "[concat(variables('prefix'), '-vm1-osdisk')]",
-            "nicName": "[concat(variables('prefix'), '-vm1-nic')]",
-            "privateIPAddress": "10.0.0.5",
-            "ipName": "[concat(variables('prefix'), '-vm1-ip')]",
-            "domainNameLabel": "[concat(variables('prefix'), '-vm1-', variables('uniqueSuffix'))]",
-            "nsgName": "[concat(variables('prefix'), '-vm1-nsg')]"
+            "vmName": "[parameters('vmName')]",
+            "computerName": "[parameters('vmName')]",
+            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
+        },
+
+        // Network interface
+
+        "networkInterfaceName": "[concat(parameters('vmName'), '-nic')]",
+        "networkInterfacePublicIpAddressConfig": {
+            "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName'))]",
+            "properties": {
+                "deleteOption": "[if(parameters('deletePublicIpAddressWithVm'), 'Delete', 'Detach')]"
+            }
         }
     },
     "resources": [
 
+        // Network security group
+
+        {
+            "name": "[variables('nsgName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2022-07-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+
         // Virtual network
 
         {
+            "condition": "[variables('isCreateNewVNet')]",
+            "name": "[parameters('vnetName')]",
             "type": "Microsoft.Network/VirtualNetworks",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('vnetName')]",
+            "apiVersion": "2022-07-01",
             "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "10.0.0.0/16"
+                        "[parameters('vnetAddressPrefix')]"
                     ]
                 },
                 "subnets": [
                     {
-                        "name": "[variables('vnetSubnetName')]",
+                        "name": "[parameters('subnetName')]",
                         "properties": {
-                            "addressPrefix": "10.0.0.0/24"
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                            "networkSecurityGroup": "[if(equals(parameters('vnetNewOrExisting'), 'new'), variables('networkSecurityGroupAssociation'), null())]"
                         }
                     }
-                ],
-                "enableDdosProtection": false
+                ]
+            }
+        },
+
+        // Public IP address
+
+        {
+            "condition": "[parameters('usePublicIpAddress')]",
+            "name": "[variables('publicIpName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2022-07-01",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('domainNameLabel')]"
+                }
             }
         },
 
         // Virtual machine
 
         {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2021-03-01",
             "name": "[variables('vm').vmName]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-08-01",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_B2s"
+                    "vmSize": "[parameters('vmSize')]"
                 },
                 "storageProfile": {
                     "osDisk": {
                         "name": "[variables('vm').osDiskName]",
-                        "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "StandardSSD_LRS"
-                        }
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        },
+                        "createOption": "fromImage",
+                        "deleteOption": "[if(parameters('deleteOsDiskWithVm'), 'Delete', 'Detach')]"
                     },
                     "imageReference": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2019-Datacenter-smalldisk",
+                        "sku": "[parameters('vmImageSku')]",
                         "version": "latest"
                     }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vm').nicName)]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]",
+                            "properties": {
+                                "deleteOption": "[if(parameters('deleteNetworkInterfaceWithVm'), 'Delete', 'Detach')]"
+                            }
                         }
                     ]
                 },
@@ -129,14 +344,14 @@
             }
         },
         {
+            "name": "[variables('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('vm').nicName]",
+            "apiVersion": "2022-07-01",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-                "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('vm').nsgName)]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -144,63 +359,19 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vnetSubnetName'))]"
+                                "id": "[variables('subnetId')]"
                             },
-                            "privateIPAddress": "[variables('vm').privateIPAddress]",
-                            "privateIPAllocationMethod": "Static",
-                            "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)]"
-                            }
+                            "publicIpAddress": "[if(parameters('usePublicIpAddress'), variables('networkInterfacePublicIpAddressConfig'), null())]"
                         }
                     }
                 ],
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('vm').nsgName)]"
-                }
+                "networkSecurityGroup": "[if(equals(parameters('vnetNewOrExisting'), 'existing'), variables('networkSecurityGroupAssociation'), null())]"
             }
         },
         {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('vm').ipName]",
-            "location": "[variables('location')]",
-            "sku": {
-                "name": "Basic"
-            },
-            "properties": {
-                "publicIpAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[variables('vm').domainNameLabel]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('vm').nsgName]",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "RDP",
-                        "properties": {
-                            "direction": "Inbound",
-                            "priority": 500,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "3389"
-                        }
-                    }
-                ]   
-            }
-        },
-        {
+            "name": "[concat(variables('vm').vmName, '/os-language-config-dsc')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2021-03-01",
-            "name": "[concat(variables('vm').vmName, '/Microsoft.Powershell.DSC')]",
+            "apiVersion": "2022-08-01",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('vm').vmName)]"
@@ -221,12 +392,12 @@
                         "dataCollection": "enable"
                     },
                     "configurationArguments": {
-                        "PreferredLanguage": "ja-JP",
-                        "LanguageCapabilities": "Minimum",
-                        "GeoLocationId": 122,  // Japan
-                        "CopySettingsToDefaultUserAccount": true,
-                        "TimeZone": "Tokyo Standard Time",
-                        "SystemLocale": "ja-JP"
+                        "PreferredLanguage": "[parameters('preferredLanguage')]",
+                        "LanguageCapabilities": "[parameters('languageCapability')]",
+                        "GeoLocationId": "[parameters('geoLocationId')]",
+                        "CopySettingsToDefaultUserAccount": "[parameters('copyToDefaultUserAccount')]",
+                        "TimeZone": "[parameters('timeZone')]",
+                        "SystemLocale": "[parameters('systemLocale')]"
                     }
                 },
                 "protectedSettings": {}
@@ -240,7 +411,7 @@
         },
         "fqdn": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('vm').ipName)).dnsSettings.fqdn]"
+            "value": "[if (parameters('usePublicIpAddress'), reference(resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName')), '2022-07-01').dnsSettings.fqdn, '')]"
         }
     }
 }

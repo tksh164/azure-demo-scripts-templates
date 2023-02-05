@@ -2,5 +2,72 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "vnetNewOrExisting": {
+            "value": "new"
+            // "value": "existing"
+        },
+        // "vnetResourceGroupName": {
+        //     "value": "value"
+        // },
+        "vnetName": {
+            "value": "langregion-vnet"
+            // "value": "langregion07-existing-vnet"
+        },
+        "vnetAddressPrefix": {
+            "value": "10.0.0.0/16"
+            // "value": "10.5.0.0/16"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "subnetAddressPrefix": {
+            "value": "10.0.0.0/24"
+            // "value": "10.5.0.0/24"
+        },
+        "vmName": {
+            "value": "langregion-vm1"
+        },
+        // "vmImageSku": {
+        //     "value": "2022-datacenter-azure-edition-smalldisk"
+        // },
+        // "vmSize": {
+        //     "value": "Standard_B2ms"
+        // },
+        // "osDiskType": {
+        //     "value": "Premium_LRS"
+        // },
+        // "deleteOsDiskWithVm": {
+        //     "value": false
+        // },
+        // "adminUserName": {
+        //     "value": "vmadmin"
+        // },
+        "usePublicIpAddress": {
+            "value": true
+        },
+        // "deleteNetworkInterfaceWithVm": {
+        //     "value": false
+        // },
+        // "deletePublicIpAddressWithVm": {
+        //     "value": false
+        // },
+        "preferredLanguage": {
+            "value": "ja-JP"
+        },
+        // "languageCapability": {
+        //     "value": "All"
+        // },
+        "geoLocationId": {
+            "value": 122
+        },
+        // "copyToDefaultUserAccount": {
+        //     "value": false
+        // },
+        "timeZone": {
+            "value": "Tokyo Standard Time"
+        },
+        "systemLocale": {
+            "value": "ja-JP"
+        }
     }
 }
