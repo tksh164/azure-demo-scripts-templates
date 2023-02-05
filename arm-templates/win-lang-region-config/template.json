@@ -212,7 +212,7 @@
         "vm": {
             "vmName": "[parameters('vmName')]",
             "computerName": "[parameters('vmName')]",
-            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
+            "osDiskName": "[concat(parameters('vmName'), '-osdisk')]"
         },
 
         // Network interface
