@@ -8,7 +8,7 @@
                 {
                     "name": "basics",
                     "label": "Basics",
-                    "description": "Create a Windows virtual machine using Azure marketplace image with specified language pack. Select an image and language pack. Complete the Basics tab then Review + create to provision a virtual machine with default parameters or review each tab for full customization.",
+                    "description": "Create a Windows virtual machine using Azure marketplace image with specified language pack. Complete the Basics tab then Review + create to provision a virtual machine with default parameters or review each tab for full customization.",
                     "elements": [
                         {
                             "name": "resourceScope",
