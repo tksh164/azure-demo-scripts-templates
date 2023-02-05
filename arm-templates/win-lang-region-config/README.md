@@ -16,4 +16,5 @@ Simple PowerShell script version is [here](https://github.com/tksh164/change-win
 ## Notes
 
 - Currently supported operating systems are Windows Server 2022 and Windows Server 2019.
+- Currently supported languages are Japanese (ja-JP), English (en-US), French (fr-FR) and Korean (ko-KR).
 - The deploy.ps1 script needs [Az module](https://www.powershellgallery.com/packages/Az/).
