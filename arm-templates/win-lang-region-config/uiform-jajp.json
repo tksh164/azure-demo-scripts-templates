@@ -14,7 +14,7 @@
                             "name": "resourceScope",
                             "type": "Microsoft.Common.ResourceScope",
                             "location": {
-                                "label": "Region",
+                                "label": "地域",
                                 "toolTip": "利用に適した Azure リージョンを選択してください。すべての VM サイズがあらゆるリージョンで利用できるわけではありません。",
                                 "resourceTypes": [
                                     "Microsoft.Resources/resourceGroups",
