@@ -1,0 +1,874 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Create a virtual machine with a language pack",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "description": "Create a Windows virtual machine using Azure marketplace image with specified language pack. Select an image and language pack. Complete the Basics tab then Review + create to provision a virtual machine with default parameters or review each tab for full customization.",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "label": "Region",
+                                "toolTip": "Choose the Azure region that's right for you. Not all VM sizes are available in all regions.",
+                                "resourceTypes": [
+                                    "Microsoft.Resources/resourceGroups",
+                                    "Microsoft.Compute/virtualMachines"
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmName",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "label": "Virtual machine name",
+                            "toolTip": "Virtual machines in Azure have two distinct names: virtual machine name used as the Azure resource identifier, and in guest host name. When you create a VM in the portal, the same name is used for both the virtual machine name and the host name. The virtual machine name cannot be changed after the VM is created. You can change the host name when you log into the virtual machine.",
+                            "multiLine": false,
+                            "placeholder": "e.g. vm1",
+                            "defaultValue": "",
+                            "constraints": {
+                                "required": true,
+                                "validations": [
+                                    {
+                                        "regex": "^(?!\\-.+$)(?!.+\\-$)[a-zA-Z0-9\\-]+$",
+                                        "message": "Virtual machine names can contain all alphanumeric characters and special character '-', also, not begin with '-' and not end with '-'."
+                                    },
+                                    {
+                                        "regex": "^.{1,15}$",
+                                        "message": "Virtual machine name must be between 1 and 15 characters long."
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmImageSku",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "label": "Image",
+                            "toolTip": "Choose the base operating system for the virtual machine.",
+                            "multiselect": false,
+                            "selectAll": false,
+                            "multiLine": false,
+                            "defaultDescription": "---",
+                            "filter": true,
+                            "filterPlaceholder": "Filter images...",
+                            "placeholder": "---",
+                            "defaultValue": "Windows Server 2022 Datacenter (Gen2)",
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Windows Server 2022 Datacenter: Azure Edition (Gen2)",
+                                        "value": "2022-datacenter-azure-edition"
+                                    },
+                                    {
+                                        "label": "Windows Server 2022 Datacenter (Gen2)",
+                                        "value": "2022-datacenter-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2019 Datacenter (Gen2)",
+                                        "value": "2019-datacenter-gensecond"
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2022 Datacenter: Azure Edition (Gen2)",
+                                        "value": "2022-datacenter-azure-edition-smalldisk"
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2022 Datacenter (Gen2)",
+                                        "value": "2022-datacenter-smalldisk-g2"
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2019 Datacenter (Gen2)",
+                                        "value": "2019-datacenter-smalldisk-g2"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmSize",
+                            "type": "Microsoft.Compute.SizeSelector",
+                            "visible": true,
+                            "label": "Size",
+                            "toolTip": "Select a VM size to support the workload that you want to run. The size that you choose then determines factors such as processing power, memory, and storage capacity. [Learn more about Virtual Machine sizes](http://go.microsoft.com/fwlink/?LinkId=2079859)",
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "osPlatform": "Windows",
+                            "count": 1,
+                            "recommendedSizes": [
+                                "Standard_B2ms"
+                            ],
+                            "constraints": {},
+                            "options": {
+                                "hideDiskTypeFilter": false
+                            }
+                        },
+                        {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "The administrator username for the virtual machine.",
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminPassword",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password"
+                                    },
+                                    "toolTip": {
+                                        "password": "The administrator password for the virtual machine."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "languageAndRegionSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Operating system language & region",
+                            "elements": [
+                                {
+                                    "name": "language",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "label": "Language",
+                                    "toolTip": "The operating system's language and region for the virtual machine.",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "multiLine": false,
+                                    "defaultDescription": "---",
+                                    "filter": false,
+                                    "filterPlaceholder": "Filter languages...",
+                                    "placeholder": "---",
+                                    "defaultValue": "Japanese (ja-JP)",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "English (en-US)",
+                                                "value": {
+                                                    "preferredLanguage": "en-US",
+                                                    "geoLocationId": 244,
+                                                    "systemLocale": "en-US"
+                                                }
+                                            },
+                                            {
+                                                "label": "Japanese (ja-JP)",
+                                                "value": {
+                                                    "preferredLanguage": "ja-JP",
+                                                    "geoLocationId": 122,
+                                                    "systemLocale": "ja-JP"
+                                                }
+                                            },
+                                            {
+                                                "label": "French (fr-FR)",
+                                                "value": {
+                                                    "preferredLanguage": "fr-FR",
+                                                    "geoLocationId": 84,
+                                                    "systemLocale": "fr-FR"
+                                                }
+                                            },
+                                            {
+                                                "label": "Korean (ko-KR)",
+                                                "value": {
+                                                    "preferredLanguage": "ko-KR",
+                                                    "geoLocationId": 134,
+                                                    "systemLocale": "ko-KR"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "languageCapability",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "label": "Language capability",
+                                    "toolTip": "The range of the language capability packages to be installed to the virtual machine.",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "multiLine": true,
+                                    "defaultDescription": "---",
+                                    "filter": false,
+                                    "filterPlaceholder": "---",
+                                    "placeholder": "---",
+                                    "defaultValue": "Essentials only",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Essentials only",
+                                                "value": "Minimum",
+                                                "description": "Install only essential language capability packages such as Basic, Fonts and OCR."
+                                            },
+                                            {
+                                                "label": "All",
+                                                "value": "All",
+                                                "description": "Install all language capability packages such as Basic, Fonts, OCR, Handwriting, Speech and TextToSpeech."
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "timeZone",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "label": "Time zone",
+                                    "toolTip": "The time zone for the virtual machine.",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "multiLine": false,
+                                    "defaultDescription": "---",
+                                    "filter": true,
+                                    "filterPlaceholder": "Filter time zones...",
+                                    "placeholder": "---",
+                                    "defaultValue": "(UTC+09:00) Osaka, Sapporo, Tokyo",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "(UTC-12:00) International Date Line West",
+                                                "value": "Dateline Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-11:00) Coordinated Universal Time-11",
+                                                "value": "UTC-11"
+                                            },
+                                            {
+                                                "label": "(UTC-10:00) Hawaii",
+                                                "value": "Hawaiian Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-09:00) Alaska",
+                                                "value": "Alaskan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-08:00) Baja California",
+                                                "value": "Pacific Standard Time (Mexico)"
+                                            },
+                                            {
+                                                "label": "(UTC-08:00) Pacific Time (US &amp; Canada)",
+                                                "value": "Pacific Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-07:00) Arizona",
+                                                "value": "US Mountain Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-07:00) Chihuahua, La Paz, Mazatlan",
+                                                "value": "Mountain Standard Time (Mexico)"
+                                            },
+                                            {
+                                                "label": "(UTC-07:00) Mountain Time (US &amp; Canada)",
+                                                "value": "Mountain Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-06:00) Central America",
+                                                "value": "Central America Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-06:00) Central Time (US &amp; Canada)",
+                                                "value": "Central Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-06:00) Guadalajara, Mexico City, Monterrey",
+                                                "value": "Central Standard Time (Mexico)"
+                                            },
+                                            {
+                                                "label": "(UTC-06:00) Saskatchewan",
+                                                "value": "Canada Central Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-05:00) Bogota, Lima, Quito, Rio Branco",
+                                                "value": "SA Pacific Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-05:00) Chetumal",
+                                                "value": "Eastern Standard Time (Mexico)"
+                                            },
+                                            {
+                                                "label": "(UTC-05:00) Eastern Time (US &amp; Canada)",
+                                                "value": "Eastern Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-05:00) Indiana (East)",
+                                                "value": "US Eastern Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-04:30) Caracas",
+                                                "value": "Venezuela Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-04:00) Asuncion",
+                                                "value": "Paraguay Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-04:00) Atlantic Time (Canada)",
+                                                "value": "Atlantic Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-04:00) Cuiaba",
+                                                "value": "Central Brazilian Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan",
+                                                "value": "SA Western Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:30) Newfoundland",
+                                                "value": "Newfoundland Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Brasilia",
+                                                "value": "E. South America Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Cayenne, Fortaleza",
+                                                "value": "SA Eastern Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) City of Buenos Aires",
+                                                "value": "Argentina Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Greenland",
+                                                "value": "Greenland Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Montevideo",
+                                                "value": "Montevideo Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Salvador",
+                                                "value": "Bahia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-03:00) Santiago",
+                                                "value": "Pacific SA Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-02:00) Coordinated Universal Time-02",
+                                                "value": "UTC-02"
+                                            },
+                                            {
+                                                "label": "(UTC-01:00) Azores",
+                                                "value": "Azores Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC-01:00) Cabo Verde Is.",
+                                                "value": "Cape Verde Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC) Casablanca",
+                                                "value": "Morocco Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC) Coordinated Universal Time",
+                                                "value": "UTC"
+                                            },
+                                            {
+                                                "label": "(UTC) Dublin, Edinburgh, Lisbon, London",
+                                                "value": "GMT Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC) Monrovia, Reykjavik",
+                                                "value": "Greenwich Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
+                                                "value": "W. Europe Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague",
+                                                "value": "Central Europe Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris",
+                                                "value": "Romance Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb",
+                                                "value": "Central European Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) West Central Africa",
+                                                "value": "W. Central Africa Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+01:00) Windhoek",
+                                                "value": "Namibia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Amman",
+                                                "value": "Jordan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Athens, Bucharest",
+                                                "value": "GTB Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Beirut",
+                                                "value": "Middle East Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Cairo",
+                                                "value": "Egypt Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Damascus",
+                                                "value": "Syria Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) E. Europe",
+                                                "value": "E. Europe Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Harare, Pretoria",
+                                                "value": "South Africa Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius",
+                                                "value": "FLE Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Istanbul",
+                                                "value": "Turkey Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Jerusalem",
+                                                "value": "Israel Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Kaliningrad (RTZ 1)",
+                                                "value": "Kaliningrad Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+02:00) Tripoli",
+                                                "value": "Libya Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:00) Baghdad",
+                                                "value": "Arabic Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:00) Kuwait, Riyadh",
+                                                "value": "Arab Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:00) Minsk",
+                                                "value": "Belarus Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:00) Moscow, St. Petersburg, Volgograd (RTZ 2)",
+                                                "value": "Russian Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:00) Nairobi",
+                                                "value": "E. Africa Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+03:30) Tehran",
+                                                "value": "Iran Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Abu Dhabi, Muscat",
+                                                "value": "Arabian Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Baku",
+                                                "value": "Azerbaijan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Izhevsk, Samara (RTZ 3)",
+                                                "value": "Russia Time Zone 3"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Port Louis",
+                                                "value": "Mauritius Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Tbilisi",
+                                                "value": "Georgian Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:00) Yerevan",
+                                                "value": "Caucasus Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+04:30) Kabul",
+                                                "value": "Afghanistan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:00) Ashgabat, Toshkent",
+                                                "value": "West Asia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:00) Ekaterinburg (RTZ 4)",
+                                                "value": "Ekaterinburg Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:00) Islamabad, Karachi",
+                                                "value": "Pakistan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi",
+                                                "value": "India Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:30) Sri Jayawardenepura",
+                                                "value": "Sri Lanka Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+05:45) Kathmandu",
+                                                "value": "Nepal Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+06:00) Astana",
+                                                "value": "Central Asia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+06:00) Dhaka",
+                                                "value": "Bangladesh Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+06:00) Novosibirsk (RTZ 5)",
+                                                "value": "N. Central Asia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+06:30) Yangon (Rangoon)",
+                                                "value": "Myanmar Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+07:00) Bangkok, Hanoi, Jakarta",
+                                                "value": "SE Asia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+07:00) Krasnoyarsk (RTZ 6)",
+                                                "value": "North Asia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi",
+                                                "value": "China Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Irkutsk (RTZ 7)",
+                                                "value": "North Asia East Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Kuala Lumpur, Singapore",
+                                                "value": "Singapore Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Perth",
+                                                "value": "W. Australia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Taipei",
+                                                "value": "Taipei Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+08:00) Ulaanbaatar",
+                                                "value": "Ulaanbaatar Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+09:00) Osaka, Sapporo, Tokyo",
+                                                "value": "Tokyo Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+09:00) Seoul",
+                                                "value": "Korea Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+09:00) Yakutsk (RTZ 8)",
+                                                "value": "Yakutsk Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+09:30) Adelaide",
+                                                "value": "Cen. Australia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+09:30) Darwin",
+                                                "value": "AUS Central Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Brisbane",
+                                                "value": "E. Australia Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Canberra, Melbourne, Sydney",
+                                                "value": "AUS Eastern Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Guam, Port Moresby",
+                                                "value": "West Pacific Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Hobart",
+                                                "value": "Tasmania Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Magadan",
+                                                "value": "Magadan Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+10:00) Vladivostok, Magadan (RTZ 9)",
+                                                "value": "Vladivostok Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+11:00) Chokurdakh (RTZ 10)",
+                                                "value": "Russia Time Zone 10"
+                                            },
+                                            {
+                                                "label": "(UTC+11:00) Solomon Is., New Caledonia",
+                                                "value": "Central Pacific Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+12:00) Anadyr, Petropavlovsk-Kamchatsky (RTZ 11)",
+                                                "value": "Russia Time Zone 11"
+                                            },
+                                            {
+                                                "label": "(UTC+12:00) Auckland, Wellington",
+                                                "value": "New Zealand Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+12:00) Coordinated Universal Time+12",
+                                                "value": "UTC+12"
+                                            },
+                                            {
+                                                "label": "(UTC+12:00) Fiji",
+                                                "value": "Fiji Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+13:00) Nuku'alofa",
+                                                "value": "Tonga Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+13:00) Samoa",
+                                                "value": "Samoa Standard Time"
+                                            },
+                                            {
+                                                "label": "(UTC+14:00) Kiritimati Island",
+                                                "value": "Line Islands Standard Time"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "copyToDefaultUserAccount",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "visible": true,
+                                    "label": "Apply the same settings to the default user account",
+                                    "toolTip": "If checked, apply language & region settings that you choose to the default user account too.",
+                                    "defaultValue": true,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "details",
+                    "label": "Disk & networking",
+                    "description": "Define disk configuration and network connectivity for your virtual machine.",
+                    "elements": [
+                        {
+                            "name": "osDiskSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "OS disk",
+                            "elements": [
+                                {
+                                    "name": "osDiskType",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "label": "OS disk type",
+                                    "toolTip": "You can choose between Azure managed disks types to support your workload or scenario. [Learn more about managed disk types](http://go.microsoft.com/fwlink/?LinkId=2077396)",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "multiLine": true,
+                                    "defaultDescription": "---",
+                                    "filter": true,
+                                    "filterPlaceholder": "Filter OS disk storage types...",
+                                    "placeholder": "---",
+                                    "defaultValue": "Standard SSD (LRS)",
+                                    "constraints": {
+                                        "required": true,
+                                        "allowedValues": [
+                                            {
+                                                "label": "Premium SSD (LRS)",
+                                                "value": "Premium_LRS",
+                                                "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter)."
+                                            },
+                                            {
+                                                "label": "Standard SSD (LRS)",
+                                                "value": "StandardSSD_LRS",
+                                                "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter)."
+                                            },
+                                            {
+                                                "label": "Standard HDD (LRS)",
+                                                "value": "Standard_LRS",
+                                                "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter)."
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "deleteOsDiskWithVm",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "visible": true,
+                                    "label": "Delete with VM",
+                                    "toolTip": "Disks persist independently from the virtual machine. You can choose to automatically delete a disk when the associated virtual machine is deleted. [Learn more](http://go.microsoft.com/fwlink/?LinkId=2161664)",
+                                    "defaultValue": true,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "virtualNetwork",
+                            "type": "Microsoft.Network.VirtualNetworkCombo",
+                            "visible": true,
+                            "label": {
+                                "virtualNetwork": "Virtual network",
+                                "subnets": "Subnet"
+                            },
+                            "toolTip": {
+                                "virtualNetwork": "Virtual networks are logically isolated from each other in Azure. You can configure their IP address ranges, subnets, route tables, gateways, and security settings, much like a traditional network in your data center. Virtual machines in the same virtual network can access each other by default.",
+                                "subnets": "A subnet is a range of IP addresses in your virtual network, which can be used to isolate virtual machines from each other or from the Internet."
+                            },
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "defaultValue": {
+                                "name": "langregion-vnet",
+                                "addressPrefixSize": "/16"
+                            },
+                            "subnets": {
+                                "defaultSubnet": {
+                                    "label": "Subnet",
+                                    "defaultValue": {
+                                        "name": "default",
+                                        "addressPrefixSize": "/24"
+                                    },
+                                    "constraints": {
+                                        "minAddressPrefixSize": "/29",
+                                        "minAddressCount": 1,
+                                        "requireContiguousAddresses": false
+                                    }
+                                }
+                            },
+                            "constraints": {
+                                "minAddressPrefixSize": "/29"
+                            },
+                            "options": {
+                                "hideExisting": false
+                            }
+                        },
+                        {
+                            "name": "networkInterfaceSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Network interface",
+                            "elements": [
+                                {
+                                    "name": "usePublicIpAddress",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "visible": true,
+                                    "label": "Use public IP address",
+                                    "toolTip": "Use a public IP address if you want to communicate with the virtual machine from outside the virtual network.",
+                                    "defaultValue": true,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                },
+                                {
+                                    "name": "deletePublicIpAddressWithVm",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "visible": "[steps('details').networkInterfaceSection.usePublicIpAddress]",
+                                    "label": "Delete public IP address and network interface when VM is deleted",
+                                    "toolTip": "Public IP addresses and network interfaces persist independently from the virtual machine. You can choose to automatically delete the public IP address and network interface when the associated virtual machine is deleted. [Learn more](http://go.microsoft.com/fwlink/?LinkId=2161664)",
+                                    "defaultValue": true,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                },
+                                {
+                                    "name": "deleteNetworkInterfaceWithVm",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "visible": "[not(steps('details').networkInterfaceSection.usePublicIpAddress)]",
+                                    "label": "Delete network interface when VM is deleted",
+                                    "toolTip": "Network interfaces persist independently from the virtual machine. You can choose to automatically delete the network interface when the associated virtual machine is deleted. [Learn more](http://go.microsoft.com/fwlink/?LinkId=2161664)",
+                                    "defaultValue": true,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "kind": "ResourceGroup",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "parameters": {
+                "vnetNewOrExisting": "[steps('details').virtualNetwork.newOrExisting]",
+                "vnetResourceGroupName": "[steps('details').virtualNetwork.resourceGroup]",
+                "vnetName": "[steps('details').virtualNetwork.name]",
+                "vnetAddressPrefix": "[steps('details').virtualNetwork.addressPrefix]",
+                "subnetName": "[steps('details').virtualNetwork.subnets.defaultSubnet.name]",
+                "subnetAddressPrefix": "[steps('details').virtualNetwork.subnets.defaultSubnet.addressPrefix]",
+        
+                "vmName": "[steps('basics').vmName]",
+                "vmImageSku": "[steps('basics').vmImageSku]",
+                "vmSize": "[steps('basics').vmSize]",
+                "osDiskType": "[steps('details').osDiskSection.osDiskType]",
+                "deleteOsDiskWithVm": "[steps('details').osDiskSection.deleteOsDiskWithVm]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
+                "usePublicIpAddress": "[steps('details').networkInterfaceSection.usePublicIpAddress]",
+                "deleteNetworkInterfaceWithVm": "[if(steps('details').networkInterfaceSection.usePublicIpAddress, steps('details').networkInterfaceSection.deletePublicIpAddressWithVm, steps('details').networkInterfaceSection.deleteNetworkInterfaceWithVm)]",
+                "deletePublicIpAddressWithVm": "[if(steps('details').networkInterfaceSection.usePublicIpAddress, steps('details').networkInterfaceSection.deletePublicIpAddressWithVm, false)]",
+        
+                "preferredLanguage": "[steps('basics').languageAndRegionSection.language.preferredLanguage]",
+                "languageCapability": "[steps('basics').languageAndRegionSection.languageCapability]",
+                "geoLocationId": "[steps('basics').languageAndRegionSection.language.geoLocationId]",
+                "copyToDefaultUserAccount": "[steps('basics').languageAndRegionSection.copyToDefaultUserAccount]",
+                "timeZone": "[steps('basics').languageAndRegionSection.timeZone]",
+                "systemLocale": "[steps('basics').languageAndRegionSection.language.systemLocale]"
+            }
+        }
+    }
+}
