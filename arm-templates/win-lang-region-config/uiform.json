@@ -39,6 +39,10 @@
                                         "message": "Virtual machine names can contain all alphanumeric characters and special character '-', also, not begin with '-' and not end with '-'."
                                     },
                                     {
+                                        "regex": "(?!^\\d+$)^.+$",
+                                        "message": "Virtual machine name cannot contain only numbers."
+                                    },
+                                    {
                                         "regex": "^.{1,15}$",
                                         "message": "Virtual machine name must be between 1 and 15 characters long."
                                     }
@@ -715,7 +719,7 @@
                                     "multiLine": true,
                                     "defaultDescription": "---",
                                     "filter": true,
-                                    "filterPlaceholder": "Filter OS disk storage types...",
+                                    "filterPlaceholder": "Filter OS disk types...",
                                     "placeholder": "---",
                                     "defaultValue": "Standard SSD (LRS)",
                                     "constraints": {
