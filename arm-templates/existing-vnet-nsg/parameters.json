@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetNewOrExisting": {
+            "value": "existing"
+        },
+        "vnetResourceGroupName": {
+            "value": "existing-vnet-nsg"
+        },
+        "vnetName": {
+            "value": "existing-vnet"
+        },
+        "vnetAddressPrefix": {
+            "value": "10.5.0.0/16"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "subnetAddressPrefix": {
+            "value": "10.5.0.0/24"
+        }
+    }
+}

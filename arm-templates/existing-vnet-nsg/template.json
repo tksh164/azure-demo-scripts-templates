@@ -1,0 +1,159 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetNewOrExisting": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target virtual network existence by 'new' or 'existing'."
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the resource group name that contains the target virtual network."
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target virtual network name."
+            }
+        },
+        "vnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target virtual network."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the target subnet name."
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the address prefix of the target subnet."
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "name": "nsg",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "vnetName": {
+                        "value": "[parameters('vnetName')]"
+                    },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    },
+                    "subnetAddressPrefix": {
+                        "value": "[reference(variables('subnetId'), '2022-07-01').addressPrefix]"
+                    },
+
+                    "nsgName": {
+                        "value": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]"
+                    },
+                    "isExistNsg": {
+                        // Check NSG existence on specified subnet.
+                        "value": "[contains(reference(variables('subnetId'), '2022-07-01'), 'networkSecurityGroup')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        },
+                        "vnetName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        },
+                        "subnetName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        },
+                        "subnetAddressPrefix": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        },
+                        "nsgName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        },
+                        "isExistNsg": {
+                            "type": "bool",
+                            "metadata": {
+                                "description": "description"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(parameters('isExistNsg'))]",
+                            "name": "[parameters('nsgName')]",
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2022-07-01",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "securityRules": []   
+                            }
+                        }//,
+                        // This works fine if the virtual network exists in the same resource group. But this does not work if the virtual network exists in another resource group.
+                        // {
+                        //     "condition": "[not(parameters('isExistNsg'))]",
+                        //     "name": "[concat(parameters('vnetName'), '/', parameters('subnetName'))]",
+                        //     "type": "Microsoft.Network/virtualNetworks/subnets",
+                        //     "apiVersion": "2022-07-01",
+                        //     "location": "[parameters('location')]",
+                        //     "dependsOn": [
+                        //         "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                        //     ],
+                        //     "properties": {
+                        //         "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                        //         "networkSecurityGroup": {
+                        //             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                        //         }
+                        //     }
+                        // }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        // Check NSG existence on specified subnet.
+        "nsg": {
+            "type": "bool",
+            "value": "[contains(reference(variables('subnetId'), '2022-07-01'), 'networkSecurityGroup')]"
+        }
+    }
+}
