@@ -254,7 +254,7 @@
 
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2021-11-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('dcVm').avSetName]",
             "location": "[variables('location')]",
             "sku": {
@@ -289,7 +289,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2021-11-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('dcVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -354,7 +354,7 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2021-12-01",
+            "apiVersion": "2022-03-02",
             "name": "[variables('dcVm').dataDiskName]",
             "location": "[variables('location')]",
             "sku": {
@@ -369,7 +369,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2021-11-01",
+            "apiVersion": "2022-03-01",
             "name": "[concat(variables('dcVm').vmName, '/configure-adds-first-dc')]",
             "location": "[variables('location')]",
             "dependsOn": [
