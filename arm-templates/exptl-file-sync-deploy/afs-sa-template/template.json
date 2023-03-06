@@ -99,7 +99,7 @@
             },
             "name": "[variables('storageAccountNames')[copyIndex()]]",
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2021-04-01",
+            "apiVersion": "2022-05-01",
             "location": "[variables('location')]",
             "kind": "StorageV2",
             "sku": {
@@ -120,7 +120,7 @@
                 {
                     "name": "default",
                     "type": "fileServices",
-                    "apiVersion": "2021-04-01",
+                    "apiVersion": "2022-05-01",
                     "dependsOn": [
                         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNames')[copyIndex()])]"
                     ],
@@ -203,7 +203,7 @@
                         {
                             "name": "[parameters('name')]",
                             "type": "Microsoft.Authorization/roleAssignments",
-                            "apiVersion": "2021-04-01-preview",
+                            "apiVersion": "2022-04-01",
                             "scope": "[parameters('scope')]",
                             "properties": {
                                 "roleDefinitionId": "[parameters('roleDefinitionId')]",
