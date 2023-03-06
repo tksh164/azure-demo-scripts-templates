@@ -194,7 +194,7 @@
 
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2021-11-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('proxyVm').avSetName]",
             "location": "[variables('location')]",
             "sku": {
@@ -229,7 +229,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2021-11-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('proxyVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
