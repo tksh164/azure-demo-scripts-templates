@@ -115,7 +115,7 @@
 
         {
             "type": "Microsoft.RecoveryServices/vaults",
-            "apiVersion": "2016-06-01",
+            "apiVersion": "2022-04-01",
             "name": "[variables('recoveryServicesVaultName')]",
             "location": "[variables('location')]",
             "sku": {
@@ -126,7 +126,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2022-05-01",
             "name": "[variables('recoveryServicesVaultDiagStorageName')]",
             "location": "[variables('location')]",
             "kind": "Storage",
@@ -140,7 +140,7 @@
         },
         {
             "type": "Microsoft.OperationalInsights/workspaces",
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "2021-06-01",
             "name": "[variables('logAnalyticsWorkspaceName')]",
             "location": "[variables('location')]",
             "properties": {
@@ -157,7 +157,7 @@
 
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2019-09-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vnetName')]",
             "location": "[variables('location')]",
             "properties": {
@@ -184,7 +184,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[0].ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -196,7 +196,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[0].nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -219,7 +219,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[0].nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -249,7 +249,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('marsAgentVm')[0].vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -302,7 +302,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[1].ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -314,7 +314,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[1].nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -337,7 +337,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('marsAgentVm')[1].nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -367,7 +367,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('marsAgentVm')[1].vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -420,7 +420,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('dcVm').ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -432,7 +432,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('dcVm').nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -455,7 +455,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('dcVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -485,7 +485,7 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-03-02",
             "name": "[variables('dcVm').dataDiskName[0]]",
             "location": "[variables('location')]",
             "sku": {
@@ -500,7 +500,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('dcVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -564,7 +564,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('absVm').ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -576,7 +576,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('absVm').nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -599,7 +599,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('absVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -634,7 +634,7 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-03-02",
             "name": "[variables('absVm').dataDiskName[0]]",
             "location": "[variables('location')]",
             "sku": {
@@ -649,7 +649,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('absVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -713,7 +713,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[0].ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -725,7 +725,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[0].nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -748,7 +748,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[0].nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -778,7 +778,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('vmBackupVm')[0].vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -831,7 +831,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[1].ipName]",
             "location": "[variables('location')]",
             "sku": {
@@ -843,7 +843,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[1].nsgName]",
             "location": "[variables('location')]",
             "properties": {
@@ -866,7 +866,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-07-01",
+            "apiVersion": "2020-11-01",
             "name": "[variables('vmBackupVm')[1].nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -896,7 +896,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2022-03-01",
             "name": "[variables('vmBackupVm')[1].vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
