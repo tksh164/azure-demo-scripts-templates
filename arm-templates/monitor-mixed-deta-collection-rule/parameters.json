@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ruleName": {
+            "value": "mixed-dcr1"
+        },
+        "destinationLogAnalyticsWorkspaceResourceId": {
+            "value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcrlab/providers/Microsoft.OperationalInsights/workspaces/dcrlab-log"
+        },
+        "dataCollectionEndpointId": {
+            "value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcrlab/providers/Microsoft.Insights/dataCollectionEndpoints/dcrlab-dce1"
+        }
+    }
+}

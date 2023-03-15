@@ -1,0 +1,266 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ruleName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the name of the data collection rule to create."
+            }
+        },
+        "destinationLogAnalyticsWorkspaceResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the resoruce ID of the Log Analytics workspace to use for destination."
+            }
+        },
+        "dataCollectionEndpointId": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the resoruce ID of the data collection endpoint."
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "laDestinationName": "[concat('la-', uniqueString(parameters('destinationLogAnalyticsWorkspaceResourceId')))]",
+        "customLogTableName": "CustomLog1_CL",
+        "customLogStreamName": "[concat('Custom-', variables('customLogTableName'))]"
+    },
+    "resources": [
+        {
+            "name": "getLogAnalyticsWorkspaceId",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "logAnalyticsWorkspaceResourceId": {
+                        "value": "[parameters('destinationLogAnalyticsWorkspaceResourceId')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "logAnalyticsWorkspaceResourceId": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "Specifies the resoruce ID of the Log Analytics workspace to use for destination."
+                            }
+                        }
+                    },
+                    "resources": [],
+                    "outputs": {
+                        "workspaceId": {
+                            "type": "string",
+                            "value": "[reference(parameters('logAnalyticsWorkspaceResourceId'), '2022-10-01').customerId]"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('ruleName')]",
+            "type": "Microsoft.Insights/dataCollectionRules",
+            "apiVersion": "2021-09-01-preview",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'getLogAnalyticsWorkspaceId')]"
+            ],
+            "kind": "Windows",
+            "properties": {
+                "dataSources": {
+                    // Performance Counters
+                    "performanceCounters": [
+                        {
+                            "name": "perfCounterDataSource60",
+                            "samplingFrequencyInSeconds": 60,
+                            "scheduledTransferPeriod": "PT1M",
+                            "counterSpecifiers": [
+                                "\\Processor Information(_Total)\\% Processor Time",
+                                "\\Processor Information(_Total)\\% Privileged Time",
+                                "\\Processor Information(_Total)\\% User Time",
+                                "\\Processor Information(_Total)\\Processor Frequency",
+                                "\\System\\Processes",
+                                "\\Process(_Total)\\Thread Count",
+                                "\\Process(_Total)\\Handle Count",
+                                "\\System\\System Up Time",
+                                "\\System\\Context Switches/sec",
+                                "\\System\\Processor Queue Length",
+                                "\\Memory\\% Committed Bytes In Use",
+                                "\\Memory\\Available Bytes",
+                                "\\Memory\\Committed Bytes",
+                                "\\Memory\\Cache Bytes",
+                                "\\Memory\\Pool Paged Bytes",
+                                "\\Memory\\Pool Nonpaged Bytes",
+                                "\\Memory\\Pages/sec",
+                                "\\Memory\\Page Faults/sec",
+                                "\\Process(_Total)\\Working Set",
+                                "\\Process(_Total)\\Working Set - Private",
+                                "\\LogicalDisk(_Total)\\% Disk Time",
+                                "\\LogicalDisk(_Total)\\% Disk Read Time",
+                                "\\LogicalDisk(_Total)\\% Disk Write Time",
+                                "\\LogicalDisk(_Total)\\% Idle Time",
+                                "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+                                "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+                                "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+                                "\\LogicalDisk(_Total)\\Disk Transfers/sec",
+                                "\\LogicalDisk(_Total)\\Disk Reads/sec",
+                                "\\LogicalDisk(_Total)\\Disk Writes/sec",
+                                "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
+                                "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
+                                "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
+                                "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
+                                "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
+                                "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
+                                "\\LogicalDisk(_Total)\\% Free Space",
+                                "\\LogicalDisk(_Total)\\Free Megabytes",
+                                "\\Network Interface(*)\\Bytes Total/sec",
+                                "\\Network Interface(*)\\Bytes Sent/sec",
+                                "\\Network Interface(*)\\Bytes Received/sec",
+                                "\\Network Interface(*)\\Packets/sec",
+                                "\\Network Interface(*)\\Packets Sent/sec",
+                                "\\Network Interface(*)\\Packets Received/sec",
+                                "\\Network Interface(*)\\Packets Outbound Errors",
+                                "\\Network Interface(*)\\Packets Received Errors"
+                            ],
+                            "streams": [
+                                "Microsoft-Perf"
+                            ]
+                        }
+                    ],
+
+                    // Windows Event Logs
+                    "windowsEventLogs": [
+                        {
+                            "name": "eventLogsDataSource",
+                            "scheduledTransferPeriod": "PT5M",
+                            "xPathQueries": [
+                                "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0)]]",
+                                "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0)]]"
+                            ],
+                            "streams": [
+                                "Microsoft-Event"
+                            ]
+                        }
+                    ],
+
+                    // IIS Logs
+                    "iisLogs": [
+                        {
+                            "name": "iisLogsDataSource",
+                            "logDirectories": null,
+                            "streams": [
+                                "Microsoft-W3CIISLog"
+                            ]
+                        }
+                    ],
+
+                    // Custom Text Logs
+                    "logFiles": [
+                        {
+                            "name": "[variables('customLogTableName')]",
+                            "filePatterns": [
+                                "C:\\logs\\*.log"
+                            ],
+                            "format": "text",
+                            "settings": {
+                                "text": {
+                                    "recordStartTimestampFormat": "ISO 8601",
+                                    "eventDelimiter": "End-of-Line",
+                                    "header": false
+                                }
+                            },
+                            "streams": [
+                                "[variables('customLogStreamName')]"
+                            ]
+                        }
+                    ]
+                },
+                "destinations": {
+                    "logAnalytics": [
+                        {
+                            "workspaceResourceId": "[parameters('destinationLogAnalyticsWorkspaceResourceId')]",
+                            "workspaceId": "[reference(resourceId('Microsoft.Resources/deployments', 'getLogAnalyticsWorkspaceId')).outputs.workspaceId.value]",
+                            "name": "[variables('laDestinationName')]"
+                        }
+                    ]
+                },
+                "dataFlows": [
+                    // Performance Counters
+                    {
+                        "streams": [
+                            "Microsoft-Perf"
+                        ],
+                        "transformKql": "source",
+                        "outputStream": "Microsoft-Perf",
+                        "destinations": [
+                            "[variables('laDestinationName')]"
+                        ]
+                    },
+
+                    // Windows Event Logs
+                    {
+                        "streams": [
+                            "Microsoft-Event"
+                        ],
+                        "transformKql": "source",
+                        "outputStream": "Microsoft-Event",
+                        "destinations": [
+                            "[variables('laDestinationName')]"
+                        ]
+                    },
+
+                    // IIS Logs
+                    {
+                        "streams": [
+                            "Microsoft-W3CIISLog"
+                        ],
+                        "transformKql": "source",
+                        "outputStream": "Microsoft-W3CIISLog",
+                        "destinations": [
+                            "[variables('laDestinationName')]"
+                        ]
+                    },
+
+                    // Custom Text Logs
+                    {
+                        "streams": [
+                            "[variables('customLogStreamName')]"
+                        ],
+                        "transformKql": "source",
+                        "outputStream": "[variables('customLogStreamName')]",
+                        "destinations": [
+                            "[variables('laDestinationName')]"
+                        ]
+                    }
+                ],
+                "dataCollectionEndpointId": "[parameters('dataCollectionEndpointId')]",
+                "streamDeclarations": {
+                    "[variables('customLogStreamName')]": {
+                        "columns": [
+                            {
+                                "name": "TimeGenerated",
+                                "type": "datetime"
+                            },
+                            {
+                                "name": "RawData",
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "destinationLogAnalyticsWorkspaceId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'getLogAnalyticsWorkspaceId')).outputs.workspaceId.value]"
+        }
+    }
+}
