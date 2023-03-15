@@ -170,7 +170,7 @@
                             "format": "text",
                             "settings": {
                                 "text": {
-                                    "recordStartTimestampFormat": "ISO 8601",
+                                    "recordStartTimestampFormat": "YYYY-MM-DD HH:MM:SS",
                                     "eventDelimiter": "End-of-Line",
                                     "header": false
                                 }
