@@ -26,7 +26,7 @@
     "resources": [
         {
             "type": "Microsoft.StorageSync/storageSyncServices",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2020-09-01",
             "name": "[variables('storageSyncServicesName')]",
             "location": "[variables('location')]",
             "properties": {},
@@ -34,7 +34,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2022-05-01",
             "name": "[variables('storageAccountName')]",
             "location": "[variables('location')]",
             "sku": {
@@ -65,7 +65,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2022-05-01",
             "name": "[concat(variables('storageAccountName'), '/default/', variables('fileShareName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
