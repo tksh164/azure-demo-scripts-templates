@@ -84,7 +84,7 @@
     },
     "resources": [
         {
-            "apiVersion": "2016-12-01",
+            "apiVersion": "2020-11-01",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('vnetName')]",
             "location": "[resourceGroup().location]",
@@ -111,7 +111,7 @@
             },
             "name": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')))]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2017-03-30",
+            "apiVersion": "2022-03-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-nic'))]",
@@ -157,7 +157,7 @@
         {
             "name": "[variables('avSetName')]",
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2016-04-30-preview",
+            "apiVersion": "2022-03-01",
             "location": "[resourceGroup().location]",
             "properties": {
                 "platformFaultDomainCount": "[parameters('availabilitySetPlatformFaultDomainCount')]",
@@ -172,7 +172,7 @@
             },
             "name": "[concat(variables('vmName'), copyIndex(variables('copyIndexOffset')), '-nic')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2016-12-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
@@ -198,7 +198,7 @@
         {
             "name": "[variables('nsgName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2016-12-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "properties": {
                 "securityRules": [
