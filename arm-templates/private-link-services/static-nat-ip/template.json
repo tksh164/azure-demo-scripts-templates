@@ -16,7 +16,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2021-04-01",
             "name": "[variables('deploymentNames').providerVNet]",
             "properties": {
                 "mode": "Incremental",
@@ -44,7 +44,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/VirtualNetworks",
-                            "apiVersion": "2020-05-01",
+                            "apiVersion": "2020-11-01",
                             "name": "[variables('vnetName')]",
                             "location": "[parameters('location')]",
                             "properties": {
@@ -89,7 +89,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2021-04-01",
             "name": "[variables('deploymentNames').backendInternalLb]",
             "properties": {
                 "mode": "Incremental",
@@ -124,7 +124,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/loadBalancers",
-                            "apiVersion": "2020-05-01",
+                            "apiVersion": "2020-11-01",
                             "name": "[variables('backendInternalLbName')]",
                             "location": "[parameters('location')]",
                             "sku": {
@@ -209,7 +209,7 @@
 
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2021-04-01",
             "name": "[variables('deploymentNames').privateLinkService]",
             "properties": {
                 "mode": "Incremental",
@@ -248,7 +248,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Network/privateLinkServices",
-                            "apiVersion": "2020-05-01",
+                            "apiVersion": "2020-11-01",
                             "name": "[variables('privateLinkServiceName')]",
                             "location": "[parameters('location')]",
                             "properties": {
