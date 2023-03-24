@@ -110,7 +110,7 @@
         {
             "name": "[variables('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -129,7 +129,7 @@
         {
             "name": "[variables('virtualMachineName')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-03-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('networkInterfaces')[0].id]",
@@ -178,7 +178,7 @@
         {
             "name": "[variables('networkInterfaces')[0].name]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]"
@@ -201,7 +201,7 @@
         {
             "name": "[variables('networkInterfaces')[1].name]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]"
@@ -224,7 +224,7 @@
         {
             "name": "[variables('networkInterfaces')[2].name]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]"
@@ -247,7 +247,7 @@
         {
             "name": "[variables('networkInterfaces')[3].name]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]"
