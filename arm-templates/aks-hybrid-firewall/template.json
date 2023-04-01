@@ -1,0 +1,395 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "firewallPolicyName": {
+            "type": "string",
+            "defaultValue": "akshybrid-fwpolicy",
+            "metadata": {
+                "description": "The name of the firewall policy for AKS hybrid."
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('firewallPolicyName')]",
+            "type": "Microsoft.Network/firewallPolicies",
+            "apiVersion": "2022-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "sku": {
+                    "tier": "Basic"
+                }
+            },
+            "resources": [
+                {
+                    "name": "DefaultApplicationRuleCollectionGroup",
+                    "type": "ruleCollectionGroups",
+                    "apiVersion": "2022-09-01",
+                    "location": "[variables('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicyName'))]"
+                    ],
+                    "properties": {
+                        "priority": 300,
+                        "ruleCollections": [
+
+                            // For AKS hybrid
+                            // https://learn.microsoft.com/en-us/azure/aks/hybrid/system-requirements
+
+                            {
+                                "name": "aks-hybrid",
+                                "priority": 1000,
+                                "action": {
+                                    "type": "Allow"
+                                },
+                                "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                                "rules": [
+                                    {
+                                        "name": "msk8s.api.cdp.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "msk8s.api.cdp.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "msk8s.b.tlu.dl.delivery.mp.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "msk8s.b.tlu.dl.delivery.mp.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "msk8s.f.tlu.dl.delivery.mp.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "msk8s.f.tlu.dl.delivery.mp.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "login.microsoftonline.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "login.microsoftonline.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "login.windows.net",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "login.windows.net"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "management.azure.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "management.azure.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "www.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "www.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "msft.sts.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "msft.sts.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "graph.windows.net",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "graph.windows.net"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "ecpacr.azurecr.io",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "ecpacr.azurecr.io"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "*.blob.core.windows.net",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "*.blob.core.windows.net"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "mcr.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "mcr.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "*.mcr.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "*.mcr.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "akshci.azurefd.net",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "akshci.azurefd.net"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "v20.events.data.microsoft.com",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "v20.events.data.microsoft.com"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    },
+                                    {
+                                        "name": "gcs.prod.monitoring.core.windows.net",
+                                        "ruleType": "ApplicationRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "sourceIpGroups": [],
+                                        "protocols": [
+                                            {
+                                                "protocolType": "https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "terminateTLS": false,
+                                        "targetFqdns": [
+                                            "gcs.prod.monitoring.core.windows.net"
+                                        ],
+                                        "fqdnTags": [],
+                                        "targetUrls": [],
+                                        "webCategories": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
