@@ -32,7 +32,7 @@
         {
             "name": "[variables('eventSubscriptionName')]",
             "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
-            "apiVersion": "2021-12-01",
+            "apiVersion": "2022-06-15",
             "properties": {
                 "eventDeliverySchema": "EventGridSchema",
                 "topic": "[parameters('systemTopicId')]",
