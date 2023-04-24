@@ -85,7 +85,7 @@
         {
             "name": "[variables('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -111,7 +111,7 @@
         {
             "name": "[variables('virtualMachineName')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualMachineDiskStorageAccountId')]",
@@ -183,7 +183,7 @@
         {
             "name": "[variables('virtualMachineDiskStorageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2018-07-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "kind": "Storage",
@@ -199,7 +199,7 @@
         {
             "name": "[variables('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]",
@@ -233,7 +233,7 @@
         {
             "name": "[variables('publicIpAddressName')]",
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -250,7 +250,7 @@
         {
             "name": "[variables('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -278,7 +278,7 @@
         {
             "name": "[variables('diagnosticsStorageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2018-07-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "kind": "Storage",
@@ -294,7 +294,7 @@
         {
             "name": "[variables('diagnosticsExtensionName')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualMachineId')]",
