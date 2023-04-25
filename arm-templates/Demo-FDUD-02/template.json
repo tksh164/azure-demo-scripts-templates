@@ -72,14 +72,14 @@
                 "name": "virtualMachineNames",
                 "count": "[parameters('virtualMachineCount')]",
                 "input": {
-                    "name": "[concat(parameters('prefix'), '-vm', copyIndex('virtualMachineNames', 1))]",
+                    "name": "[concat(parameters('prefix'), '-vm', copyIndex('virtualMachineNames', 1))]"
                 }
             },
             {
                 "name": "networkInterfaceNames",
                 "count": "[length(variables('virtualMachineNames'))]",
                 "input": {
-                    "name": "[concat(variables('virtualMachineNames')[copyIndex('networkInterfaceNames')].name, '-nic1')]",
+                    "name": "[concat(variables('virtualMachineNames')[copyIndex('networkInterfaceNames')].name, '-nic1')]"
                 }
             },
             {
@@ -94,7 +94,7 @@
                     },
                     "networkInterface": {
                         "name": "[variables('networkInterfaceNames')[copyIndex('configs')].name]",
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('configs')].name)]",
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('configs')].name)]"
                     }
                 }
             }
