@@ -229,12 +229,12 @@
                                             {
                                                 "label": "必須のみ",
                                                 "value": "Minimum",
-                                                "description": "Basic、Fonts、OCRなど、必須の言語機能パッケージのみをインストールします。"
+                                                "description": "Basic、Fonts、OCR など、必須の言語機能パッケージのみをインストールします。"
                                             },
                                             {
                                                 "label": "すべて",
                                                 "value": "All",
-                                                "description": "Basic、Fonts、OCR、Handwriting、Speech、TextToSpeech など、すべての言語機能パッケージをインストールします。"
+                                                "description": "すべての言語機能パッケージ (Basic、Fonts、OCR、Handwriting、Speech、TextToSpeech) をインストールします。"
                                             }
                                         ]
                                     }
