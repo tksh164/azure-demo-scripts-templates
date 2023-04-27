@@ -72,14 +72,14 @@
                 "name": "virtualMachineNames",
                 "count": "[parameters('virtualMachineCount')]",
                 "input": {
-                    "name": "[concat(parameters('prefix'), '-vm', copyIndex('virtualMachineNames', 1))]",
+                    "name": "[concat(parameters('prefix'), '-vm', copyIndex('virtualMachineNames', 1))]"
                 }
             },
             {
                 "name": "networkInterfaceNames",
                 "count": "[length(variables('virtualMachineNames'))]",
                 "input": {
-                    "name": "[concat(variables('virtualMachineNames')[copyIndex('networkInterfaceNames')].name, '-nic1')]",
+                    "name": "[concat(variables('virtualMachineNames')[copyIndex('networkInterfaceNames')].name, '-nic1')]"
                 }
             },
             {
@@ -94,7 +94,7 @@
                     },
                     "networkInterface": {
                         "name": "[variables('networkInterfaceNames')[copyIndex('configs')].name]",
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('configs')].name)]",
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNames')[copyIndex('configs')].name)]"
                     }
                 }
             }
@@ -114,7 +114,7 @@
         {
             "name": "[variables('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -144,7 +144,7 @@
             },
             "name": "[variables('configs')[copyIndex()].virtualMachine.name]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('configs')[copyIndex()].networkInterface.id]",
@@ -205,7 +205,7 @@
             },
             "name": "[variables('configs')[copyIndex()].networkInterface.name]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
+            "apiVersion": "2022-09-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[variables('virtualNetworkId')]"
@@ -231,7 +231,7 @@
         {
             "name": "[variables('availabilitySetName')]",
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2022-11-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
