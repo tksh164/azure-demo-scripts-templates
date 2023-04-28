@@ -8,7 +8,7 @@
                 {
                     "name": "basics",
                     "label": "基本",
-                    "description": "Azure marketplace のイメージと言語パックを指定して、Windows 仮想マシンを作成します。[基本] タブに続いて [確認および作成] を完了させて既定のパラメーターで仮想マシンをプロビジョニングするか、それぞれのタブを確認してフル カスタマイズを行います。",
+                    "description": "Azure marketplace のイメージと言語パックを指定して、Windows 仮想マシンを作成します。[基本] タブに続いて [確認および作成] を完了させて既定のパラメーターで仮想マシンをプロビジョニングするか、それぞれのタブを確認してカスタマイズを行います。",
                     "elements": [
                         {
                             "name": "resourceScope",
@@ -229,12 +229,12 @@
                                             {
                                                 "label": "必須のみ",
                                                 "value": "Minimum",
-                                                "description": "Basic、Fonts、OCRなど、必須の言語機能パッケージのみをインストールします。"
+                                                "description": "Basic、Fonts、OCR など、必須の言語機能パッケージのみをインストールします。"
                                             },
                                             {
                                                 "label": "すべて",
                                                 "value": "All",
-                                                "description": "Basic、Fonts、OCR、Handwriting、Speech、TextToSpeech など、すべての言語機能パッケージをインストールします。"
+                                                "description": "すべての言語機能パッケージ (Basic、Fonts、OCR、Handwriting、Speech、TextToSpeech) をインストールします。"
                                             }
                                         ]
                                     }
