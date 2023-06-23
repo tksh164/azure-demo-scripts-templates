@@ -6,7 +6,7 @@ Azure Arc-enabled servers is not designed or supported to enable management of v
 
 ## For Windows Azure VM
 
-1. Remove the Azure VM's extensions. You can do this by run the following in Azure Cloud Shell.
+1. Remove the Azure VM's extensions. You can do this by run the following in [Azure Cloud Shell](https://shell.azure.com/powershell).
 
     ```powershell
     $rgName = 'vmext-rg'
@@ -26,7 +26,7 @@ Azure Arc-enabled servers is not designed or supported to enable management of v
 
 ## For Linux Azure VM (Ubuntu)
 
-1. Remove the Azure VM's extensions. You can do this by run the following in Azure Cloud Shell.
+1. Remove the Azure VM's extensions. You can do this by run the following in [Azure Cloud Shell](https://shell.azure.com/powershell).
 
     ```powershell
     $rgName = 'vmext-rg'
