@@ -1,15 +1,3 @@
 # HCI Lab
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#view/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fhci-lab%2Ftemplate.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Ftksh164%2Fazure-demo-scripts-templates%2Fmaster%2Farm-templates%2Fhci-lab%2Fuiform.json)
-
-## Template overview
-
-This template deploys an HCI lab environment with Azure Stack HCI or Windows Server 2022.
-
-## Notes
-
-- The log files of the custom scripts are stored under `C:\temp\hcilab-logs` in the lab host Azure VM. Those log files are helpful for troubleshooting when deployment fails.
-
-## External artifacts
-
-- The custom script `create-base-vhd.ps1` in this template downloads `Convert-WindowsImage.ps1` from [microsoft/MSLab](https://github.com/microsoft/MSLab) and uses it during the deployment.
+This template moved to the [hci-lab repository](https://github.com/tksh164/hci-lab). You can get the latest template on the repository.
