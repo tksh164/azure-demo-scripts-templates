@@ -1,5 +1,8 @@
 # Auto resoruce tagging using Event Grid
 
+> [!IMPORTANT]
+> The latest template available on the [Resource Tagging](https://github.com/tksh164/azure-resource-tagging) repo.
+
 ## Deploy steps
 
 1. Deploy a Function App.
