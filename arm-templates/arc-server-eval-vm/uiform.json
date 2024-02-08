@@ -1,0 +1,398 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Azure VM for Azure Arc-enabled servers evaluation",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+                        {
+                            "name": "vmName",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "multiLine": false,
+                            "label": "Virtual machine name",
+                            "toolTip": "Specify the virtual machine name.",
+                            "placeholder": "e.g. arceval-vm1",
+                            "defaultValue": "arceval-vm1",
+                            "constraints": {
+                                "required": true,
+                                "validations": [
+                                    {
+                                        "regex": "^(?!\\-.+$)(?!.+\\-$)[a-zA-Z0-9\\-]+$",
+                                        "message": "Virtual machine names can contain all alphanumeric characters and special character '-', also, not begin with '-' and not end with '-'."
+                                    },
+                                    {
+                                        "regex": "(?!^\\d+$)^.+$",
+                                        "message": "Virtual machine name cannot contain only numbers."
+                                    },
+                                    {
+                                        "regex": "^.{1,15}$",
+                                        "message": "Virtual machine name must be between 1 and 15 characters long."
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmImage",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "label": "Image",
+                            "toolTip": "Select a VM image.",
+                            "placeholder": "Select a VM image",
+                            "multiselect": false,
+                            "selectAll":  false,
+                            "filter": true,
+                            "filterPlaceholder": "Filter VM images...",
+                            "multiLine": false,
+                            "defaultValue": [
+                                "Windows Server 2022 Datacenter - x64 Gen2"
+                            ],
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Windows Server 2022 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2022-datacenter-g2",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "Windows Server 2019 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2019-datacenter-gensecond",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "Windows Server 2016 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2016-datacenter-gensecond",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "Windows Server 2012 R2 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2012-r2-datacenter-gensecond",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "Windows Server 2012 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2012-datacenter-gensecond",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2022 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2022-datacenter-smalldisk-g2",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2019 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2019-datacenter-smalldisk-g2",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2016 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2016-datacenter-smalldisk-g2",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2012 R2 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2012-r2-datacenter-smalldisk-g2",
+                                            "version": "latest"
+                                        }
+                                    },
+                                    {
+                                        "label": "[smalldisk] Windows Server 2012 Datacenter - x64 Gen2",
+                                        "value": {
+                                            "publisher": "MicrosoftWindowsServer",
+                                            "offer": "WindowsServer",
+                                            "sku": "2012-datacenter-smalldisk-g2",
+                                            "version": "latest"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "vmSize",
+                            "type": "Microsoft.Compute.SizeSelector",
+                            "visible": true,
+                            "label": "Size",
+                            "toolTip": "Specify the size for the virtual machine.",
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "recommendedSizes": [
+                                "Standard_B2s_v2"
+                            ],
+                            "constraints": {
+                                "required": true
+                            },
+                            "osPlatform": "Windows",
+                            "imageReference": {
+                                "publisher": "[steps('basics').vmImage.publisher]",
+                                "offer": "[steps('basics').vmImage.offer]",
+                                "sku": "[steps('basics').vmImage.sku]"
+                            },
+                            "count": 1,
+                            "options": {
+                                "hideDiskTypeFilter": false
+                            }
+                        },
+                        {
+                            "name": "virtualNetworkSelector",
+                            "type": "Microsoft.Solutions.ResourceSelector",
+                            "visible": true,
+                            "label": "Virtual network",
+                            "toolTip": "Select a virtual network.",
+                            "resourceType": "Microsoft.Network/virtualNetworks",
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
+                                "location": "[steps('basics').resourceScope.location.name]"
+                            },
+                            "constraints": {
+                                "required": true
+                            }
+                        },
+                        {
+                            "name": "listSubnetsArmApi",
+                            "type": "Microsoft.Solutions.ArmApiControl",
+                            "condition": "[not(empty(steps('basics').virtualNetworkSelector.name))]",
+                            "request": {
+                                "method": "GET",
+                                "path": "[format('{0}/subnets?api-version=2023-09-01', steps('basics').virtualNetworkSelector.id)]"
+                            }
+                        },
+                        {
+                            "name": "subnetDropDown",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "label": "Subnet",
+                            "toolTip": "Select a subnet.",
+                            "placeholder": "Select a subnet",
+                            "multiselect": false,
+                            "selectAll":  false,
+                            "filter": true,
+                            "filterPlaceholder": "Filter subnets...",
+                            "multiLine": true,
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": "[map(steps('basics').listSubnetsArmApi.value, (item) => parse(format('{\"label\":\"{0}\", \"description\":\"Address prefix: {1}\", \"value\":\"{2}\"}', item.name, item.properties.addressPrefix, item.name)))]"
+                            }
+                        },
+                        {
+                            "name": "adminAccountSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Administrator account",
+                            "elements": [
+                                {
+                                    "name": "adminUserName",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "visible": true,
+                                    "label": "Username",
+                                    "toolTip": "Specify the administrator username.",
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "adminPassword",
+                                    "type": "Microsoft.Compute.CredentialsCombo",
+                                    "visible": true,
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm password"
+                                    },
+                                    "toolTip": {
+                                        "password": "Specify the administrator password."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "azureHybridBenefitSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Azure Hybrid Benefit",
+                            "elements": [
+                                {
+                                    "name": "azureHybridBenefitSectionText",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Save up to 49% with a license you already own using Azure Hybrid Benefit.",
+                                        "link": {
+                                            "label": "Learn more",
+                                            "uri": "https://docs.microsoft.com/azure/virtual-machines/windows/hybrid-use-benefit-licensing"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "isUseExistingWindowsServerLicense",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "label": "Would you like to use an existing Windows Server license?",
+                                    "visible": true,
+                                    "defaultValue": false,
+                                    "constraints": {
+                                        "required": false
+                                    }
+                                },
+                                {
+                                    "name": "hasEligibleWindowsServerLicense",
+                                    "type": "Microsoft.Common.CheckBox",
+                                    "label": "I confirm I have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit.",
+                                    "visible": "[steps('basics').azureHybridBenefitSection.isUseExistingWindowsServerLicense]",
+                                    "defaultValue": false,
+                                    "constraints": {
+                                        "required": true,
+                                        "validationMessage": "Please confirm."
+                                    }
+                                },
+                                {
+                                    "name": "azureHybridBenefitSectionText2",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "",
+                                        "link": {
+                                            "label": "Review Azure hybrid benefit compliance",
+                                            "uri": "http://go.microsoft.com/fwlink/?LinkId=859786"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "details",
+                    "label": "Details",
+                    "elements": [
+                        {
+                            "name": "osDiskType",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "label": "OS disk type",
+                            "toolTip": "Select an OS disk type.",
+                            "placeholder": "Select an OS disk type",
+                            "multiselect": false,
+                            "selectAll":  false,
+                            "filter": true,
+                            "filterPlaceholder": "Filter OS disk types...",
+                            "multiLine": true,
+                            "defaultValue": [
+                                "Standard SSD (LRS)"
+                            ],
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Premium SSD (LRS)",
+                                        "value": "Premium_LRS",
+                                        "description": "Best for production and performance sensitive workloads. Locally-redundant storage (data is replicated within a single datacenter)."
+                                    },
+                                    {
+                                        "label": "Standard SSD (LRS)",
+                                        "value": "StandardSSD_LRS",
+                                        "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter)."
+                                    },
+                                    {
+                                        "label": "Standard HDD (LRS)",
+                                        "value": "Standard_LRS",
+                                        "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter)."
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "shouldProvisionVmGuestAgent",
+                            "type": "Microsoft.Common.OptionsGroup",
+                            "visible": true,
+                            "label": "Azure VM guest agent",
+                            "toolTip": "Select whether to provision the Azure VM guest agent.",
+                            "defaultValue": "Not provision",
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "Provision",
+                                        "value": true
+                                    },
+                                    {
+                                        "label": "Not provision",
+                                        "value": false
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+            "parameters": {
+                "vmName": "[steps('basics').vmName]",
+                "vmSize": "[steps('basics').vmSize]",
+                "vmImage": "[steps('basics').vmImage]",
+                "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
+                "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
+                "osDiskType": "[steps('details').osDiskType]",
+                "shouldProvisionVmGuestAgent": "[steps('details').shouldProvisionVmGuestAgent]",
+                "hasEligibleWindowsServerLicense": "[steps('basics').azureHybridBenefitSection.hasEligibleWindowsServerLicense]",
+                "virtualNetworkId": "[steps('basics').virtualNetworkSelector.id]",
+                "subnetName": "[steps('basics').subnetDropDown]"
+            }
+        }
+    }
+}

@@ -1,0 +1,415 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The virtual machine name."
+            },
+            "minLength": 1,
+            "maxLength": 64,
+            "defaultValue": "arceval-vm1"
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The virtual machine size."
+            },
+            "defaultValue": "Standard_B2s_v2"
+        },
+        "vmImage": {
+            "type": "object",
+            "metadata": {
+                "description": "The image for the virtual machine."
+            },
+            "defaultValue": {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2022-datacenter-g2",
+                "version": "latest"
+            },
+            "allowedValues": [
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2022-datacenter-g2",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2022-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-gensecond",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2016-datacenter-gensecond",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2016-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2012-r2-datacenter-gensecond",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2012-r2-datacenter-smalldisk-g2",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2012-datacenter-gensecond",
+                    "version": "latest"
+                },
+                {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2012-datacenter-smalldisk-g2",
+                    "version": "latest"
+                }
+            ]
+        },
+        "adminUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The administrator user name."
+            },
+            "minLength": 1,
+            "maxLength": 20
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The administrator password. The password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character. And the password must be between 12 and 123 characters long."
+            }
+        },
+        "osDiskType": {
+            "type": "string",
+            "metadata": {
+                "description": "The Storage type of the virtual machine's OS disk."
+            },
+            "defaultValue": "StandardSSD_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "StandardSSD_LRS",
+                "Premium_LRS"
+            ]
+        },
+        "shouldProvisionVmGuestAgent": {
+            "type": "bool",
+            "metadata": {
+                "description": "Set to true to install Azure Guest Agent on the virtual machine."
+            },
+            "defaultValue": false
+        },
+        "hasEligibleWindowsServerLicense": {
+            "type": "bool",
+            "metadata": {
+                "description": "By specifying True, you confirm you have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit. You can read more about compliance here: http://go.microsoft.com/fwlink/?LinkId=859786"
+            }
+        },
+        "virtualNetworkId": {
+            "type": "string",
+            "metadata": {
+                "description": "The virtual network ID that deploys the virtual machine."
+            },
+            "minLength": 114,
+            "maxLength": 282
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The subnet name that deploys the virtual machine."
+            },
+            "minLength": 1,
+            "maxLength": 80
+        },
+        "salt": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "The value for generate unique values."
+            }
+        }
+    },
+    "variables": {
+        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('salt')), 0, 6)]"
+    },
+    "resources": [
+
+        // Retrieve the wxisting virtual network information
+
+        {
+            "name": "existingVirtualNetwork",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "virtualNetworkId": {
+                        "value": "[parameters('virtualNetworkId')]"
+                    },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "virtualNetworkId": {
+                            "type": "string"
+                        },
+                        "subnetName": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [],
+                    "outputs": {
+                        "virtualNetworkLocation": {
+                            "type": "string",
+                            "value": "[reference(parameters('virtualNetworkId'), '2023-04-01', 'Full').location]"
+                        },
+                        "subnetId": {
+                            "type": "string",
+                            "value": "[first(filter(reference(parameters('virtualNetworkId'), '2023-04-01').subnets, lambda('subnet', equals(lambdaVariables('subnet').name, parameters('subnetName'))))).id]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Virtual machine for Arc-enabled servers evaluation
+
+        {
+            "name": "arcEvaluationVirtualMachine",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'existingVirtualNetwork')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[reference('existingVirtualNetwork').outputs.virtualNetworkLocation.value]"
+                    },
+                    "vmName": {
+                        "value": "[parameters('vmName')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('adminUserName')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "osDiskType": {
+                        "value": "[parameters('osDiskType')]"
+                    },
+                    "shouldProvisionVmGuestAgent": {
+                        "value": "[parameters('shouldProvisionVmGuestAgent')]"
+                    },
+                    "hasEligibleWindowsServerLicense": {
+                        "value": "[parameters('hasEligibleWindowsServerLicense')]"
+                    },
+                    "subnetId": {
+                        "value": "[reference('existingVirtualNetwork').outputs.subnetId.value]"
+                    },
+                    "uniqueString": {
+                        "value": "[variables('uniqueString')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "vmName": {
+                            "type": "string"
+                        },
+                        "vmSize": {
+                            "type": "string"
+                        },
+                        "vmImage": {
+                            "type": "object"
+                        },
+                        "adminUserName": {
+                            "type": "string"
+                        },
+                        "adminPassword": {
+                            "type": "securestring"
+                        },
+                        "osDiskType": {
+                            "type": "string"
+                        },
+                        "shouldProvisionVmGuestAgent": {
+                            "type": "bool"
+                        },
+                        "hasEligibleWindowsServerLicense": {
+                            "type": "bool"
+                        },
+                        "subnetId": {
+                            "type": "string"
+                        },
+                        "uniqueString": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "networkInterfaceName": "[format('{0}-nic1', parameters('vmName'))]",
+                        "publicIpAddressName": "[format('{0}-ip1', parameters('vmName'))]",
+                        "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, parameters('vmName'), toLower(parameters('uniqueString'))))]",
+                        "osDiskName": "[format('{0}-osdisk', parameters('vmName'))]"
+                    },
+                    "resources": [
+                        {
+                            "name": "[variables('publicIpAddressName')]",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "apiVersion": "2023-04-01",
+                            "location": "[parameters('location')]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static",
+                                "dnsSettings": {
+                                    "domainNameLabel": "[variables('dnsNameForPublicIP')]"
+                                }
+                            }
+                        },
+                        {
+                            "name": "[variables('networkInterfaceName')]",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2023-04-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('subnetId')]"
+                                            },
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "publicIpAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]",
+                                                "properties": {
+                                                    "deleteOption": "Delete"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableAcceleratedNetworking": true
+                            }
+                        },
+                        {
+                            "name": "[parameters('vmName')]",
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2023-03-01",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "[parameters('vmSize')]"
+                                },
+                                "osProfile": {
+                                    "computerName": "arcevalvm",
+                                    "adminUsername": "[parameters('adminUserName')]",
+                                    "adminPassword": "[parameters('adminPassword')]",
+                                    "windowsConfiguration": {
+                                        "provisionVmAgent": "[parameters('shouldProvisionVmGuestAgent')]",
+                                        "enableAutomaticUpdates": true,
+                                        "patchSettings": {
+                                            "patchMode": "AutomaticByOS",
+                                            "enableHotpatching": false
+                                        }
+                                    }
+                                },
+                                "licenseType": "[if(parameters('hasEligibleWindowsServerLicense'), 'Windows_Server', 'None')]",
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                                        }
+                                    ]
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "name": "[variables('osDiskName')]",
+                                        "managedDisk": {
+                                            "storageAccountType": "[parameters('osDiskType')]"
+                                        },
+                                        "createOption": "FromImage",
+                                        "caching": "ReadWrite",
+                                        "deleteOption": "Delete"
+                                    },
+                                    "imageReference": "[parameters('vmImage')]"
+                                },
+                                "diagnosticsProfile": {
+                                    "bootDiagnostics": {
+                                        "enabled": true
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "fqdn": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]"
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "fqdn": {
+            "type": "string",
+            "value": "[reference('arcEvaluationVirtualMachine').outputs.fqdn.value]"
+        }
+    }
+}
