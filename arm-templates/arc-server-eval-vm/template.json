@@ -212,7 +212,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'existingVirtualNetwork')]"
+                "[resourceId('Microsoft.Resources/deployments', 'retrieveExistingVirtualNetwork')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -221,7 +221,7 @@
                 },
                 "parameters": {
                     "location": {
-                        "value": "[reference('existingVirtualNetwork').outputs.virtualNetworkLocation.value]"
+                        "value": "[reference('retrieveExistingVirtualNetwork').outputs.virtualNetworkLocation.value]"
                     },
                     "vmName": {
                         "value": "[parameters('vmName')]"
@@ -248,7 +248,7 @@
                         "value": "[parameters('hasEligibleWindowsServerLicense')]"
                     },
                     "subnetId": {
-                        "value": "[reference('existingVirtualNetwork').outputs.subnetId.value]"
+                        "value": "[reference('retrieveExistingVirtualNetwork').outputs.subnetId.value]"
                     },
                     "uniqueString": {
                         "value": "[variables('uniqueString')]"
@@ -409,7 +409,7 @@
     "outputs": {
         "fqdn": {
             "type": "string",
-            "value": "[reference('arcEvaluationVirtualMachine').outputs.fqdn.value]"
+            "value": "[reference('createArcEvaluationVirtualMachine').outputs.fqdn.value]"
         }
     }
 }
