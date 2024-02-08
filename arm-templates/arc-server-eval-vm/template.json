@@ -146,17 +146,9 @@
             },
             "minLength": 1,
             "maxLength": 80
-        },
-        "salt": {
-            "type": "string",
-            "defaultValue": "[utcNow()]",
-            "metadata": {
-                "description": "The value for generate unique values."
-            }
         }
     },
     "variables": {
-        "uniqueString": "[substring(uniqueString(resourceGroup().id, parameters('salt')), 0, 6)]"
     },
     "resources": [
 
@@ -249,9 +241,6 @@
                     },
                     "subnetId": {
                         "value": "[reference('retrieveExistingVirtualNetwork').outputs.subnetId.value]"
-                    },
-                    "uniqueString": {
-                        "value": "[variables('uniqueString')]"
                     }
                 },
                 "template": {
@@ -288,14 +277,17 @@
                         "subnetId": {
                             "type": "string"
                         },
-                        "uniqueString": {
-                            "type": "string"
+                        "timestamp": {
+                            "type": "string",
+                            "defaultValue": "[utcNow('HHmmss')]"
                         }
                     },
                     "variables": {
+                        "uniqueString": "[substring(uniqueString(parameters('timestamp')), 0, 6)]",
+                        "computerName": "[take(format('arceval{0}', parameters('timestamp')), 15)]",
                         "networkInterfaceName": "[format('{0}-nic1', parameters('vmName'))]",
                         "publicIpAddressName": "[format('{0}-ip1', parameters('vmName'))]",
-                        "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, parameters('vmName'), toLower(parameters('uniqueString'))))]",
+                        "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, parameters('vmName'), toLower(variables('uniqueString'))))]",
                         "osDiskName": "[format('{0}-osdisk', parameters('vmName'))]"
                     },
                     "resources": [
@@ -356,7 +348,7 @@
                                     "vmSize": "[parameters('vmSize')]"
                                 },
                                 "osProfile": {
-                                    "computerName": "arcevalvm",
+                                    "computerName": "[variables('computerName')]",
                                     "adminUsername": "[parameters('adminUserName')]",
                                     "adminPassword": "[parameters('adminPassword')]",
                                     "windowsConfiguration": {
