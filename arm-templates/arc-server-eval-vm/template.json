@@ -163,7 +163,7 @@
         // Retrieve the wxisting virtual network information
 
         {
-            "name": "existingVirtualNetwork",
+            "name": "retrieveExistingVirtualNetwork",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
             "properties": {
@@ -208,7 +208,7 @@
         // Virtual machine for Arc-enabled servers evaluation
 
         {
-            "name": "arcEvaluationVirtualMachine",
+            "name": "createArcEvaluationVirtualMachine",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
             "dependsOn": [
