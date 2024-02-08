@@ -277,14 +277,14 @@
                         "subnetId": {
                             "type": "string"
                         },
-                        "timestamp": {
+                        "uniquenessSeed": {
                             "type": "string",
-                            "defaultValue": "[utcNow('HHmmss')]"
+                            "defaultValue": "[utcNow()]"
                         }
                     },
                     "variables": {
-                        "uniqueString": "[substring(uniqueString(parameters('timestamp')), 0, 6)]",
-                        "computerName": "[take(format('arceval{0}', parameters('timestamp')), 15)]",
+                        "uniqueString": "[substring(uniqueString(parameters('uniquenessSeed')), 0, 6)]",
+                        "computerName": "[take(parameters('vmName'), 15)]",
                         "networkInterfaceName": "[format('{0}-nic1', parameters('vmName'))]",
                         "publicIpAddressName": "[format('{0}-ip1', parameters('vmName'))]",
                         "dnsNameForPublicIP": "[toLower(format('{0}-{1}-{2}', resourceGroup().name, parameters('vmName'), toLower(variables('uniqueString'))))]",
