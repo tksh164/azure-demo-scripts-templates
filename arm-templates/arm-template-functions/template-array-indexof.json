@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "arrayToSearch": [
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2022-datacenter-g2",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2019-datacenter-gensecond",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2016-datacenter-gensecond",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2012-r2-datacenter-gensecond",
+                "version": "latest"
+            },
+            {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2012-datacenter-gensecond",
+                "version": "latest"
+            }
+        ],
+        "itemToFind": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-datacenter-gensecond",
+            "version": "latest"
+        }
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "result": {
+            "type": "int",
+            "value": "[indexOf(variables('arrayToSearch'), variables('itemToFind'))]"
+        }
+    }
+}
