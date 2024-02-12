@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "utc": {
+            "type": "string",
+            "defaultValue": "[utcNow()]"
+        },
+        "utcWithFormat": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyyy-MM-dd HH:mm:ss.fff')]"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "utcNow()": {
+            "type": "string",
+            "value": "[parameters('utc')]"
+        },
+        "utcNow('yyyy-MM-dd HH:mm:ss.fff')": {
+            "type": "string",
+            "value": "[parameters('utcWithFormat')]"
+        }
+    }
+}
