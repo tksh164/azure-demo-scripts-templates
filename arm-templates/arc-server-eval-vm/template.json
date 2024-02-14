@@ -149,6 +149,8 @@
         }
     },
     "variables": {
+        "firstLogonCommandCommandLine": "powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -Command \"&amp;{ New-NetFirewallRule -Name 'BlockAzureIMDS' -DisplayName 'Block access to Azure IMDS' -Profile Any -Direction Outbound -RemoteAddress '169.254.169.254' -Action Block -Enabled True }\"",
+        "additionalUnattendContent": "[format('<FirstLogonCommands><SynchronousCommand><CommandLine>{0}</CommandLine><Order>1</Order><Description></Description></SynchronousCommand></FirstLogonCommands>', variables('firstLogonCommandCommandLine'))]"
     },
     "resources": [
 
@@ -239,6 +241,9 @@
                     "hasEligibleWindowsServerLicense": {
                         "value": "[parameters('hasEligibleWindowsServerLicense')]"
                     },
+                    "additionalUnattendContent": {
+                        "value": "[variables('additionalUnattendContent')]"
+                    },
                     "subnetId": {
                         "value": "[reference('retrieveExistingVirtualNetwork').outputs.subnetId.value]"
                     }
@@ -273,6 +278,9 @@
                         },
                         "hasEligibleWindowsServerLicense": {
                             "type": "bool"
+                        },
+                        "additionalUnattendContent": {
+                            "type": "string"
                         },
                         "subnetId": {
                             "type": "string"
@@ -357,7 +365,15 @@
                                         "patchSettings": {
                                             "patchMode": "AutomaticByOS",
                                             "enableHotpatching": false
-                                        }
+                                        },
+                                        "additionalUnattendContent": [
+                                            {
+                                                "passName": "OobeSystem",
+                                                "componentName": "Microsoft-Windows-Shell-Setup",
+                                                "settingName": "FirstLogonCommands",
+                                                "content": "[parameters('additionalUnattendContent')]"
+                                            }
+                                        ]
                                     }
                                 },
                                 "licenseType": "[if(parameters('hasEligibleWindowsServerLicense'), 'Windows_Server', 'None')]",
