@@ -332,7 +332,7 @@
                                         }
                                     }
                                 ],
-                                "enableAcceleratedNetworking": true
+                                "enableAcceleratedNetworking": false
                             }
                         },
                         {
