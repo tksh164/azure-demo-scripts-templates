@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "inputArray": [
+            {
+                "name": "subnet1",
+                "properties": {
+                    "addressPrefix": "10.0.1.0/24",
+                    "networkSecurityGroup": {
+                        "id": "Microsoft.Network/networkSecurityGroups/nsg1"
+                    }
+                }
+            },
+            {
+                "name": "subnet2",
+                "properties": {
+                    "addressPrefix": "10.0.2.0/24",
+                    "networkSecurityGroup": {
+                        "id": "Microsoft.Network/networkSecurityGroups/nsg2"
+                    }
+                }
+            },
+            {
+                "name": "subnet3",
+                "properties": {
+                    "addressPrefix": "10.0.3.0/24",
+                    "networkSecurityGroup": {
+                        "id": "Microsoft.Network/networkSecurityGroups/nsg3"
+                    }
+                }
+            }
+        ]
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "result": {
+            "type": "object",
+            "value": "[toObject(variables('inputArray'), lambda('subnet', lambdaVariables('subnet').name))]"
+        }
+    }
+}
