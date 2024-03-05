@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/viewdefinition/0.0.1-preview/ViewDefinition.json#",
+    "contentVersion": "0.0.0.1",
+    "views": [
+        {
+            "kind": "Overview",
+            "properties": {
+                "header": "Azure Managed Application with Custom Views",
+                "description": "This managed application is for demo purposes only.",
+                "commands": [
+                    {
+                        "displayName": "Test Action",
+                        "path": "testAction"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "Metrics",
+            "properties": {
+                "displayName": "This is my metrics view",
+                "version": "1.0.0",
+                "charts": [
+                    {
+                        "displayName": "Sample chart",
+                        "chartType": "Bar",
+                        "metrics": [
+                            {
+                                "name": "Availability",
+                                "aggregationType": "avg",
+                                "resourceTagFilter": [
+                                    "tag1"
+                                ],
+                                "resourceType": "Microsoft.Storage/storageAccounts",
+                                "namespace": "Microsoft.Storage/storageAccounts"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "CustomResources",
+            "properties": {
+                "displayName": "Test custom resource type",
+                "version": "1.0.0",
+                "resourceType": "testCustomResource",
+                "createUIDefinition": {
+                },
+                "commands": [
+                    {
+                        "displayName": "Custom Context Action",
+                        "path": "testCustomResource/testContextAction",
+                        "icon": "Stop",
+                        "createUIDefinition": {
+                        }
+                    }
+                ],
+                "columns": [
+                    {
+                        "key": "name",
+                        "displayName": "Name"
+                    },
+                    {
+                        "key": "properties.myProperty1",
+                        "displayName": "Property 1"
+                    },
+                    {
+                        "key": "properties.myProperty2",
+                        "displayName": "Property 2",
+                        "optional": true
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "Associations",
+            "properties": {
+                "displayName": "Test association resource type",
+                "version": "1.0.0",
+                "targetResourceType": "Microsoft.Compute/virtualMachines",
+                "createUIDefinition": {
+                }
+            }
+        }
+    ]
+}
