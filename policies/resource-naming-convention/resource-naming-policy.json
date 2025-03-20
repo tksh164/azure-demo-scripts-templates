@@ -1,0 +1,49 @@
+{
+  "mode": "All",
+  "parameters": {
+    "resourceType": {
+      "type": "string",
+      "metadata": {
+        "strongType": "resourceTypes",
+        "displayName": "Resource type",
+        "description": "Resource type to verify naming convention."
+      }
+    },
+    "resourceNamePattern": {
+      "type": "string",
+      "metadata": {
+        "displayName": "Pattern",
+        "description": "Pattern for the resource naming convention. # to match a digit, ? to match a letter, . to match any character. Any other character to match that actual character."
+      }
+    },
+    "effect": {
+      "type": "String",
+      "metadata": {
+        "displayName": "effect",
+        "description": "How effect this policy."
+      },
+      "defaultValue": "audit",
+      "allowedValues": [
+        "audit",
+        "deny"
+      ]
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "[parameters('resourceType')]"
+        },
+        {
+          "field": "name",
+          "notMatch": "[parameters('resourceNamePattern')]"
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]"
+    }
+  }
+}
