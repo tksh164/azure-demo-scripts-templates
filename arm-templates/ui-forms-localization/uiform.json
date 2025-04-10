@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Test Form View",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+                        {
+                            "name": "name",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Name",
+                            "defaultValue": "",
+                            "constraints": {
+                                "required": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "tags",
+                    "label": "Tags",
+                    "elements": [
+                        {
+                            "name": "tagsControl",
+                            "type": "Microsoft.Common.TagsByResource",
+                            "resources": [
+                                "Providers.Test/statefulIbizaEngines"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+            "parameters": {}
+        }
+    }
+}
