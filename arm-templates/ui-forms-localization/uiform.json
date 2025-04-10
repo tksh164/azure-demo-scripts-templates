@@ -1,10 +1,10 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
-    "stringSource": "Strings.ja.resjson",
+    "stringSource": "Strings.resjson",
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Test Form View 3",
+            "title": "Test Form View 4",
             "steps": [
                 {
                     "name": "basics",
