@@ -1,9 +1,10 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "stringSource": "Strings.ja.resjson",
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Test Form View 2",
+            "title": "Test Form View 3",
             "steps": [
                 {
                     "name": "basics",
@@ -17,16 +18,7 @@
                             "name": "name",
                             "type": "Microsoft.Common.TextBox",
                             "label": {
-                                "en": "Name1",
-                                "fr": "Nom",
-                                "de": "Name",
-                                "es": "Nombre",
-                                "it": "Nome",
-                                "pt-BR": "Nome",
-                                "ja": "名前",
-                                "ko": "이름",
-                                "zh-CN": "名称",
-                                "zh-TW": "名稱"
+                                "property": "resourceName"
                             },
                             "defaultValue": "",
                             "constraints": {
