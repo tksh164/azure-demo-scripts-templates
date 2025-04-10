@@ -1,5 +1,32 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "stringSource": {
+        "en": {
+            "form": {
+                "title": "テスト フォーム ビュー",
+                "basics": {
+                    "name": "Basics",
+                    "elements": {
+                        "resourceScope": {
+                            "label": "Resource Scope"
+                        },
+                        "name": {
+                            "label": "Name",
+                            "placeholder": "Enter a name for the resource"
+                        }
+                    }
+                },
+                "tags": {
+                    "name": "Tags",
+                    "elements": {
+                        "tagsControl": {
+                            "label": "Tags Control"
+                        }
+                    }
+                }
+            }
+        }
+    },
     "view": {
         "kind": "Form",
         "properties": {
