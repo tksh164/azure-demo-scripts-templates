@@ -1,36 +1,9 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
-    "stringSource": {
-        "en": {
-            "form": {
-                "title": "テスト フォーム ビュー",
-                "basics": {
-                    "name": "Basics",
-                    "elements": {
-                        "resourceScope": {
-                            "label": "Resource Scope"
-                        },
-                        "name": {
-                            "label": "Name",
-                            "placeholder": "Enter a name for the resource"
-                        }
-                    }
-                },
-                "tags": {
-                    "name": "Tags",
-                    "elements": {
-                        "tagsControl": {
-                            "label": "Tags Control"
-                        }
-                    }
-                }
-            }
-        }
-    },
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Test Form View 1",
+            "title": "Test Form View 2",
             "steps": [
                 {
                     "name": "basics",
@@ -43,7 +16,18 @@
                         {
                             "name": "name",
                             "type": "Microsoft.Common.TextBox",
-                            "label": "Name",
+                            "label": {
+                                "en": "Name1",
+                                "fr": "Nom",
+                                "de": "Name",
+                                "es": "Nombre",
+                                "it": "Nome",
+                                "pt-BR": "Nome",
+                                "ja": "名前",
+                                "ko": "이름",
+                                "zh-CN": "名称",
+                                "zh-TW": "名稱"
+                            },
                             "defaultValue": "",
                             "constraints": {
                                 "required": true
