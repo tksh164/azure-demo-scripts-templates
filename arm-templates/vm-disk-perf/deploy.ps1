@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [string] $ResourceGroupName = 'dskperf',
+    [string] $ResourceGroupName = 'diskperf',
     [string] $ResourceGroupLocation = 'japaneast',
     [string] $TemplateFile = './main.bicep',
     [string] $TemplateParametersFile = './parameters.json',
