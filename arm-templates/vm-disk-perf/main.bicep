@@ -13,12 +13,20 @@ param adminPassword string
 
 // Variables
 
-var prefix = 'dskperf'
+var prefix = 'diskperf'
+
+var subnetName = 'default'  // Name of the subnet.
 
 var vmName = '${prefix}-vm1'     // Name of the virtual machine.
 var vmSize = 'Standard_E16s_v5'  // Virtual machine size.
 
-var subnetName = 'default'  // Name of the subnet.
+var dataDiskSku = 'StandardSSD_LRS'  // SKU for the data disks.
+var dataDiskSizeGB = 64              // Size of the data disks in GB.
+var dataDiskCount = 2                // Number of data disks to attach to the VM.
+var isEnablePerformancePlus = false  // The performancePlus flag can only be set on disks at least 512 GB in size.
+var isEnabledBursting = false        // Bursting is supported only for 'Premium_LRS,Premium_ZRS' SKUs
+
+var diskSuffixRange = range(0, dataDiskCount)
 
 // Resource declarations
 
@@ -71,6 +79,23 @@ resource nic 'Microsoft.Network/networkInterfaces@2024-05-01' = {
   }
 }
 
+resource dataDisk 'Microsoft.Compute/disks@2024-03-02' = [for i in diskSuffixRange: {
+  name: '${vmName}-datadisk${padLeft(i + 1, 2, '0')}'
+  location: location
+  sku: {
+    name: dataDiskSku
+  }
+  properties: {
+    diskSizeGB: dataDiskSizeGB
+    creationData: {
+      createOption: 'Empty'
+      performancePlus: isEnablePerformancePlus
+    }
+    osType: 'Windows'
+    burstingEnabled: isEnabledBursting
+  }
+}]
+
 resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: vmName
   location: location
@@ -97,6 +122,13 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
           storageAccountType: 'StandardSSD_LRS'
         }
       }
+      dataDisks: [for i in diskSuffixRange: {
+        lun: i
+        createOption: 'Attach'
+        managedDisk: {
+          id: dataDisk[i].id
+        }
+      }]
     }
     networkProfile: {
       networkInterfaces: [
