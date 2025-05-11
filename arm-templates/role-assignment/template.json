@@ -1,0 +1,65 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "utcNow": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "The UTC timestamp."
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[concat('rbac-', parameters('utcNow'))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2024-11-01",
+            "resourceGroup": "[resourceGroup().name]",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                    },
+                    "variables": {
+                        // "name": "c15a4032-a81f-4245-b98c-4c2983a2c7e7",
+                        // "name": "369e4a34-83a3-4889-b34f-e5fa0f23332c",
+                        // "name": "0c0f2132-ccac-4942-8607-4591a933f45e",
+                        // "name": "2af2e727-738e-4864-96c0-c1ea6c8baac4",
+                        "name": "abcdefghijklmnopqrstuvwxyz1234567890",
+
+                        // Azure Connected Machine Resource Manager
+                        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'f5819b54-e033-4d82-ac66-4fec3cbf3f4c')]",
+
+                        // Service principal object ID
+                        "principalId": "66808bcd-e775-43f7-8f5a-715540a08cf4"
+                        // "principalId": "d94e53da-a550-4e82-b1f4-e07e59ac85dc"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[variables('name')]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('roleDefinitionId')]",
+                                "principalType": "ServicePrincipal",
+                                "principalId": "[variables('principalId')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
