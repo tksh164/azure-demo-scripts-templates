@@ -137,8 +137,7 @@
             "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
             "osDiskStorageType": "[parameters('osDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
-            "avSetName": "[concat(parameters('vmName'), '-as')]"
+            "nsgName": "[concat(parameters('vmName'), '-nsg')]"
         }
     },
     "resources": [
@@ -180,19 +179,6 @@
 
         // Proxy server virtual machine
 
-        {
-            "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2022-03-01",
-            "name": "[variables('proxyVm').avSetName]",
-            "location": "[variables('location')]",
-            "sku": {
-                "name": "Aligned"
-            },
-            "properties": {
-                "platformUpdateDomainCount": 5,
-                "platformFaultDomainCount": 2
-            }
-        },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
@@ -267,15 +253,15 @@
                     },
                     "customData": "[base64(concat('#include\n', 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/squid-proxy/cloud-init.yaml'))]"
                 },
-                "availabilitySet": {
-                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('proxyVm').avSetName)]"
-                },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true
                     }
                 }
-            }
+            },
+            "zones": [
+                "1"
+            ]
         }
     ],
     "outputs": {
