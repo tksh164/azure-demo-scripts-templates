@@ -3,7 +3,7 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Deploy a proxy server VM using Squid into a VNet",
+            "title": "🦑 Deploy Squid proxy server VM into VNet",
             "steps": [
                 {
                     "name": "basics",
@@ -53,14 +53,19 @@
                             "placeholder": "Select the VM image...",
                             "defaultDescription": "---",
                             "filterPlaceholder": "Filter images...",
-                            "defaultValue": "Ubuntu Server 22.04 LTS",
+                            "defaultValue": "Ubuntu Server 24.04 LTS",
                             "constraints": {
                                 "required": true,
                                 "allowedValues": [
                                     {
                                         "label": "Ubuntu Server 22.04 LTS",
-                                        "description": "Ubuntu Server 22.04 LTS for generation 2 VM.",
+                                        "description": "Ubuntu Server 22.04 LTS with generation 2 VM.",
                                         "value": "22_04-lts-gen2"
+                                    },
+                                    {
+                                        "label": "Ubuntu Server 24.04 LTS",
+                                        "description": "Ubuntu Server 24.04 LTS with generation 2 VM.",
+                                        "value": "ubuntu-24_04-lts"
                                     }
                                 ]
                             }
