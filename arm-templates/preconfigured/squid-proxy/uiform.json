@@ -26,7 +26,7 @@
                             "type": "Microsoft.Common.TextBox",
                             "visible": true,
                             "multiLine": false,
-                            "label": "Proxy server virtual machine name",
+                            "label": "Virtual machine name",
                             "toolTip": "TODO",
                             "constraints": {
                                 "required": true,
@@ -216,8 +216,8 @@
                                     "type": "Microsoft.Common.TextBox",
                                     "visible": true,
                                     "multiLine": false,
-                                    "label": "Computer name",
-                                    "toolTip": "Specify the computer name for the proxy server VM. Naming conventions for the computer name are <a href='https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftcompute'>here</a>.",
+                                    "label": "Host name",
+                                    "toolTip": "Specify the host name for the proxy server.",
                                     "placeholder": "e.g. proxy1",
                                     "defaultValue": "[steps('basics').vmName]",
                                     "constraints": {
