@@ -272,9 +272,14 @@
             ]
         },
         "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "parameters": {
                 "vmName": "[steps('basics').vmName]",
-                "vmImageSku": "[steps('basics').vmIamge]",
+                "vmImagePublisher": "[steps('basics').vmIamge.publisher]",
+                "vmImageOffer": "[steps('basics').vmIamge.offer]",
+                "vmImageSku": "[steps('basics').vmIamge.sku]",
                 "vmSize": "[steps('basics').vmSize]",
                 "vnetNewOrExisting": "[steps('basics').vnet.newOrExisting]",
                 "vnetResourceGroupName": "[steps('basics').vnet.resourceGroup]",
@@ -286,10 +291,7 @@
                 "adminPublicKey": "[steps('basics').adminAccountSection.adminCredentials.sshPublicKey]",
                 "computerName": "[steps('details').proxyServerVMSection.computerName]",
                 "osDiskStorageType": "[steps('details').proxyServerVMSection.osDiskStorageType]"
-            },
-            "kind": "ResourceGroup",
-            "location": "[steps('basics').resourceScope.location.name]",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+            }
         }
     }
 }
