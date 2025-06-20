@@ -49,30 +49,18 @@
         },
         "vmImagePublisher": {
             "type": "string",
-            "defaultValue": "canonical",
-            "allowedValues": [
-                "canonical"
-            ],
             "metadata": {
                 "description": ""
             }
         },
         "vmImageOffer": {
             "type": "string",
-            "defaultValue": "0001-com-ubuntu-server-jammy",
-            "allowedValues": [
-                "0001-com-ubuntu-server-jammy"
-            ],
             "metadata": {
                 "description": ""
             }
         },
         "vmImageSku": {
             "type": "string",
-            "defaultValue": "22_04-lts-gen2",
-            "allowedValues": [
-                "22_04-lts-gen2"
-            ],
             "metadata": {
                 "description": ""
             }
