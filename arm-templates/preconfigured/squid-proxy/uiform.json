@@ -60,12 +60,20 @@
                                     {
                                         "label": "Ubuntu Server 22.04 LTS",
                                         "description": "Ubuntu Server 22.04 LTS with generation 2 VM.",
-                                        "value": "22_04-lts-gen2"
+                                        "value": {
+                                            "publisher": "canonical",
+                                            "offer": "0001-com-ubuntu-server-jammy",
+                                            "sku": "22_04-lts-gen2"
+                                        }
                                     },
                                     {
                                         "label": "Ubuntu Server 24.04 LTS",
                                         "description": "Ubuntu Server 24.04 LTS with generation 2 VM.",
-                                        "value": "ubuntu-24_04-lts"
+                                        "value": {
+                                            "publisher": "canonical",
+                                            "offer": "ubuntu-24_04-lts",
+                                            "sku": "server"
+                                        }
                                     }
                                 ]
                             }
@@ -89,9 +97,9 @@
                             },
                             "osPlatform": "Linux",
                             "imageReference": {
-                                "publisher": "canonical",
-                                "offer": "0001-com-ubuntu-server-jammy",
-                                "sku": "[steps('basics').vmIamge]"
+                                "publisher": "[steps('basics').vmIamge.publisher]",
+                                "offer": "[steps('basics').vmIamge.offer]",
+                                "sku": "[steps('basics').vmIamge.sku]"
                             },
                             "count": 1,
                             "visible": true
@@ -264,9 +272,14 @@
             ]
         },
         "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "parameters": {
                 "vmName": "[steps('basics').vmName]",
-                "vmImageSku": "[steps('basics').vmIamge]",
+                "vmImagePublisher": "[steps('basics').vmIamge.publisher]",
+                "vmImageOffer": "[steps('basics').vmIamge.offer]",
+                "vmImageSku": "[steps('basics').vmIamge.sku]",
                 "vmSize": "[steps('basics').vmSize]",
                 "vnetNewOrExisting": "[steps('basics').vnet.newOrExisting]",
                 "vnetResourceGroupName": "[steps('basics').vnet.resourceGroup]",
@@ -278,10 +291,7 @@
                 "adminPublicKey": "[steps('basics').adminAccountSection.adminCredentials.sshPublicKey]",
                 "computerName": "[steps('details').proxyServerVMSection.computerName]",
                 "osDiskStorageType": "[steps('details').proxyServerVMSection.osDiskStorageType]"
-            },
-            "kind": "ResourceGroup",
-            "location": "[steps('basics').resourceScope.location.name]",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+            }
         }
     }
 }
