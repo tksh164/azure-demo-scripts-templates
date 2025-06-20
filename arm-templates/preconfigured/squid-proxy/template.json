@@ -207,7 +207,6 @@
             "name": "[variables('proxyVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/availabilitySets', variables('proxyVm').avSetName)]",
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
             ],
             "properties": {
