@@ -6,13 +6,16 @@
             "value": "japaneast"
         },
         "vnetNewOrExisting": {
-            "value": "existing"
+            "value": "new"
         },
+        // "vnetNewOrExisting": {
+        //     "value": "existing"
+        // },
         "vnetResourceGroupName": {
-            "value": "squid1"
+            "value": "squid"
         },
         "vnetName": {
-            "value": "squidproxy-vnet"
+            "value": "proxy-vnet"
         },
         "vnetAddressPrefix": {
             "value": "172.16.0.0/16"
@@ -24,7 +27,7 @@
             "value": "172.16.0.0/24"
         },
         "vmName": {
-            "value": "squidproxy-vm1"
+            "value": "proxy-vm"
         },
         "vmImagePublisher": {
             "value": "canonical"
