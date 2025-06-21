@@ -2,5 +2,38 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "vnetNewOrExisting": {
+            "value": "existing"
+        },
+        "vnetResourceGroupName": {
+            "value": "squid1"
+        },
+        "vnetName": {
+            "value": "squidproxy-vnet"
+        },
+        "vnetAddressPrefix": {
+            "value": "172.16.0.0/16"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "subnetAddressPrefix": {
+            "value": "172.16.0.0/24"
+        },
+        "vmName": {
+            "value": "squidproxy-vm1"
+        },
+        "vmImagePublisher": {
+            "value": "canonical"
+        },
+        "vmImageOffer": {
+            "value": "ubuntu-24_04-lts"
+        },
+        "vmImageSku": {
+            "value": "server"
+        }//,
+        // "adminPublicKey": {
+        //     "value": ""
+        // }
     }
 }
