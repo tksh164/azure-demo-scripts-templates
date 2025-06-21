@@ -3,13 +3,29 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "🦑 Deploy Squid proxy server VM into VNet",
+            "title": "🦑 Deploy Squid proxy VM into VNet",
             "steps": [
                 {
                     "name": "basics",
                     "label": "Basics",
-                    "description": "This template will deploy a proxy server VM using Squid into a virtual network.",
+                    "description": "This template will deploy a VM as proxy using Squid into a virtual network.",
                     "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "instanceDetailsLabel": "Proxy VM details",
+                            "globalResource": false,
+                            "resourceGroup": {
+                                "allowExisting": true
+                            },
+                            "location": {
+                                "label": "Resource group region",
+                                "toolTip": "Specify the region to deploy the proxy VM.",
+                                "resourceTypes": [
+                                    "Microsoft.Resources/resourceGroups"
+                                ]
+                            }
+                        },
                         {
                             "name": "vmName",
                             "type": "Microsoft.Common.TextBox",
@@ -26,15 +42,18 @@
                                     }
                                 ]
                             },
-                            "placeholder": "e.g. squidproxy-vm1",
-                            "defaultValue": "squidproxy-vm1"
+                            "placeholder": "e.g. proxy-vm1",
+                            "defaultValue": "proxy-vm1"
                         },
                         {
-                            "name": "resourceScope",
-                            "type": "Microsoft.Common.ResourceScope",
-                            "location": {
-                                "label": "Region",
-                                "toolTip": "Specify the region to deploy the proxy server VM."
+                            "type": "Microsoft.Common.LocationSelector",
+                            "name": "location",
+                            "label": "Proxy VM region",
+                            "resourceTypes": [
+                                "Microsoft.Compute/virtualMachines"
+                            ],
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]"
                             }
                         },
                         {
@@ -83,8 +102,7 @@
                             "recommendedSizes": [
                                 "Standard_B2ms"
                             ],
-                            "constraints": {
-                            },
+                            "constraints": {},
                             "options": {
                                 "hideDiskTypeFilter": false
                             },
@@ -142,7 +160,7 @@
                                     }
                                 }
                             }
-                        },                        
+                        },
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
@@ -176,8 +194,8 @@
                                     "osPlatform": "Linux",
                                     "constraints": {
                                         "required": true
-                                     },
-                                     "options": {
+                                    },
+                                    "options": {
                                         "hideConfirmation": false,
                                         "hidePassword": true
                                     },
