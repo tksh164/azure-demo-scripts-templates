@@ -137,7 +137,7 @@
             "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
             "osDiskStorageType": "[parameters('osDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+            "pipName": "[concat(parameters('vmName'), '-ip1')]",
             "cloudInitFileUri": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/preconfigured/squid-proxy/cloud-init.yaml"
         }
     },
@@ -183,7 +183,7 @@
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2020-08-01",
-            "name": "[concat(variables('proxyVm').vmName, '-ip')]",
+            "name": "[variables('proxyVm').pipName]",
             "location": "[variables('location')]",
             "zones": [
                 "1"
@@ -202,7 +202,7 @@
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
-                "[resourceId('Microsoft.Network/publicIpAddresses', concat(variables('proxyVm').vmName, '-ip'))]"
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('proxyVm').pipName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -214,7 +214,7 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(variables('proxyVm').vmName, '-ip'))]",
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('proxyVm').pipName)]",
                                 "properties": {
                                     "deleteOption": "Delete"
                                 }
