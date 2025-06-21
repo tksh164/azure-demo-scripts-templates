@@ -231,6 +231,7 @@
                     "osDisk": {
                         "name": "[variables('proxyVm').osDiskName]",
                         "createOption": "fromImage",
+                        "deleteOption": "Delete",
                         "managedDisk": {
                             "storageAccountType": "[variables('proxyVm').osDiskStorageType]"
                         }
