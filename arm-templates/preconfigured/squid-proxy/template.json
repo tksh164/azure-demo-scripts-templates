@@ -137,7 +137,8 @@
             "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
             "osDiskStorageType": "[parameters('osDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]"
+            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+            "cloudInitFileUri": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/preconfigured/squid-proxy/cloud-init.yaml"
         }
     },
     "resources": [
@@ -250,7 +251,7 @@
                             ]
                         }
                     },
-                    "customData": "[base64(concat('#include\n', 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/squid-proxy/cloud-init.yaml'))]"
+                    "customData": "[base64(concat('#include\n', variables('proxyVm').cloudInitFileUri))]"
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
