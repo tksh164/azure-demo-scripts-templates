@@ -181,12 +181,28 @@
         // Proxy server virtual machine
 
         {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-08-01",
+            "name": "[concat(variables('proxyVm').vmName, '-ip')]",
+            "location": "[variables('location')]",
+            "zones": [
+                "1"
+            ],
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            }
+        },
+        {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
             "name": "[variables('proxyVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', concat(variables('proxyVm').vmName, '-ip'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -196,7 +212,13 @@
                             "subnet": {
                                 "id": "[variables('subnetId')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic"
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(variables('proxyVm').vmName, '-ip'))]",
+                                "properties": {
+                                    "deleteOption": "Delete"
+                                }
+                            }
                        }
                     }
                 ]
