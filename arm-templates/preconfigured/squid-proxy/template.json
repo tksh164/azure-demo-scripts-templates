@@ -123,7 +123,7 @@
 
         // Virtual network
 
-        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "shouldCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
         "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
@@ -144,13 +144,25 @@
     "resources": [
 
         // Virtual network
-
         {
-            "condition": "[variables('isCreateNewVNet')]",
+            "condition": "[variables('shouldCreateNewVNet')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+        {
+            "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-11-01",
             "name": "[parameters('vnetName')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -161,20 +173,13 @@
                     {
                         "name": "[parameters('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                            }
                         }
                     }
                 ]
-            }
-        },
-
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('nsgName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": []   
             }
         },
 
