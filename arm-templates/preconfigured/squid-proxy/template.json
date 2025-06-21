@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the location to create resources."
+            }
+        },
         "vnetNewOrExisting": {
             "type": "string",
             "metadata": {
@@ -119,7 +125,6 @@
         // Common
 
         //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
-        "location": "[resourceGroup().location]",
 
         // Virtual network
 
@@ -189,7 +194,7 @@
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2020-08-01",
             "name": "[variables('proxyVm').pipName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "zones": [
                 "1"
             ],
@@ -204,7 +209,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
             "name": "[variables('proxyVm').nicName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
                 "[resourceId('Microsoft.Network/publicIpAddresses', variables('proxyVm').pipName)]"
@@ -233,7 +238,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2022-03-01",
             "name": "[variables('proxyVm').vmName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
             ],
