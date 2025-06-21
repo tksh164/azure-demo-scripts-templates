@@ -130,7 +130,6 @@
 
         "shouldCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
-
         "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
 
         // Proxy server virtual machine
