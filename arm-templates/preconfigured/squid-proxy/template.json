@@ -259,6 +259,13 @@
                     },
                     "customData": "[base64(concat('#include\n', variables('proxyVm').cloudInitFileUri))]"
                 },
+                "securityProfile": {
+                    "securityType": "TrustedLaunch",
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    }
+                },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true
