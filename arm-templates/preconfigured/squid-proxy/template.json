@@ -217,6 +217,16 @@
                 "hardwareProfile": {
                     "vmSize": "[variables('proxyVm').vmSize]"
                 },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
                 "storageProfile": {
                     "osDisk": {
                         "name": "[variables('proxyVm').osDiskName]",
@@ -232,13 +242,6 @@
                         "version": "latest"
                     },
                     "dataDisks": []                    
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
-                        }
-                    ]
                 },
                 "osProfile": {
                     "computerName": "[variables('proxyVm').computerName]",
