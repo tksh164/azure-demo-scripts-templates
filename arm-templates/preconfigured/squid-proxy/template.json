@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the location to create resources."
+            }
+        },
         "vnetNewOrExisting": {
             "type": "string",
             "metadata": {
@@ -119,13 +125,11 @@
         // Common
 
         //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
-        "location": "[resourceGroup().location]",
 
         // Virtual network
 
-        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "shouldCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
-
         "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
 
         // Proxy server virtual machine
@@ -137,19 +141,32 @@
             "osDiskName": "[concat(parameters('vmName'), '-osdisk')]",
             "osDiskStorageType": "[parameters('osDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]"
+            "pipName": "[concat(parameters('vmName'), '-ip1')]",
+            "cloudInitFileUri": "https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/preconfigured/squid-proxy/cloud-init.yaml"
         }
     },
     "resources": [
 
         // Virtual network
-
         {
-            "condition": "[variables('isCreateNewVNet')]",
+            "condition": "[variables('shouldCreateNewVNet')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('nsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+        {
+            "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-11-01",
             "name": "[parameters('vnetName')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -160,32 +177,41 @@
                     {
                         "name": "[parameters('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                            }
                         }
                     }
                 ]
             }
         },
 
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('nsgName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": []   
-            }
-        },
-
         // Proxy server virtual machine
 
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-08-01",
+            "name": "[variables('proxyVm').pipName]",
+            "location": "[parameters('location')]",
+            "zones": [
+                "1"
+            ],
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            }
+        },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
             "name": "[variables('proxyVm').nicName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('proxyVm').pipName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -195,7 +221,13 @@
                             "subnet": {
                                 "id": "[variables('subnetId')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic"
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('proxyVm').pipName)]",
+                                "properties": {
+                                    "deleteOption": "Delete"
+                                }
+                            }
                        }
                     }
                 ]
@@ -205,18 +237,32 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2022-03-01",
             "name": "[variables('proxyVm').vmName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
+            ],
+            "zones": [
+                "1"
             ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "[variables('proxyVm').vmSize]"
                 },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
                 "storageProfile": {
                     "osDisk": {
                         "name": "[variables('proxyVm').osDiskName]",
                         "createOption": "fromImage",
+                        "deleteOption": "Delete",
                         "managedDisk": {
                             "storageAccountType": "[variables('proxyVm').osDiskStorageType]"
                         }
@@ -228,13 +274,6 @@
                         "version": "latest"
                     },
                     "dataDisks": []                    
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
-                        }
-                    ]
                 },
                 "osProfile": {
                     "computerName": "[variables('proxyVm').computerName]",
@@ -248,19 +287,27 @@
                                     "keyData": "[parameters('adminPublicKey')]"
                                 }
                             ]
+                        },
+                        "patchSettings": {
+                            "assessmentMode": "ImageDefault",
+                            "patchMode": "ImageDefault"
                         }
                     },
-                    "customData": "[base64(concat('#include\n', 'https://raw.githubusercontent.com/tksh164/azure-demo-scripts-templates/master/arm-templates/squid-proxy/cloud-init.yaml'))]"
+                    "customData": "[base64(concat('#include\n', variables('proxyVm').cloudInitFileUri))]"
+                },
+                "securityProfile": {
+                    "securityType": "TrustedLaunch",
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    }
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true
                     }
                 }
-            },
-            "zones": [
-                "1"
-            ]
+            }
         }
     ],
     "outputs": {

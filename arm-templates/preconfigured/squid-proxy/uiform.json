@@ -276,6 +276,7 @@
             "location": "[steps('basics').resourceScope.location.name]",
             "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "parameters": {
+                "location": "[steps('basics').resourceScope.location.name]",
                 "vmName": "[steps('basics').vmName]",
                 "vmImagePublisher": "[steps('basics').vmIamge.publisher]",
                 "vmImageOffer": "[steps('basics').vmIamge.offer]",
