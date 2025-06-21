@@ -151,7 +151,7 @@
         {
             "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[variables('nsgName')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -161,7 +161,7 @@
         {
             "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[parameters('vnetName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -191,7 +191,7 @@
 
         {
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2020-08-01",
+            "apiVersion": "2024-05-01",
             "name": "[variables('proxyVm').pipName]",
             "location": "[parameters('location')]",
             "zones": [
@@ -206,7 +206,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[variables('proxyVm').nicName]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -235,7 +235,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2024-07-01",
             "name": "[variables('proxyVm').vmName]",
             "location": "[parameters('location')]",
             "dependsOn": [
