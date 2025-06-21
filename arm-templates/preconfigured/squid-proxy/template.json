@@ -255,6 +255,10 @@
                                     "keyData": "[parameters('adminPublicKey')]"
                                 }
                             ]
+                        },
+                        "patchSettings": {
+                            "assessmentMode": "ImageDefault",
+                            "patchMode": "ImageDefault"
                         }
                     },
                     "customData": "[base64(concat('#include\n', variables('proxyVm').cloudInitFileUri))]"
