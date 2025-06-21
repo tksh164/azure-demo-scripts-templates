@@ -46,7 +46,7 @@
         },
         "vmName": {
             "type": "string",
-            "defaultValue": "squidproxy-vm1",
+            "defaultValue": "proxy-vm1",
             "minLength": 1,
             "maxLength": 64,
             "metadata": {
@@ -92,7 +92,7 @@
         },
         "computerName": {
             "type": "string",
-            "defaultValue": "proxy1",
+            "defaultValue": "proxy",
             "minLength": 1,
             "maxLength": 64,
             "metadata": {
@@ -111,14 +111,14 @@
             "metadata": {
                 "description": "Specify the admin user's SSH public key for the proxy server virtual machine."
             }
-        },
-        "uniqueSuffixSeed": {
-            "type": "string",
-            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
-            "metadata": {
-                "description": "Don't change this value."
-            }
-        }
+        }//,
+        // "uniqueSuffixSeed": {
+        //     "type": "string",
+        //     "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+        //     "metadata": {
+        //         "description": "Don't change this value."
+        //     }
+        // }
     },
     "variables": {
 
