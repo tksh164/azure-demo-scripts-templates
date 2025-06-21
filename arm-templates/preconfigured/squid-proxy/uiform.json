@@ -164,6 +164,24 @@
                             }
                         },
                         {
+                            "name": "newVnetInfoBox",
+                            "type": "Microsoft.Common.InfoBox",
+                            "visible": "[if(equals(steps('basics').vnet.newOrExisting, 'new'), true, false)]",
+                            "options": {
+                                "style": "Info",
+                                "text": "The deployment will be creating a new network security group and associate it with the subnet."
+                            }
+                        },
+                        {
+                            "name": "existingVnetInfoBox",
+                            "type": "Microsoft.Common.InfoBox",
+                            "visible": "[if(equals(steps('basics').vnet.newOrExisting, 'existing'), true, false)]",
+                            "options": {
+                                "style": "Warning",
+                                "text": "The deployment not be create any network security groups. If you need network security groups, please create and associate it manually."
+                            }
+                        },
+                        {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
