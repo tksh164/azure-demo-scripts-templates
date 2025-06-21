@@ -210,6 +210,9 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('proxyVm').nicName)]"
             ],
+            "zones": [
+                "1"
+            ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "[variables('proxyVm').vmSize]"
@@ -258,10 +261,7 @@
                         "enabled": true
                     }
                 }
-            },
-            "zones": [
-                "1"
-            ]
+            }
         }
     ],
     "outputs": {
