@@ -11,17 +11,6 @@
                     "description": "This template will deploy a proxy server VM using Squid into a virtual network.",
                     "elements": [
                         {
-                            "name": "resourceScope",
-                            "type": "Microsoft.Common.ResourceScope",
-                            "location": {
-                                "label": "Region",
-                                "toolTip": "Specify the region to deploy the proxy server VM.",
-                                "resourceTypes": [
-                                    "microsoft.resources/resourcegroups"
-                                ]
-                            }
-                        },
-                        {
                             "name": "vmName",
                             "type": "Microsoft.Common.TextBox",
                             "visible": true,
@@ -39,6 +28,14 @@
                             },
                             "placeholder": "e.g. squidproxy-vm1",
                             "defaultValue": "squidproxy-vm1"
+                        },
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "label": "Region",
+                                "toolTip": "Specify the region to deploy the proxy server VM."
+                            }
                         },
                         {
                             "name": "vmIamge",
