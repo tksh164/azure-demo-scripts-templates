@@ -20,7 +20,7 @@
                             },
                             "location": {
                                 "label": "Resource group region",
-                                "toolTip": "Specify the region to deploy the proxy VM.",
+                                "toolTip": "Specify the region to deploy the resource group.",
                                 "resourceTypes": [
                                     "Microsoft.Resources/resourceGroups"
                                 ]
@@ -46,15 +46,17 @@
                             "defaultValue": "proxy-vm1"
                         },
                         {
+                            "name": "resourceLocation",
                             "type": "Microsoft.Common.LocationSelector",
-                            "name": "location",
-                            "label": "Proxy VM region",
-                            "resourceTypes": [
-                                "Microsoft.Compute/virtualMachines"
-                            ],
+                            "visible": true,
+                            "label": "Virtual machine region",
+                            "toolTip": "Specify the region to deploy the proxy VM.",
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]"
-                            }
+                            },
+                            "resourceTypes": [
+                                "Microsoft.Compute/virtualMachines"
+                            ]
                         },
                         {
                             "name": "vmIamge",
@@ -108,7 +110,7 @@
                             },
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                "location": "[steps('basics').resourceScope.location.name]"
+                                "location": "[steps('basics').resourceLocation.name]"
                             },
                             "osPlatform": "Linux",
                             "imageReference": {
@@ -128,19 +130,19 @@
                                 "subnets": "Subnets"
                             },
                             "toolTip": {
-                                "virtualNetwork": "Specify the virtual network to deploy the proxy server VM.",
-                                "subnets": "Specify the subnet to deploy the proxy server VM."
+                                "virtualNetwork": "Specify the virtual network to deploy the proxy VM.",
+                                "subnets": "Specify the subnet to deploy the proxy VM."
                             },
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
                                 "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
-                                "location": "[steps('basics').resourceScope.location.name]"
+                                "location": "[steps('basics').resourceLocation.name]"
                             },
                             "options": {
                                 "hideExisting": false
                             },
                             "defaultValue": {
-                                "name": "squidproxy-vnet",
+                                "name": "proxy-vnet",
                                 "addressPrefixSize": "/16"
                             },
                             "constraints": {
@@ -172,7 +174,7 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the proxy server VM."
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the proxy VM."
                                     }
                                 },
                                 {
@@ -291,7 +293,7 @@
             "location": "[steps('basics').resourceScope.location.name]",
             "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "parameters": {
-                "location": "[steps('basics').resourceScope.location.name]",
+                "location": "[steps('basics').resourceLocation.name]",
                 "vmName": "[steps('basics').vmName]",
                 "vmImagePublisher": "[steps('basics').vmIamge.publisher]",
                 "vmImageOffer": "[steps('basics').vmIamge.offer]",
