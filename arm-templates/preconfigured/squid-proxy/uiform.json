@@ -3,17 +3,17 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "🦑 Deploy Squid proxy VM into VNet",
+            "title": "🦑 Deploy Squid proxy virtual machine into VNet",
             "steps": [
                 {
                     "name": "basics",
                     "label": "Basics",
-                    "description": "This template will deploy a VM as proxy using Squid into a virtual network.",
+                    "description": "This template will deploy a virtual machine as proxy using Squid into a virtual network.",
                     "elements": [
                         {
                             "name": "resourceScope",
                             "type": "Microsoft.Common.ResourceScope",
-                            "instanceDetailsLabel": "Proxy VM details",
+                            "instanceDetailsLabel": "Proxy virtual machine details",
                             "globalResource": false,
                             "resourceGroup": {
                                 "allowExisting": true
@@ -50,7 +50,7 @@
                             "type": "Microsoft.Common.LocationSelector",
                             "visible": true,
                             "label": "Virtual machine region",
-                            "toolTip": "Specify the region to deploy the proxy VM.",
+                            "toolTip": "Specify the region to deploy the proxy virtual machine.",
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]"
                             },
@@ -67,8 +67,8 @@
                             "filter": true,
                             "multiLine": true,
                             "label": "Image",
-                            "toolTip": "The VM image for the proxy server VM.",
-                            "placeholder": "Select the VM image...",
+                            "toolTip": "The virtual machine image for the proxy virtual machine.",
+                            "placeholder": "Select the virtual machine image...",
                             "defaultDescription": "---",
                             "filterPlaceholder": "Filter images...",
                             "defaultValue": "Ubuntu Server 24.04 LTS",
@@ -100,7 +100,7 @@
                             "name": "vmSize",
                             "type": "Microsoft.Compute.SizeSelector",
                             "label": "Size",
-                            "toolTip": "The VM size for the proxy server VM.",
+                            "toolTip": "The virtual machine size for the proxy virtual machine.",
                             "recommendedSizes": [
                                 "Standard_B2ms"
                             ],
@@ -130,8 +130,8 @@
                                 "subnets": "Subnets"
                             },
                             "toolTip": {
-                                "virtualNetwork": "Specify the virtual network to deploy the proxy VM.",
-                                "subnets": "Specify the subnet to deploy the proxy VM."
+                                "virtualNetwork": "Specify the virtual network to deploy the proxy virtual machine.",
+                                "subnets": "Specify the subnet to deploy the proxy virtual machine."
                             },
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
@@ -174,7 +174,7 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the proxy VM."
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the proxy virtual machine."
                                     }
                                 },
                                 {
@@ -209,7 +209,7 @@
                                     },
                                     "toolTip": {
                                         "authenticationType": "Choose whether the administrator account will use username/password or SSH keys for authentication.",
-                                        "password": "The administrator password for the VM.",
+                                        "password": "The administrator password for the virtual machine.",
                                         "sshPublicKey": "Provide an RSA public key in the single-line format (starting with \"ssh-rsa\") or the multi-line PEM format. You can generate SSH keys using ssh-keygen on Linux and OS X, or PuTTYGen on Windows."
                                     }
                                 }
