@@ -244,7 +244,7 @@
                             "name": "proxyServerVMSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "Proxy server virtual machine",
+                            "label": "Proxy virtual machine",
                             "elements": [
                                 {
                                     "name": "computerName",
@@ -252,7 +252,7 @@
                                     "visible": true,
                                     "multiLine": false,
                                     "label": "Host name",
-                                    "toolTip": "Specify the host name for the proxy server.",
+                                    "toolTip": "Specify the host name for the proxy virtual machine.",
                                     "placeholder": "e.g. proxy1",
                                     "defaultValue": "[steps('basics').vmName]",
                                     "constraints": {
