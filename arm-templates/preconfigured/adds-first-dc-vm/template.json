@@ -76,22 +76,30 @@
         },
         "vmImageSku": {
             "type": "string",
-            "defaultValue": "2019-Datacenter-smalldisk",
+            "defaultValue": "2025-datacenter-azure-edition-smalldisk",
             "allowedValues": [
+                // Windows Server 2025
+                "2025-datacenter-g2",
+                "2025-datacenter",
+                "2025-datacenter-smalldisk-g2",
+                "2025-datacenter-smalldisk",
+                "2025-datacenter-azure-edition",
+                "2025-datacenter-azure-edition-smalldisk",
+                // Windows Server 2022
                 "2022-datacenter-g2",
-                "2022-datacenter-smalldisk-g2",
                 "2022-datacenter",
+                "2022-datacenter-smalldisk-g2",
                 "2022-datacenter-smalldisk",
+                "2022-datacenter-azure-edition",
+                "2022-datacenter-azure-edition-smalldisk",
+                // Windows Server 2019
                 "2019-datacenter-gensecond",
-                "2019-datacenter-smalldisk-g2",
                 "2019-Datacenter",
+                "2019-datacenter-smalldisk-g2",
                 "2019-Datacenter-smalldisk",
+                // Windows Server 2016
                 "2016-Datacenter",
-                "2016-Datacenter-smalldisk"//,
-                //"2012-R2-Datacenter",
-                //"2012-R2-Datacenter-smalldisk",
-                // "2012-Datacenter",
-                // "2012-Datacenter-smalldisk"
+                "2016-Datacenter-smalldisk"
             ],
             "metadata": {
                 "description": ""
