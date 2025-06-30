@@ -253,10 +253,10 @@
                     "description": "TODO",
                     "elements": [
                         {
-                            "name": "addsVMSection",
+                            "name": "dcSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "AD DS virtual machine",
+                            "label": "Domain Controller",
                             "elements": [
                                 {
                                     "name": "computerName",
@@ -276,7 +276,15 @@
                                             }
                                         ]
                                     }
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "name": "osDiskSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "OS disk",
+                            "elements": [
                                 {
                                     "name": "osDiskStorageType",
                                     "type": "Microsoft.Common.DropDown",
@@ -311,7 +319,15 @@
                                             }
                                         ]
                                     }
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "name": "dataDiskSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Data disk",
+                            "elements": [
                                 {
                                     "name": "addsDataDiskStorageType",
                                     "type": "Microsoft.Common.DropDown",
@@ -518,11 +534,11 @@
                 "subnetAddressPrefix": "[steps('basics').vnet.subnets.addsSubnet.addressPrefix]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
-                "computerName": "[steps('details').addsVMSection.computerName]",
-                "osDiskStorageType": "[steps('details').addsVMSection.osDiskStorageType]",
-                "addsDataDiskStorageType": "[steps('details').addsVMSection.addsDataDiskStorageType]",
-                "addsDriveLetter": "[steps('details').addsVMSection.addsDriveLetter]",
-                "addsDriveLabel": "[steps('details').addsVMSection.addsDriveLabel]",
+                "computerName": "[steps('details').dcSection.computerName]",
+                "osDiskStorageType": "[steps('details').osDiskSection.osDiskStorageType]",
+                "addsDataDiskStorageType": "[steps('details').dataDiskSection.addsDataDiskStorageType]",
+                "addsDriveLetter": "[steps('details').dataDiskSection.addsDriveLetter]",
+                "addsDriveLabel": "[steps('details').dataDiskSection.addsDriveLabel]",
                 "domainName": "[steps('details').domainNameSection.domainName]"
             },
             "kind": "ResourceGroup",
