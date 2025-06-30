@@ -28,6 +28,8 @@
                             "multiLine": false,
                             "label": "AD DS virtual machine name",
                             "toolTip": "TODO",
+                            "placeholder": "e.g. adds-vm1",
+                            "defaultValue": "adds-vm1",
                             "constraints": {
                                 "required": true,
                                 "validations": [
@@ -36,9 +38,7 @@
                                         "message": "TODO"
                                     }
                                 ]
-                            },
-                            "placeholder": "e.g. adds-vm1",
-                            "defaultValue": ""
+                            }
                         },
                         {
                             "name": "vmIamge",
@@ -53,10 +53,40 @@
                             "placeholder": "Select the VM image...",
                             "defaultDescription": "---",
                             "filterPlaceholder": "Filter images...",
-                            "defaultValue": "Windows Server 2022 Gen 2 (smalldisk)",
+                            "defaultValue": "Windows Server 2025 Azure Edition (smalldisk)",
                             "constraints": {
                                 "required": true,
                                 "allowedValues": [
+                                    {
+                                        "label": "Windows Server 2025 Azure Edition",
+                                        "description": "Windows Server 2025 Azure Edition with 127 GiB OS disk for generation 2 VM.",
+                                        "value": "2025-datacenter-azure-edition"
+                                    },
+                                    {
+                                        "label": "Windows Server 2025 Azure Edition (smalldisk)",
+                                        "description": "Windows Server 2025 Azure Edition with 31 GiB OS disk for generation 2 VM.",
+                                        "value": "2025-datacenter-azure-edition-smalldisk"
+                                    },
+                                    {
+                                        "label": "Windows Server 2025 Gen 2",
+                                        "description": "Windows Server 2025 with 127 GiB OS disk for generation 2 VM.",
+                                        "value": "2025-datacenter-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2025 Gen 2 (smalldisk)",
+                                        "description": "Windows Server 2025 with 31 GiB OS disk for generation 2 VM.",
+                                        "value": "2025-datacenter-smalldisk-g2"
+                                    },
+                                    {
+                                        "label": "Windows Server 2025 Gen 1",
+                                        "description": "Windows Server 2025 with 127 GiB OS disk for generation 1 VM.",
+                                        "value": "2025-datacenter"
+                                    },
+                                    {
+                                        "label": "Windows Server 2025 Gen 1 (smalldisk)",
+                                        "description": "Windows Server 2025 with 31 GiB OS disk for generation 1 VM.",
+                                        "value": "2025-datacenter-smalldisk"
+                                    },
                                     {
                                         "label": "Windows Server 2022 Gen 2",
                                         "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
@@ -223,10 +253,10 @@
                     "description": "TODO",
                     "elements": [
                         {
-                            "name": "addsVMSection",
+                            "name": "dcSection",
                             "type": "Microsoft.Common.Section",
                             "visible": true,
-                            "label": "AD DS virtual machine",
+                            "label": "Domain Controller",
                             "elements": [
                                 {
                                     "name": "computerName",
@@ -246,7 +276,15 @@
                                             }
                                         ]
                                     }
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "name": "osDiskSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "OS disk",
+                            "elements": [
                                 {
                                     "name": "osDiskStorageType",
                                     "type": "Microsoft.Common.DropDown",
@@ -281,7 +319,15 @@
                                             }
                                         ]
                                     }
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "name": "dataDiskSection",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "label": "Data disk",
+                            "elements": [
                                 {
                                     "name": "addsDataDiskStorageType",
                                     "type": "Microsoft.Common.DropDown",
@@ -488,11 +534,11 @@
                 "subnetAddressPrefix": "[steps('basics').vnet.subnets.addsSubnet.addressPrefix]",
                 "adminUserName": "[steps('basics').adminAccountSection.adminUserName]",
                 "adminPassword": "[steps('basics').adminAccountSection.adminPassword.password]",
-                "computerName": "[steps('details').addsVMSection.computerName]",
-                "osDiskStorageType": "[steps('details').addsVMSection.osDiskStorageType]",
-                "addsDataDiskStorageType": "[steps('details').addsVMSection.addsDataDiskStorageType]",
-                "addsDriveLetter": "[steps('details').addsVMSection.addsDriveLetter]",
-                "addsDriveLabel": "[steps('details').addsVMSection.addsDriveLabel]",
+                "computerName": "[steps('details').dcSection.computerName]",
+                "osDiskStorageType": "[steps('details').osDiskSection.osDiskStorageType]",
+                "addsDataDiskStorageType": "[steps('details').dataDiskSection.addsDataDiskStorageType]",
+                "addsDriveLetter": "[steps('details').dataDiskSection.addsDriveLetter]",
+                "addsDriveLabel": "[steps('details').dataDiskSection.addsDriveLabel]",
                 "domainName": "[steps('details').domainNameSection.domainName]"
             },
             "kind": "ResourceGroup",
