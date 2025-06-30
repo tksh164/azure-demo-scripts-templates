@@ -28,6 +28,8 @@
                             "multiLine": false,
                             "label": "AD DS virtual machine name",
                             "toolTip": "TODO",
+                            "placeholder": "e.g. adds-vm1",
+                            "defaultValue": "adds-vm1",
                             "constraints": {
                                 "required": true,
                                 "validations": [
@@ -36,9 +38,7 @@
                                         "message": "TODO"
                                     }
                                 ]
-                            },
-                            "placeholder": "e.g. adds-vm1",
-                            "defaultValue": ""
+                            }
                         },
                         {
                             "name": "vmIamge",
