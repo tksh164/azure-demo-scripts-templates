@@ -3,7 +3,7 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Deploy a first domain controller VM (AD DS) into a VNet",
+            "title": "📚 Deploy a first domain controller VM (AD DS) into a VNet",
             "steps": [
                 {
                     "name": "basics",
