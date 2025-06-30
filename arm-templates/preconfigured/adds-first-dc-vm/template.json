@@ -225,7 +225,7 @@
         {
             "condition": "[variables('isCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[parameters('vnetName')]",
             "location": "[variables('location')]",
             "properties": {
@@ -247,7 +247,7 @@
 
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[variables('nsgName')]",
             "location": "[variables('location')]",
             "properties": {
@@ -259,7 +259,7 @@
 
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2024-07-01",
             "name": "[variables('dcVm').avSetName]",
             "location": "[variables('location')]",
             "sku": {
@@ -272,7 +272,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-05-01",
             "name": "[variables('dcVm').nicName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -294,7 +294,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2024-07-01",
             "name": "[variables('dcVm').vmName]",
             "location": "[variables('location')]",
             "dependsOn": [
@@ -359,7 +359,7 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2022-03-02",
+            "apiVersion": "2024-03-02",
             "name": "[variables('dcVm').dataDiskName]",
             "location": "[variables('location')]",
             "sku": {
@@ -374,7 +374,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2024-07-01",
             "name": "[concat(variables('dcVm').vmName, '/configure-adds-first-dc')]",
             "location": "[variables('location')]",
             "dependsOn": [
