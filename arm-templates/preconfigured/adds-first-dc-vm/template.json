@@ -177,14 +177,14 @@
             "metadata": {
                 "description": "Specify the volume lavel for the AD DS data volume."
             }
-        },
-        "uniqueSuffixSeed": {
-            "type": "string",
-            "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
-            "metadata": {
-                "description": "Don't change this value."
-            }
-        }
+        }//,
+        // "uniqueSuffixSeed": {
+        //     "type": "string",
+        //     "defaultValue": "[utcNow('yyyyMMddhhmmssfff')]",
+        //     "metadata": {
+        //         "description": "Don't change this value."
+        //     }
+        // }
     },
     "variables": {
 
