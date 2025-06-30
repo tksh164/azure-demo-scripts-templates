@@ -3,7 +3,7 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "Deploy a first domain controller VM (AD DS) into a VNet",
+            "title": "📚 Deploy a first domain controller VM (AD DS) into a VNet",
             "steps": [
                 {
                     "name": "basics",
@@ -13,11 +13,16 @@
                         {
                             "name": "resourceScope",
                             "type": "Microsoft.Common.ResourceScope",
+                            "instanceDetailsLabel": "Domain controller virtual machine details",
+                            "globalResource": false,
+                            "resourceGroup": {
+                                "allowExisting": true
+                            },
                             "location": {
-                                "label": "Region",
-                                "toolTip": "Specify the region to deploy the domain controller VM.",
+                                "label": "Resource group region",
+                                "toolTip": "Specify the region to deploy the resource group.",
                                 "resourceTypes": [
-                                    "microsoft.resources/resourcegroups"
+                                    "Microsoft.Resources/resourceGroups"
                                 ]
                             }
                         },
@@ -26,7 +31,7 @@
                             "type": "Microsoft.Common.TextBox",
                             "visible": true,
                             "multiLine": false,
-                            "label": "AD DS virtual machine name",
+                            "label": "Virtual machine name",
                             "toolTip": "TODO",
                             "placeholder": "e.g. adds-vm1",
                             "defaultValue": "adds-vm1",
@@ -39,6 +44,19 @@
                                     }
                                 ]
                             }
+                        },
+                        {
+                            "name": "resourceLocation",
+                            "type": "Microsoft.Common.LocationSelector",
+                            "visible": true,
+                            "label": "Virtual machine region",
+                            "toolTip": "Specify the region to deploy the proxy virtual machine.",
+                            "scope": {
+                                "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]"
+                            },
+                            "resourceTypes": [
+                                "Microsoft.Compute/virtualMachines"
+                            ]
                         },
                         {
                             "name": "vmIamge",
@@ -145,7 +163,7 @@
                             },
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
-                                "location": "[steps('basics').resourceScope.location.name]"
+                                "location": "[steps('basics').resourceLocation.name]"
                             },
                             "osPlatform": "Windows",
                             "imageReference": {
@@ -171,7 +189,7 @@
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
                                 "resourceGroupName": "[steps('basics').resourceScope.resourceGroup.name]",
-                                "location": "[steps('basics').resourceScope.location.name]"
+                                "location": "[steps('basics').resourceLocation.name]"
                             },
                             "options": {
                                 "hideExisting": false
@@ -522,7 +540,11 @@
             ]
         },
         "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
             "parameters": {
+                "location": "[steps('basics').resourceLocation.name]",
                 "vmName": "[steps('basics').vmName]",
                 "vmImageSku": "[steps('basics').vmIamge]",
                 "vmSize": "[steps('basics').vmSize]",
@@ -540,10 +562,7 @@
                 "addsDriveLetter": "[steps('details').dataDiskSection.addsDriveLetter]",
                 "addsDriveLabel": "[steps('details').dataDiskSection.addsDriveLabel]",
                 "domainName": "[steps('details').domainNameSection.domainName]"
-            },
-            "kind": "ResourceGroup",
-            "location": "[steps('basics').resourceScope.location.name]",
-            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+            }
         }
     }
 }
