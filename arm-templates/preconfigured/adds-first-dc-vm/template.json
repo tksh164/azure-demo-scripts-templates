@@ -96,10 +96,7 @@
                 "2019-datacenter-gensecond",
                 "2019-Datacenter",
                 "2019-datacenter-smalldisk-g2",
-                "2019-Datacenter-smalldisk",
-                // Windows Server 2016
-                "2016-Datacenter",
-                "2016-Datacenter-smalldisk"
+                "2019-Datacenter-smalldisk"
             ],
             "metadata": {
                 "description": ""
