@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the location to create resources."
+            }
+        },
         "vnetNewOrExisting": {
             "type": "string",
             "metadata": {
@@ -185,7 +191,7 @@
         // Common
 
         //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
-        "location": "[resourceGroup().location]",
+        //"location": "[resourceGroup().location]",
         //"prefix": "dc",
 
         // Virtual network
@@ -227,7 +233,7 @@
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2024-05-01",
             "name": "[parameters('vnetName')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -249,7 +255,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2024-05-01",
             "name": "[variables('nsgName')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "properties": {
                 "securityRules": []   
             }
@@ -261,7 +267,7 @@
             "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "2024-07-01",
             "name": "[variables('dcVm').avSetName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "sku": {
                 "name": "Aligned"
             },
@@ -274,7 +280,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2024-05-01",
             "name": "[variables('dcVm').nicName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
             ],
@@ -296,7 +302,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2024-07-01",
             "name": "[variables('dcVm').vmName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets', variables('dcVm').avSetName)]",
                 "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
@@ -361,7 +367,7 @@
             "type": "Microsoft.Compute/disks",
             "apiVersion": "2024-03-02",
             "name": "[variables('dcVm').dataDiskName]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "sku": {
                 "name": "[variables('dcVm').dataDiskStorageType]"
             },
@@ -376,7 +382,7 @@
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2024-07-01",
             "name": "[concat(variables('dcVm').vmName, '/configure-adds-first-dc')]",
-            "location": "[variables('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('dcVm').vmName)]"
             ],
