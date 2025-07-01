@@ -191,16 +191,12 @@
         // Common
 
         //"uniqueSuffix": "[concat('0', toLower(take(uniqueString(parameters('uniqueSuffixSeed')), 3)))]",
-        //"location": "[resourceGroup().location]",
-        //"prefix": "dc",
-
         "zone": "1",
 
         // Virtual network
 
         "shouldCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
-
         "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
 
         // Domain controller virtual machine
@@ -214,8 +210,7 @@
             "dataDiskName": "[concat(parameters('vmName'), '-datadisk1')]",
             "dataDiskStorageType": "[parameters('addsDataDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
-            "pipName": "[concat(parameters('vmName'), '-ip1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]"
+            "pipName": "[concat(parameters('vmName'), '-ip1')]"
         },
 
         // AD DS domain configuration
@@ -232,10 +227,23 @@
 
         {
             "condition": "[variables('shouldCreateNewVNet')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2024-05-01",
+            "name": "[variables('nsgName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": []   
+            }
+        },
+        {
+            "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2024-05-01",
             "name": "[parameters('vnetName')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -246,20 +254,13 @@
                     {
                         "name": "[parameters('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                            }
                         }
                     }
                 ]
-            }
-        },
-
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2024-05-01",
-            "name": "[variables('nsgName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": []
             }
         },
 
