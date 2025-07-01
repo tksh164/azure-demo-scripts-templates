@@ -2,5 +2,9 @@
 
 package_update: true
 package_upgrade: true
+package_reboot_if_required: true
 packages:
   - squid
+runcmd:
+  - sed -e '/^#http_access allow localnet$/s/^#//' -i /etc/squid/conf.d/debian.conf
+  - systemctl restart squid
