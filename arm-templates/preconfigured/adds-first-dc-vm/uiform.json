@@ -3,12 +3,12 @@
     "view": {
         "kind": "Form",
         "properties": {
-            "title": "📚 Deploy a first domain controller VM (AD DS) into a VNet",
+            "title": "📚 Deploy first AD DS domain controller virtual machine into virtual network",
             "steps": [
                 {
                     "name": "basics",
                     "label": "Basics",
-                    "description": "This template will deploy a first domain controller VM (AD DS) into a virtual network.",
+                    "description": "This template will deploy a virtual machine as a first AD DS domain controller into a virtual network.",
                     "elements": [
                         {
                             "name": "resourceScope",
@@ -67,8 +67,8 @@
                             "filter": true,
                             "multiLine": true,
                             "label": "Image",
-                            "toolTip": "The VM image for the domain controller VM.",
-                            "placeholder": "Select the VM image...",
+                            "toolTip": "The virtual machine image for the domain controller virtual machine.",
+                            "placeholder": "Select the virtual machine image...",
                             "defaultDescription": "---",
                             "filterPlaceholder": "Filter images...",
                             "defaultValue": "Windows Server 2025 Azure Edition (smalldisk)",
@@ -86,64 +86,34 @@
                                         "value": "2025-datacenter-azure-edition-smalldisk"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 2",
+                                        "label": "Windows Server 2025",
                                         "description": "Windows Server 2025 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2025-datacenter-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2025 (smalldisk)",
                                         "description": "Windows Server 2025 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2025-datacenter-smalldisk-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 1",
-                                        "description": "Windows Server 2025 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2025-datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2025 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2025 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2025-datacenter-smalldisk"
-                                    },
-                                    {
-                                        "label": "Windows Server 2022 Gen 2",
+                                        "label": "Windows Server 2022",
                                         "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2022-datacenter-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2022 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2022 (smalldisk)",
                                         "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2022-datacenter-smalldisk-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2022 Gen 1",
-                                        "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2022-datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2022 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2022-datacenter-smalldisk"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 2",
+                                        "label": "Windows Server 2019",
                                         "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2019-datacenter-gensecond"
                                     },                                            
                                     {
-                                        "label": "Windows Server 2019 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2019 (smalldisk)",
                                         "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2019-datacenter-smalldisk-g2"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 1",
-                                        "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2019-Datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2019-Datacenter-smalldisk"
                                     }
                                 ]
                             }
@@ -152,12 +122,11 @@
                             "name": "vmSize",
                             "type": "Microsoft.Compute.SizeSelector",
                             "label": "Size",
-                            "toolTip": "The VM size for the domain controller VM.",
+                            "toolTip": "The virtual machine size for the domain controller virtual machine.",
                             "recommendedSizes": [
                                 "Standard_B2ms"
                             ],
-                            "constraints": {
-                            },
+                            "constraints": {},
                             "options": {
                                 "hideDiskTypeFilter": false
                             },
@@ -183,8 +152,8 @@
                                 "subnets": "Subnets"
                             },
                             "toolTip": {
-                                "virtualNetwork": "Specify the virtual network to deploy the domain controller VM.",
-                                "subnets": "Specify the subnet to deploy the domain controller VM."
+                                "virtualNetwork": "Specify the virtual network to deploy the domain controller virtual machine.",
+                                "subnets": "Specify the subnet to deploy the domain controller virtual machine."
                             },
                             "scope": {
                                 "subscriptionId": "[steps('basics').resourceScope.subscription.subscriptionId]",
@@ -215,7 +184,25 @@
                                     }
                                 }
                             }
-                        },                        
+                        },
+                        {
+                            "name": "newVnetInfoBox",
+                            "type": "Microsoft.Common.InfoBox",
+                            "visible": "[if(equals(steps('basics').vnet.newOrExisting, 'new'), true, false)]",
+                            "options": {
+                                "style": "Info",
+                                "text": "The deployment will be creating a new network security group and associate it with the subnet."
+                            }
+                        },
+                        {
+                            "name": "existingVnetInfoBox",
+                            "type": "Microsoft.Common.InfoBox",
+                            "visible": "[if(equals(steps('basics').vnet.newOrExisting, 'existing'), true, false)]",
+                            "options": {
+                                "style": "Warning",
+                                "text": "The deployment not be create any network security groups. If you need network security groups, please create and associate it manually."
+                            }
+                        },
                         {
                             "name": "adminAccountSection",
                             "type": "Microsoft.Common.Section",
@@ -227,7 +214,7 @@
                                     "type": "Microsoft.Common.TextBlock",
                                     "visible": true,
                                     "options": {
-                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller VM and domain administrator account."
+                                        "text": "Specify the administrator account credentials. The credentials are used for the local administrator account on the domain controller virtual machine and the domain administrator account."
                                     }
                                 },
                                 {
@@ -254,11 +241,11 @@
                                         "password": "Specify the administrator password."
                                     },
                                     "osPlatform": "Windows",
-                                    "constraints": {
-                                        "required": true
-                                    },
                                     "options": {
                                         "hideConfirmation": false
+                                    },
+                                    "constraints": {
+                                        "required": true
                                     }
                                 }
                             ]

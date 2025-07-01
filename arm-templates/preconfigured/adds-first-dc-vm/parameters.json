@@ -2,5 +2,35 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "value": "japaneast"
+        },
+        "vnetNewOrExisting": {
+            "value": "new"
+        },
+        // "vnetNewOrExisting": {
+        //     "value": "existing"
+        // },
+        "vnetResourceGroupName": {
+            "value": "adds"
+        },
+        "vnetName": {
+            "value": "adds-vnet"
+        },
+        "vnetAddressPrefix": {
+            "value": "172.16.0.0/16"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "subnetAddressPrefix": {
+            "value": "172.16.0.0/24"
+        },
+        "vmName": {
+            "value": "adds-vm1"
+        },
+        "vmImageSku": {
+            "value": "2025-datacenter-azure-edition-smalldisk"
+        }
     }
 }
