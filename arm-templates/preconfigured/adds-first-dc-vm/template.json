@@ -212,6 +212,7 @@
             "dataDiskName": "[concat(parameters('vmName'), '-datadisk1')]",
             "dataDiskStorageType": "[parameters('addsDataDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
+            "pipName": "[concat(parameters('vmName'), '-ip1')]",
             "nsgName": "[concat(parameters('vmName'), '-nsg')]",
             "avSetName": "[concat(parameters('vmName'), '-as')]"
         },
@@ -257,7 +258,7 @@
             "name": "[variables('nsgName')]",
             "location": "[parameters('location')]",
             "properties": {
-                "securityRules": []   
+                "securityRules": []
             }
         },
 
@@ -277,12 +278,28 @@
             }
         },
         {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2024-05-01",
+            "name": "[variables('dcVm').pipName]",
+            "location": "[parameters('location')]",
+            "zones": [
+                "1"
+            ],
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            }
+        },
+        {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2024-05-01",
             "name": "[variables('dcVm').nicName]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('dcVm').pipName)]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -292,8 +309,14 @@
                             "subnet": {
                                 "id": "[variables('subnetId')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic"
-                       }
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('dcVm').pipName)]",
+                                "properties": {
+                                    "deleteOption": "Delete"
+                                }
+                            }
+                        }
                     }
                 ]
             }
@@ -335,7 +358,7 @@
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]"
                             }
                         }
-                    ]                    
+                    ]
                 },
                 "networkProfile": {
                     "networkInterfaces": [
