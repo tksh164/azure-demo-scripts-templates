@@ -33,6 +33,8 @@
                             "multiLine": false,
                             "label": "Virtual machine name",
                             "toolTip": "TODO",
+                            "placeholder": "e.g. proxy-vm1",
+                            "defaultValue": "proxy-vm1",
                             "constraints": {
                                 "required": true,
                                 "validations": [
@@ -41,9 +43,7 @@
                                         "message": "TODO"
                                     }
                                 ]
-                            },
-                            "placeholder": "e.g. proxy-vm1",
-                            "defaultValue": "proxy-vm1"
+                            }
                         },
                         {
                             "name": "resourceLocation",
@@ -211,14 +211,6 @@
                                     "name": "adminCredentials",
                                     "type": "Microsoft.Compute.CredentialsCombo",
                                     "visible": true,
-                                    "osPlatform": "Linux",
-                                    "constraints": {
-                                        "required": true
-                                    },
-                                    "options": {
-                                        "hideConfirmation": false,
-                                        "hidePassword": true
-                                    },
                                     "label": {
                                         "authenticationType": "Authentication type",
                                         "password": "Password",
@@ -229,6 +221,14 @@
                                         "authenticationType": "Choose whether the administrator account will use username/password or SSH keys for authentication.",
                                         "password": "The administrator password for the virtual machine.",
                                         "sshPublicKey": "Provide an RSA public key in the single-line format (starting with \"ssh-rsa\") or the multi-line PEM format. You can generate SSH keys using ssh-keygen on Linux and OS X, or PuTTYGen on Windows."
+                                    },
+                                    "osPlatform": "Linux",
+                                    "options": {
+                                        "hideConfirmation": false,
+                                        "hidePassword": true
+                                    },
+                                    "constraints": {
+                                        "required": true
                                     }
                                 }
                             ]
