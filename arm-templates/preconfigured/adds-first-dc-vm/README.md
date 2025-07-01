@@ -14,5 +14,3 @@ Deploy a first domain controller virtual machine of Active Directory domain serv
 ## TODO
 
 - [ ] Add Public IP address option
-- [ ] Add NSG resource assosiation
-- [ ] Add Availability Set / Availability Zone option
