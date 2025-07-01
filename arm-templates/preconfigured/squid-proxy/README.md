@@ -6,7 +6,7 @@
 
 Deploy a virtual machine as a proxy server using Squid into a new virtual network or an existing virtual network.
 
-You can use the proxy server from within the virtual network with the following address.
+You can use the proxy server from within the virtual network with the following address and port.
 
 ```
 <Proxy server's private IP address>:3128
