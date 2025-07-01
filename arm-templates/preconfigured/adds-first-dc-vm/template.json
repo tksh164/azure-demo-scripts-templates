@@ -198,7 +198,7 @@
 
         // Virtual network
 
-        "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+        "shouldCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
         "subnetId": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
 
         "nsgName": "[concat(parameters('vnetName'), '-', parameters('subnetName'), '-nsg')]",
@@ -231,7 +231,7 @@
         // Virtual network
 
         {
-            "condition": "[variables('isCreateNewVNet')]",
+            "condition": "[variables('shouldCreateNewVNet')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2024-05-01",
             "name": "[parameters('vnetName')]",
