@@ -194,6 +194,8 @@
         //"location": "[resourceGroup().location]",
         //"prefix": "dc",
 
+        "zone": "1",
+
         // Virtual network
 
         "isCreateNewVNet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -213,8 +215,7 @@
             "dataDiskStorageType": "[parameters('addsDataDiskStorageType')]",
             "nicName": "[concat(parameters('vmName'), '-nic1')]",
             "pipName": "[concat(parameters('vmName'), '-ip1')]",
-            "nsgName": "[concat(parameters('vmName'), '-nsg')]",
-            "avSetName": "[concat(parameters('vmName'), '-as')]"
+            "nsgName": "[concat(parameters('vmName'), '-nsg')]"
         },
 
         // AD DS domain configuration
@@ -265,25 +266,12 @@
         // Domain controller virtual machine
 
         {
-            "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "2024-07-01",
-            "name": "[variables('dcVm').avSetName]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "Aligned"
-            },
-            "properties": {
-                "platformUpdateDomainCount": 5,
-                "platformFaultDomainCount": 2
-            }
-        },
-        {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2024-05-01",
             "name": "[variables('dcVm').pipName]",
             "location": "[parameters('location')]",
             "zones": [
-                "1"
+                "[variables('zone')]"
             ],
             "sku": {
                 "name": "Standard"
@@ -322,23 +310,54 @@
             }
         },
         {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2024-03-02",
+            "name": "[variables('dcVm').dataDiskName]",
+            "location": "[parameters('location')]",
+            "zones": [
+                "[variables('zone')]"
+            ],
+            "sku": {
+                "name": "[variables('dcVm').dataDiskStorageType]"
+            },
+            "properties": {
+                "diskSizeGB": 4,
+                "creationData": {
+                    "createOption": "empty"
+                }
+            }
+        },
+        {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2024-07-01",
             "name": "[variables('dcVm').vmName]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/availabilitySets', variables('dcVm').avSetName)]",
                 "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]",
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
+            ],
+            "zones": [
+                "[variables('zone')]"
             ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "[variables('dcVm').vmSize]"
                 },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
                 "storageProfile": {
                     "osDisk": {
                         "name": "[variables('dcVm').osDiskName]",
                         "createOption": "fromImage",
+                        "deleteOption": "Delete",
                         "managedDisk": {
                             "storageAccountType": "[variables('dcVm').osDiskStorageType]"
                         }
@@ -351,19 +370,13 @@
                     },
                     "dataDisks": [
                         {
-                            "createOption": "Attach",
                             "lun": 0,
                             "caching": "ReadOnly",
+                            "createOption": "Attach",
+                            "deleteOption": "Delete",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks', variables('dcVm').dataDiskName)]"
                             }
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcVm').nicName)]"
                         }
                     ]
                 },
@@ -376,28 +389,17 @@
                         "provisionVmAgent": true
                     }
                 },
-                "availabilitySet": {
-                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('dcVm').avSetName)]"
+                "securityProfile": {
+                    "securityType": "TrustedLaunch",
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    }
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true
                     }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/disks",
-            "apiVersion": "2024-03-02",
-            "name": "[variables('dcVm').dataDiskName]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "[variables('dcVm').dataDiskStorageType]"
-            },
-            "properties": {
-                "diskSizeGB": 4,
-                "creationData": {
-                    "createOption": "empty"
                 }
             }
         },
