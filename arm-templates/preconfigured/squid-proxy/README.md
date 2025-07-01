@@ -6,15 +6,17 @@
 
 Deploy a virtual machine as a proxy server using Squid into a new virtual network or an existing virtual network.
 
-### Deployment
+You can use the proxy server from within the virtual network with the following address.
 
-To be updated.
+```
+<Proxy server's private IP address>:3128
+```
 
 ## Notes
 
 - Squid is installed through the template deployment.
+- Squid is active with the default config and `http_access allow localnet`.
 
 ## TODO
 
-- [ ] Update the Deployment section in README
 - [ ] Add Public IP address option
