@@ -7,4 +7,6 @@ packages:
   - squid
 runcmd:
   - sed -e '/^#http_access allow localnet$/s/^#//' -i /etc/squid/conf.d/debian.conf
+  - echo '[squid] Uncommented http_access allow localnet'
   - systemctl restart squid
+  - echo '[squid] Restart'
