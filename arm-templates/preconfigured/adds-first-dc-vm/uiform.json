@@ -86,64 +86,34 @@
                                         "value": "2025-datacenter-azure-edition-smalldisk"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 2",
+                                        "label": "Windows Server 2025",
                                         "description": "Windows Server 2025 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2025-datacenter-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2025 (smalldisk)",
                                         "description": "Windows Server 2025 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2025-datacenter-smalldisk-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2025 Gen 1",
-                                        "description": "Windows Server 2025 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2025-datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2025 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2025 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2025-datacenter-smalldisk"
-                                    },
-                                    {
-                                        "label": "Windows Server 2022 Gen 2",
+                                        "label": "Windows Server 2022",
                                         "description": "Windows Server 2022 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2022-datacenter-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2022 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2022 (smalldisk)",
                                         "description": "Windows Server 2022 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2022-datacenter-smalldisk-g2"
                                     },
                                     {
-                                        "label": "Windows Server 2022 Gen 1",
-                                        "description": "Windows Server 2022 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2022-datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2022 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2022 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2022-datacenter-smalldisk"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 2",
+                                        "label": "Windows Server 2019",
                                         "description": "Windows Server 2019 with 127 GiB OS disk for generation 2 VM.",
                                         "value": "2019-datacenter-gensecond"
                                     },                                            
                                     {
-                                        "label": "Windows Server 2019 Gen 2 (smalldisk)",
+                                        "label": "Windows Server 2019 (smalldisk)",
                                         "description": "Windows Server 2019 with 31 GiB OS disk for generation 2 VM.",
                                         "value": "2019-datacenter-smalldisk-g2"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 1",
-                                        "description": "Windows Server 2019 with 127 GiB OS disk for generation 1 VM.",
-                                        "value": "2019-Datacenter"
-                                    },
-                                    {
-                                        "label": "Windows Server 2019 Gen 1 (smalldisk)",
-                                        "description": "Windows Server 2019 with 31 GiB OS disk for generation 1 VM.",
-                                        "value": "2019-Datacenter-smalldisk"
                                     }
                                 ]
                             }
