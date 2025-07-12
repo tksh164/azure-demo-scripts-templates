@@ -6,7 +6,7 @@
     //     "url": "https://example.com/webhook",
     //     "method": "POST",
     //     "body": {
-    //         "message": "{{datetime}} - Maximum write IOPS test completed."
+    //         "message": "{{datetime}} - {{computername}} - Maximum write IOPS test completed."
     //     }
     // }
 }

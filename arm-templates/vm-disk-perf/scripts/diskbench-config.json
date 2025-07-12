@@ -3,10 +3,10 @@
         "url": "https://example.com/webhook",
         "method": "POST",
         "bodyForStart": {
-            "message": "{{datetime}} - Benchmark started."
+            "message": "{{datetime}} - {{computername}} - Benchmark started."
         },
         "bodyForEnd": {
-            "message": "{{datetime}} - Benchmark completed."
+            "message": "{{datetime}} - {{computername}} - Benchmark completed."
         }
     }
 }
