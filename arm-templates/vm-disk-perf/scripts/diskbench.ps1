@@ -8,7 +8,7 @@ param (
     [string[]] $BenchmarkConfigFilePath,
 
     [Parameter(Mandatory = $false)]
-    [int] $IntervalSeconds = 30
+    [int] $IntervalSeconds = 60
 )
 
 function Invoke-Webhook {
@@ -29,7 +29,9 @@ function Invoke-Webhook {
         ContentType = 'application/json'
     }
     if ($PSBoundParameters.ContainsKey('Body')) {
-        $params.Body = $Body
+        $filledBody = $Body.Replace('{{datetime}}', [datetime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))
+        $filledBody = $filledBody.Replace('{{computername}}', $env:ComputerName)
+        $params.Body = $filledBody
     }
     $result = Invoke-WebRequest @params
     Write-Host ('Webhook: {0} {1}' -f $result.StatusCode, $result.StatusDescription)
@@ -63,7 +65,7 @@ function Invoke-DiskBenchmark
             Url    = $config.webhook.url
         }
         if ($config.webhook.body) {
-            $params.Body = ($config.webhook.body | ConvertTo-Json).Replace('{{datetime}}', [datetime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))
+            $params.Body = $config.webhook.body | ConvertTo-Json
         }
         Invoke-Webhook @params
     }
@@ -77,7 +79,7 @@ if ($config.webhook) {
         Url    = $config.webhook.url
     }
     if ($config.webhook.bodyForStart) {
-        $params.Body = ($config.webhook.bodyForStart | ConvertTo-Json).Replace('{{datetime}}', [datetime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))
+        $params.Body = $config.webhook.bodyForStart | ConvertTo-Json
     }
     Invoke-Webhook @params
 }
@@ -98,7 +100,7 @@ if ($config.webhook) {
         Url    = $config.webhook.url
     }
     if ($config.webhook.bodyForEnd) {
-        $params.Body = ($config.webhook.bodyForEnd | ConvertTo-Json).Replace('{{datetime}}', [datetime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))
+        $params.Body = $config.webhook.bodyForEnd | ConvertTo-Json
     }
     Invoke-Webhook @params
 }
