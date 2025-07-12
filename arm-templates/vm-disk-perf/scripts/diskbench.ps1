@@ -47,13 +47,14 @@ function Invoke-DiskBenchmark
 
     $config = Get-Content -LiteralPath $ConfigFilePath -Raw -Encoding utf8 | ConvertFrom-Json
 
+    $outputFileParentPath = [IO.Path]::GetDirectoryName($config.outputFilePath)
+    $outputFileName = [IO.Path]::GetFileName($config.outputFilePath)
     $timestamp = [datetime]::Now.ToString('yyyyMMdd-HHmmss')
-    $outputFileExtension = [IO.Path]::GetExtension($config.outputFilePath)
 
     $params = @{
         FilePath               = $config.diskspdPath
         ArgumentList           = $config.diskspdArgs
-        RedirectStandardOutput = $config.outputFilePath.Replace($outputFileExtension, ('-' + $timestamp + $outputFileExtension))
+        RedirectStandardOutput = Join-Path -Path $outputFileParentPath -ChildPath ($timestamp + '-' + $outputFileName)
         NoNewWindow            = $true
         Wait                   = $true
     }
