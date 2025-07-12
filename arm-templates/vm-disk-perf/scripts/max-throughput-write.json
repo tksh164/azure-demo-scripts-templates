@@ -1,0 +1,12 @@
+{
+    "diskspdPath": "C:\\work\\DiskSpd\\amd64\\diskspd.exe",
+    "diskspdArgs": "-c200G -w100 -b64K -F4 -r -o128 -W30 -d30 -Sh T:\\testfile.dat",
+    "outputFilePath": "C:\\work\\results\\max-throughput-write-result.txt"//,
+    // "webhook": {
+    //     "url": "https://example.com/webhook",
+    //     "method": "POST",
+    //     "body": {
+    //         "message": "{{datetime}} - Maximum write throughput test completed."
+    //     }
+    // }
+}
