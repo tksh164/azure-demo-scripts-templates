@@ -1,0 +1,12 @@
+{
+    "diskspdPath": "C:\\work\\DiskSpd\\amd64\\diskspd.exe",
+    "diskspdArgs": "-c200G -b4K -F4 -r -o128 -W7200 -d30 -Sh T:\\testfile.dat",
+    "outputFilePath": "C:\\work\\results\\max-iops-read-result.txt"//,
+    // "webhook": {
+    //     "url": "https://example.com/webhook",
+    //     "method": "POST",
+    //     "body": {
+    //         "message": "{{datetime}} - {{computername}} - Maximum read IOPS test completed."
+    //     }
+    // }
+}

@@ -13,20 +13,35 @@ param adminPassword string
 
 // Variables
 
-var prefix = 'diskperf'
+var prefix = 'diskbench'
 
 var subnetName = 'default'  // Name of the subnet.
 
 var vmName = '${prefix}-vm1'     // Name of the virtual machine.
 var vmSize = 'Standard_E16s_v5'  // Virtual machine size.
+var zone = '1'                   // Availability zone for resources.
 
-var dataDiskSku = 'StandardSSD_LRS'  // SKU for the data disks.
-var dataDiskSizeGB = 64              // Size of the data disks in GB.
-var dataDiskCount = 2                // Number of data disks to attach to the VM.
-var isEnablePerformancePlus = false  // The performancePlus flag can only be set on disks at least 512 GB in size.
-var isEnabledBursting = false        // Bursting is supported only for 'Premium_LRS,Premium_ZRS' SKUs
+var diskConfig = {
+  // SKU for the data disks.
+  dataDiskSku: 'StandardSSD_LRS'
 
-var diskSuffixRange = range(0, dataDiskCount)
+  // Caching type for the data disks.
+  hostCaching: 'ReadWrite'
+
+  // Size of the data disks in GB.
+  dataDiskSizeGB: 64
+
+  // Number of data disks to attach to the VM.
+  dataDiskCount: 1
+
+  // The performancePlus flag can only be set on disks at least 512 GB in size.
+  isEnablePerformancePlus: false
+
+  // Bursting is supported only for 'Premium_LRS, Premium_ZRS' SKUs
+  isEnabledBursting: false
+}
+
+var diskSuffixRange = range(0, diskConfig.dataDiskCount)
 
 // Resource declarations
 
@@ -82,23 +97,25 @@ resource nic 'Microsoft.Network/networkInterfaces@2024-05-01' = {
 resource dataDisk 'Microsoft.Compute/disks@2024-03-02' = [for i in diskSuffixRange: {
   name: '${vmName}-datadisk${padLeft(i + 1, 2, '0')}'
   location: location
+  zones: [ zone ]
   sku: {
-    name: dataDiskSku
+    name: diskConfig.dataDiskSku
   }
   properties: {
-    diskSizeGB: dataDiskSizeGB
+    diskSizeGB: diskConfig.dataDiskSizeGB
     creationData: {
       createOption: 'Empty'
-      performancePlus: isEnablePerformancePlus
+      performancePlus: diskConfig.isEnablePerformancePlus
     }
     osType: 'Windows'
-    burstingEnabled: isEnabledBursting
+    burstingEnabled: diskConfig.isEnabledBursting
   }
 }]
 
 resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: vmName
   location: location
+  zones: [ zone ]
   properties: {
     hardwareProfile: {
       vmSize: vmSize
@@ -125,6 +142,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
       dataDisks: [for i in diskSuffixRange: {
         lun: i
         createOption: 'Attach'
+        caching: diskConfig.hostCaching
         managedDisk: {
           id: dataDisk[i].id
         }

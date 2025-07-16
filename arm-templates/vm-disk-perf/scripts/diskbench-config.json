@@ -1,0 +1,12 @@
+{
+    "webhook": {
+        "url": "https://example.com/webhook",
+        "method": "POST",
+        "bodyForStart": {
+            "message": "{{datetime}} - {{computername}} - Benchmark started."
+        },
+        "bodyForEnd": {
+            "message": "{{datetime}} - {{computername}} - Benchmark completed."
+        }
+    }
+}
