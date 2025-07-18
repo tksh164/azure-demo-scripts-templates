@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "VNet selection demo",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        }
+                    ]
+                },
+                {
+                    "name": "vnet",
+                    "label": "VNet",
+                    "elements": [
+                        {
+                            "name": "osDiskType",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "multiselect": false,
+                            "selectAll": false,
+                            "filter": false,
+                            "multiLine": true,
+                            "label": "OS disk type",
+                            "toolTip": "You can choose between Azure managed disks types to support your workload or scenario.",
+                            "placeholder": "Select the OS disk type...",
+                            "defaultDescription": "---",
+                            "filterPlaceholder": "Filter OS disk types...",
+                            "defaultValue": "Standard SSD (LRS)",
+                            "constraints": {
+                                "required": true,
+                                "allowedValues": [
+                                    {
+                                        "label": "<strong>Premium SSD (LRS)</strong>",
+                                        "value": "Premium_LRS",
+                                        "description": "Best for production and performance <strong>sensitive</strong> workloads. <u>Locally</u>-redundant storage (data is replicated within a single datacenter)."
+                                    },
+                                    {
+                                        "label": "Standard SSD (LRS)",
+                                        "value": "StandardSSD_LRS",
+                                        "description": "Best for web servers, lightly used enterprise applications and dev/test. Locally-redundant storage (data is replicated within a single datacenter)."
+                                    },
+                                    {
+                                        "label": "Standard HDD (LRS)",
+                                        "value": "Standard_LRS",
+                                        "description": "Best for backup, non-critical, and infrequent access. Locally-redundant storage (data is replicated within a single datacenter)."
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+            "parameters": {}
+        }
+    }
+}
