@@ -1,0 +1,428 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "salt": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "The value for generate unique values."
+            }
+        }
+    },
+    "variables": {
+        "uniqueString": "[take(uniqueString(resourceGroup().id, parameters('salt')), 5)]",
+
+        "virtualNetworkName": "test-vnet",
+        "privateEndpointSubnetName": "private-endpoint-subnet",
+
+        "storageAccountName": "[format('sapeexptl{0}', variables('uniqueString'))]",
+        "storageAccountPrivateEndpointName": "[format('{0}-pe', variables('storageAccountName'))]",
+        "storageAccountPrivateEndpointNicName": "[format('{0}-pe-nic', variables('storageAccountName'))]",
+        "storageAccountPrivateEndpointDeploymentName": "storageAccountPrivateEndpoint",
+        "blobPrivateDnsZoneName": "privatelink.blob.core.windows.net",
+
+        "keyVaultName": "[format('test{0}-kv', variables('uniqueString'))]",
+        "keyVaultPrivateEndpointName": "[format('{0}-pe', variables('keyVaultName'))]",
+        "keyVaultPrivateEndpointNicName": "[format('{0}-pe-nic', variables('keyVaultName'))]",
+        "keyVaultPrivateEndpointDeploymentName": "keyVaultPrivateEndpoint",
+        "vaultPrivateDnsZoneName": "privatelink.vaultcore.azure.net"
+    },
+    "resources": [
+
+        // Virtual network
+
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2024-05-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "privateEndpointNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "[variables('privateEndpointSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.0.1.0/24",
+                            "privateEndpointNetworkPolicies": "Enabled"
+                        }
+                    }
+                ]
+            }
+        },
+
+        //
+        // Storage account
+        //
+
+        // Private DNS zone for Blob storage
+
+        {
+            "name": "[variables('blobPrivateDnsZoneName')]",
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "properties": {}
+        },
+
+        // Private DNS zone virtual network link for Blob storage
+
+        {
+            "name": "[format('{0}/{1}-vnetlink', variables('blobPrivateDnsZoneName'), variables('virtualNetworkName'))]",
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('blobPrivateDnsZoneName'))]"
+            ],
+            "properties": {
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+                },
+                "registrationEnabled": false,
+                "resolutionPolicy": "Default"
+            }
+        },
+
+        // Storage account
+
+        {
+            "name": "[variables('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2024-01-01",
+            "location": "[parameters('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "accessTier": "Hot",
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "publicNetworkAccess": "Enabled",
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "allowCrossTenantReplication": true,
+                "defaultToOAuthAuthentication": false,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Allow",
+                    "ipRules": []
+                },
+                "dnsEndpointType": "Standard",
+                "encryption": {
+                    "keySource": "Microsoft.Storage",
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        },
+                        "table": {
+                            "enabled": true
+                        },
+                        "queue": {
+                            "enabled": true
+                        }
+                    },
+                    "requireInfrastructureEncryption": false
+                }
+            }
+        },
+
+        // Private endpoint for Storage account
+
+        {
+            "name": "[variables('storageAccountPrivateEndpointDeploymentName')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2024-11-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "privateEndpointName": {
+                        "value": "[variables('storageAccountPrivateEndpointName')]"
+                    },
+                    "subnetId": {
+                        "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('privateEndpointSubnetName'))]"
+                    },
+                    "networkInterfaceName": {
+                        "value": "[variables('storageAccountPrivateEndpointNicName')]"
+                    },
+                    "privateLinkServiceConnections": {
+                        "value": [
+                            {
+                                "name": "[variables('storageAccountPrivateEndpointName')]",
+                                "id": "[format('{0}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/{1}', resourceGroup().id, variables('storageAccountPrivateEndpointName'))]",
+                                "properties": {
+                                    "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                                    "groupIds": [
+                                        "blob"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "privateEndpointName": {
+                            "type": "string"
+                        },
+                        "subnetId": {
+                            "type": "string"
+                        },
+                        "networkInterfaceName": {
+                            "type": "string"
+                        },
+                        "privateLinkServiceConnections": {
+                            "type": "array"
+                        }
+                    },
+                    "variables": {
+                        "apiVersion": "2024-05-01"
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('privateEndpointName')]",
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "[variables('apiVersion')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "subnet": {
+                                    "id": "[parameters('subnetId')]"
+                                },
+                                "customNetworkInterfaceName": "[parameters('networkInterfaceName')]",
+                                "privateLinkServiceConnections": "[parameters('privateLinkServiceConnections')]"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateIPAddress": {
+                            "type": "string",
+                            "value": "[reference(parameters('privateEndpointName'), variables('apiVersion')).customDnsConfigs[0].ipAddresses[0]]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Private DNS zone A record for Storage account
+
+        {
+            "name": "[concat(variables('blobPrivateDnsZoneName'), '/', variables('storageAccountName'))]",
+            "type": "Microsoft.Network/privateDnsZones/A",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('blobPrivateDnsZoneName'))]",
+                "[resourceId('Microsoft.Resources/deployments', variables('storageAccountPrivateEndpointDeploymentName'))]"
+            ],
+            "properties": {
+                "ttl": 3600,
+                "aRecords": [
+                    {
+                        "ipv4Address": "[reference(variables('storageAccountPrivateEndpointDeploymentName'), '2024-11-01').outputs.privateIPAddress.value]"
+                    }
+                ]
+            }
+        },
+
+        //
+        // Key Vault
+        //
+
+        // Private DNS zone for Key Vault
+
+        {
+            "name": "[variables('vaultPrivateDnsZoneName')]",
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "properties": {}
+        },
+
+        // Private DNS zone virtual network link for Key Vault
+
+        {
+            "name": "[format('{0}/{1}-vnetlink', variables('vaultPrivateDnsZoneName'), variables('virtualNetworkName'))]",
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('vaultPrivateDnsZoneName'))]"
+            ],
+            "properties": {
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+                },
+                "registrationEnabled": false,
+                "resolutionPolicy": "Default"
+            }
+        },
+
+        // Key Vault
+
+        {
+            "name": "[variables('keyVaultName')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2024-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                },
+                "accessPolicies": [],
+                "tenantId": "[tenant().tenantId]"
+            }
+        },
+
+        // Private endpoint for Key Vault
+
+        {
+            "name": "[variables('keyVaultPrivateEndpointDeploymentName')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2024-11-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "privateEndpointName": {
+                        "value": "[variables('keyVaultPrivateEndpointName')]"
+                    },
+                    "subnetId": {
+                        "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('privateEndpointSubnetName'))]"
+                    },
+                    "networkInterfaceName": {
+                        "value": "[variables('keyVaultPrivateEndpointNicName')]"
+                    },
+                    "privateLinkServiceConnections": {
+                        "value": [
+                            {
+                                "name": "[variables('keyVaultPrivateEndpointName')]",
+                                "id": "[format('{0}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/{1}', resourceGroup().id, variables('keyVaultPrivateEndpointName'))]",
+                                "properties": {
+                                    "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+                                    "groupIds": [
+                                        "vault"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "privateEndpointName": {
+                            "type": "string"
+                        },
+                        "subnetId": {
+                            "type": "string"
+                        },
+                        "networkInterfaceName": {
+                            "type": "string"
+                        },
+                        "privateLinkServiceConnections": {
+                            "type": "array"
+                        }
+                    },
+                    "variables": {
+                        "apiVersion": "2024-05-01"
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('privateEndpointName')]",
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "[variables('apiVersion')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "subnet": {
+                                    "id": "[parameters('subnetId')]"
+                                },
+                                "customNetworkInterfaceName": "[parameters('networkInterfaceName')]",
+                                "privateLinkServiceConnections": "[parameters('privateLinkServiceConnections')]"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "privateIPAddress": {
+                            "type": "string",
+                            "value": "[reference(parameters('privateEndpointName'), variables('apiVersion')).customDnsConfigs[0].ipAddresses[0]]"
+                        }
+                    }
+                }
+            }
+        },
+
+        // Private DNS zone A record for Key Vault
+
+        {
+            "name": "[concat(variables('vaultPrivateDnsZoneName'), '/', variables('keyVaultName'))]",
+            "type": "Microsoft.Network/privateDnsZones/A",
+            "apiVersion": "2024-06-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('vaultPrivateDnsZoneName'))]",
+                "[resourceId('Microsoft.Resources/deployments', variables('keyVaultPrivateEndpointDeploymentName'))]"
+            ],
+            "properties": {
+                "ttl": 3600,
+                "aRecords": [
+                    {
+                        "ipv4Address": "[reference(variables('keyVaultPrivateEndpointDeploymentName'), '2024-11-01').outputs.privateIPAddress.value]"
+                    }
+                ]
+            }
+        }
+    ]
+}
