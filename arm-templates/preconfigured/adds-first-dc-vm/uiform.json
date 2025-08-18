@@ -514,8 +514,8 @@
                                     "multiLine": false,
                                     "label": "Domain name (FQDN)",
                                     "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "placeholder": "e.g. sub.example.com",
-                                    "defaultValue": "lab.contoso.com",
+                                    "placeholder": "e.g. lab.internal",
+                                    "defaultValue": "lab.internal",
                                     "constraints": {
                                         "required": true
                                     }

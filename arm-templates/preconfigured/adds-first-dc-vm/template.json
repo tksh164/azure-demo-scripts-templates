@@ -46,7 +46,7 @@
         },
         "domainName": {
             "type": "string",
-            "defaultValue": "lab.contoso.com",
+            "defaultValue": "lab.internal",
             "metadata": {
                 "description": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
             }
