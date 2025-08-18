@@ -124,7 +124,7 @@
                             "label": "Size",
                             "toolTip": "The virtual machine size for the domain controller virtual machine.",
                             "recommendedSizes": [
-                                "Standard_B2ms"
+                                "Standard_B2as_v2"
                             ],
                             "constraints": {},
                             "options": {

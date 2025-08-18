@@ -110,7 +110,7 @@
         },
         "vmSize": {
             "type": "string",
-            "defaultValue": "Standard_B2ms",
+            "defaultValue": "Standard_B2as_v2",
             "metadata": {
                 "description": "Specify the VM size for the domain controller virtual machine."
             }
