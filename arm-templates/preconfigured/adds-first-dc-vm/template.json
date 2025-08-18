@@ -46,7 +46,7 @@
         },
         "domainName": {
             "type": "string",
-            "defaultValue": "lab.contoso.com",
+            "defaultValue": "lab.internal",
             "metadata": {
                 "description": "Specify the fully qualified domain name (FQDN) for the new AD DS forest."
             }
@@ -110,7 +110,7 @@
         },
         "vmSize": {
             "type": "string",
-            "defaultValue": "Standard_B2ms",
+            "defaultValue": "Standard_B2as_v2",
             "metadata": {
                 "description": "Specify the VM size for the domain controller virtual machine."
             }
@@ -129,7 +129,7 @@
         },
         "addsDataDiskStorageType": {
             "type": "string",
-            "defaultValue": "StandardSSD_LRS",
+            "defaultValue": "Standard_LRS",
             "allowedValues": [
                 "Premium_LRS",
                 "StandardSSD_LRS",

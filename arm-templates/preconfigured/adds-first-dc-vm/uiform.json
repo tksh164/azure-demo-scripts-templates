@@ -124,7 +124,7 @@
                             "label": "Size",
                             "toolTip": "The virtual machine size for the domain controller virtual machine.",
                             "recommendedSizes": [
-                                "Standard_B2ms"
+                                "Standard_B2as_v2"
                             ],
                             "constraints": {},
                             "options": {
@@ -346,7 +346,7 @@
                                     "placeholder": "Select the AD DS data disk storage type...",
                                     "defaultDescription": "---",
                                     "filterPlaceholder": "Filter AD DS data disk storage types...",
-                                    "defaultValue": "Standard SSD (LRS)",
+                                    "defaultValue": "Standard HDD (LRS)",
                                     "constraints": {
                                         "required": true,
                                         "allowedValues": [
@@ -514,8 +514,8 @@
                                     "multiLine": false,
                                     "label": "Domain name (FQDN)",
                                     "toolTip": "Specify the FQDN for the new AD DS forest.",
-                                    "placeholder": "e.g. sub.example.com",
-                                    "defaultValue": "lab.contoso.com",
+                                    "placeholder": "e.g. lab.internal",
+                                    "defaultValue": "lab.internal",
                                     "constraints": {
                                         "required": true
                                     }
