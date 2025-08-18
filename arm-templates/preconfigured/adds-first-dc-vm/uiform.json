@@ -346,7 +346,7 @@
                                     "placeholder": "Select the AD DS data disk storage type...",
                                     "defaultDescription": "---",
                                     "filterPlaceholder": "Filter AD DS data disk storage types...",
-                                    "defaultValue": "Standard SSD (LRS)",
+                                    "defaultValue": "Standard HDD (LRS)",
                                     "constraints": {
                                         "required": true,
                                         "allowedValues": [

@@ -129,7 +129,7 @@
         },
         "addsDataDiskStorageType": {
             "type": "string",
-            "defaultValue": "StandardSSD_LRS",
+            "defaultValue": "Standard_LRS",
             "allowedValues": [
                 "Premium_LRS",
                 "StandardSSD_LRS",
