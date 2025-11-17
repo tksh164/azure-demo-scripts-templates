@@ -2,20 +2,38 @@
 
 ## Example usage
 
+### All prices in a region
+
 ```PowerShell
-PS > .\retailprices.ps1 -ArmRegionName japaneast
+.\retailprices.ps1 -ArmRegionName japaneast
+```
+
+### Specific service family
+
+```PowerShell
+.\retailprices.ps1 -ArmRegionName japaneast -ServiceFamily Networking
 ```
 
 ```PowerShell
-PS > .\retailprices.ps1 -ArmRegionName japaneast -ServiceFamily Networking
+.\retailprices.ps1 -ArmRegionName Global -ServiceFamily Networking
 ```
 
-```PowerShell
-PS > .\retailprices.ps1 -ArmRegionName Global -ServiceFamily Networking
-```
+### Specific service
 
 ```PowerShell
-PS > .\retailprices.ps1 -ServiceName ExpressRoute
+.\retailprices.ps1 -ServiceName ExpressRoute
+```
+
+### Specific SKU
+
+```PowerShell
+.\retailprices.ps1 -ArmRegionName japaneast -ArmSkuName Standard_D8ads_v5
+```
+
+### Output to grid view
+
+```PowerShell
+.\retailprices.ps1 -ArmRegionName japaneast -ArmSkuName Standard_D8ads_v5 | Out-GridView
 ```
 
 ## References
