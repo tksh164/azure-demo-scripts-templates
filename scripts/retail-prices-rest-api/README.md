@@ -3,19 +3,19 @@
 ## Example usage
 
 ```PowerShell
-PS > .\retailpice.ps1 -ArmRegionName japaneast
+PS > .\retailprices.ps1 -ArmRegionName japaneast
 ```
 
 ```PowerShell
-PS > .\retailpice.ps1 -ArmRegionName japaneast -ServiceFamily Networking
+PS > .\retailprices.ps1 -ArmRegionName japaneast -ServiceFamily Networking
 ```
 
 ```PowerShell
-PS > .\retailpice.ps1 -ArmRegionName Global -ServiceFamily Networking
+PS > .\retailprices.ps1 -ArmRegionName Global -ServiceFamily Networking
 ```
 
 ```PowerShell
-PS > .\retailpice.ps1 -ServiceName ExpressRoute
+PS > .\retailprices.ps1 -ServiceName ExpressRoute
 ```
 
 ## References
