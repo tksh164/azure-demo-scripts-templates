@@ -181,7 +181,7 @@ function Get-SasToken {
 }
 
 # Blob
-$blobUrl = 'https://account.blob.core.windows.net/con1/test.txt' -f $storageAccountName
+$blobUrl = 'https://account.blob.core.windows.net/con1/test.txt'
 
 # Signed user's tenant ID. Signed user means the user who creates SAS.
 $signedUserTenantId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
