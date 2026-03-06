@@ -1,6 +1,12 @@
 # Azure Storage SAS
 
 - **create-udsas.ps1** for create SAS, User delegation SAS and User-bound user delegation SAS.
+
+    ```powershell
+    PS C:\> .\create-udsas.ps1
+    PS C:\> SAS URL: https://account.blob.core.windows.net/con1/test.txt?....
+    ```
+
     - You need update some variables in the script before run it.
 
         ```powershell
@@ -19,11 +25,6 @@
         # For user-bound user-delegation SAS tokens.
         $delegatedEndUserObjectId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
         ```
-
-    ```powershell
-    PS C:\> .\create-udsas.ps1
-    PS C:\> SAS URL: https://account.blob.core.windows.net/con1/test.txt?....
-    ```
 
 - **access-ubudsas.ps1** for access to user-bound user delegation SAS.
 
