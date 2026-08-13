@@ -1,4 +1,7 @@
 # VMs on Dedicated Host
+
+## Deploy VMs onto a dedicated host
+
 ```powershell
 $env:SSH_PUB_KEY = Get-Content -Raw -LiteralPath 'path-to-ssh-pub-key-file'
 
