@@ -21,3 +21,9 @@ $templateParameterFilePath = '.\template.bicepparam'
 
 az deployment group create --name ([guid]::NewGuid()) --resource-group $resourceGroupName --template-file $templateFilePath --parameters $templateParameterFilePath
 ```
+
+## Remove VMs on a dedicated host
+
+```powershell
+Remove-VMOnDedicatedHost.ps1 -HostId '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/RG1/providers/Microsoft.Compute/hostGroups/hostgroup1/hosts/host1'
+```
