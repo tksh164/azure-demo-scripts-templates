@@ -17,6 +17,7 @@
                 { "Name": "*.aadcdn.msftauth.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.aadcdn.msftauth.net" },
                 { "Name": "*.aadcdn.msftauthimages.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.aadcdn.msftauthimages.net" },
                 { "Name": "*.aadcdn.msauthimages.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.aadcdn.msauthimages.net" },
+                { "Name": "logincdn.msftauth.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "logincdn.msftauth.net" },
                 { "Name": "*.logincdn.msftauth.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.logincdn.msftauth.net" },
                 { "Name": "*.msauth.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.msauth.net" },
                 { "Name": "*.aadcdn.microsoftonline-p.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.aadcdn.microsoftonline-p.com" },
@@ -28,15 +29,22 @@
             "Priority": 1100,
             "ActionType": "Allow",
             "Rules": [
+                { "Name": "portal.azure.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "portal.azure.com" },
                 { "Name": "*.portal.azure.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.portal.azure.com" },
+                { "Name": "hosting.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "hosting.portal.azure.net" },
                 { "Name": "*.hosting.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.hosting.portal.azure.net" },
+                { "Name": "hosting-ms.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "hosting-ms.portal.azure.net" },
                 { "Name": "*.hosting-ms.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.hosting-ms.portal.azure.net" },
+                { "Name": "reactblade.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "reactblade.portal.azure.net" },
                 { "Name": "*.reactblade.portal.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.reactblade.portal.azure.net" },
                 { "Name": "management.azure.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "management.azure.com" },
                 { "Name": "*.ext.azure.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.ext.azure.com" },
                 { "Name": "*.graph.windows.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.graph.windows.net" },
+                { "Name": "graph.microsoft.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "graph.microsoft.com" },
                 { "Name": "*.graph.microsoft.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.graph.microsoft.com" },
-                { "Name": "hosting.partners.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "hosting.partners.azure.net" }
+                { "Name": "hosting.partners.azure.net", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "hosting.partners.azure.net" },
+                { "Name": "*.portalrp.azure.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.portalrp.azure.com" },  // Azure Copilot
+                { "Name": "*.botframework.com", "SourceAddress": "*", "Protocol": ["http", "https"], "TargetFqdn": "*.botframework.com" }  // Azure Copilot
             ]
         },
         {
