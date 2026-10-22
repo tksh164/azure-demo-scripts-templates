@@ -6,5 +6,11 @@ param (
 )
 
 $token = (Get-AzAccessToken -ResourceTypeName Storage).Token
-$response = Invoke-RestMethod -Method Get -Uri $SasUrl -Authentication Bearer -Token $token
+$params = @{
+    Method         = 'Get'
+    Uri            = $SasUrl
+    Authentication = 'Bearer'
+    Token          = $token
+}
+$response = Invoke-RestMethod @params
 $response
